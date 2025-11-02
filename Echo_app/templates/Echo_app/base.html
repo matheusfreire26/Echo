@@ -41,13 +41,13 @@
             </a>
         </div>
         
-        <a href="{% url 'dashboard' %}" class="logo-container top-nav-center">
+    <a href="{% url 'Echo_app:dashboard' %}" class="logo-container top-nav-center">
             <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo JC" class="logo-img">
             <span class="brand-name">Echo</span>
         </a>
         
         <div class="top-nav-right">
-             <a href="#" class="nav-icon-profile-link">
+             <a href="{% url 'Echo_app:perfil' %}" class="nav-icon-profile-link">
                 <img src="{% static 'Echo_app/images/perfil.png' %}" alt="Foto de Perfil" class="nav-icon-img">
             </a>
         </div>
@@ -156,7 +156,7 @@
             <hr>
             
             {% if user.is_authenticated %}
-                <a href="{% url 'sair' %}">Sair (Logout)</a>
+                <a href="{% url 'Echo_app:sair' %}">Sair (Logout)</a>
             {% endif %}
             
         </nav>
@@ -268,6 +268,7 @@
                 // escondemos o grupo. Por agora, vamos manter simples e filtrar apenas os links.
             });
         }
+        
 
         // --- CÓDIGO DOS PRODUTOS (DOS COLEGAS) ---
         const partnerLogos = document.querySelectorAll('.partner-logo');
@@ -286,6 +287,7 @@
             }
         });
     });
+
     </script>
     {% endblock %}
 

@@ -89,7 +89,7 @@ def registrar(request):
                 
                 # 7. Logar o usuário automaticamente
                 login(request, user)
-                return redirect("dashboard")
+                return redirect("Echo_app:dashboard")
                 
             except IntegrityError:
                 contexto['erros'].append('Erro ao criar usuário. Tente novamente.')
@@ -133,7 +133,7 @@ def entrar(request):
                 return redirect(next_url)
             else:
                 # Caso contrário, redireciona para o dashboard padrão
-                return redirect("dashboard")
+                return redirect("Echo_app:dashboard")
         else:
             # 4. Falha na autenticação
             contexto['erro_login'] = 'Usuário ou senha inválidos. Tente novamente.'
@@ -148,7 +148,7 @@ def sair(request):
     Desloga o usuário e o redireciona para a página de login.
     """
     logout(request)
-    return redirect("entrar")
+    return redirect("Echo_app:entrar")
 
 # === FIM DAS FUNÇÕES ADICIONADAS ===
 
@@ -349,8 +349,66 @@ def dashboard(request):
     
     return render(request, "Echo_app/dashboard.html", context)
 
+# Corrige: define `perfil` no nível do módulo (não aninhado) e garante que `dashboard` seja único.
+
+
 @login_required
 def perfil(request):
-    # Aqui você pode passar informações do usuário para o template
+    """
+    Exibe e permite a atualização do perfil do usuário.
+    Atualiza first_name, email e categorias de interesse.
+    """
     usuario = request.user
-    return render(request, "perfil.html", {"usuario": usuario})
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=usuario)
+
+    try:
+        todas_categorias = Categoria.objects.all()
+    except Exception:
+        todas_categorias = []
+
+    if request.method == "POST":
+        erros = []
+        first_name = request.POST.get("first_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        categorias_ids = request.POST.getlist("categoria")
+
+        # Validações básicas
+        if not email:
+            erros.append("Email é obrigatório.")
+        elif User.objects.filter(email__iexact=email).exclude(pk=usuario.pk).exists():
+            erros.append("Este email já está em uso por outro usuário.")
+
+        if erros:
+            context = {
+                "usuario": usuario,
+                "perfil": perfil,
+                "todas_categorias": todas_categorias,
+                "erros": erros,
+                "dados_preenchidos": {
+                    "first_name": first_name,
+                    "email": email,
+                    "categorias_selecionadas_ids": categorias_ids,
+                },
+            }
+            return render(request, "Echo_app/perfil.html", context)
+
+        # Salva alterações
+        usuario.first_name = first_name
+        usuario.email = email
+        usuario.save()
+
+        if categorias_ids:
+            categorias = Categoria.objects.filter(pk__in=categorias_ids)
+            perfil.categorias_de_interesse.set(categorias)
+        else:
+            perfil.categorias_de_interesse.clear()
+
+            return redirect("Echo_app:perfil")
+
+    # GET
+    context = {
+        "usuario": usuario,
+        "perfil": perfil,
+        "todas_categorias": todas_categorias,
+    }
+    return render(request, "Echo_app/perfil.html", context)

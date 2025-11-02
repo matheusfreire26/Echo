@@ -21,7 +21,7 @@
     </aside>
 
     <article class="noticia-article">
-        <p class="voltar-link"><a href="{% url 'dashboard' %}">← Voltar para o Dashboard</a></p>
+    <p class="voltar-link"><a href="{% url 'Echo_app:dashboard' %}">← Voltar para o Dashboard</a></p>
 
         <span class="noticia-categoria-tag">{{ noticia.categoria.nome|default:"Geral" }}</span>
 
@@ -44,8 +44,8 @@
             {% if user.is_authenticated %}
                 {% csrf_token %} 
 
-                <button id="btn-curtir"
-                        data-url="{% url 'noticia_curtir' noticia_id=noticia.pk %}"
+        <button id="btn-curtir"
+            data-url="{% url 'Echo_app:noticia_curtir' noticia_id=noticia.pk %}"
                         class="btn-interacao {% if usuario_curtiu %}curtida-ativa{% endif %}"
                         title="Curtir">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -55,8 +55,8 @@
                     <span class="sr-only">Curtir</span>
                 </button>
 
-                <button id="btn-salvar"
-                        data-url="{% url 'noticia_salvar' noticia_id=noticia.pk %}"
+        <button id="btn-salvar"
+            data-url="{% url 'Echo_app:noticia_salvar' noticia_id=noticia.pk %}"
                         class="btn-interacao {% if usuario_salvou %}salvamento-ativa{% endif %}"
                         title="Salvar">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -67,7 +67,7 @@
                 </button>
 
             {% else %}
-                <p class="login-prompt">Faça <a href="{% url 'entrar' %}?next={{ request.path }}">login</a> para interagir.</p>
+                <p class="login-prompt">Faça <a href="{% url 'Echo_app:entrar' %}?next={{ request.path }}">login</a> para interagir.</p>
             {% endif %}
         </div>
         
@@ -127,7 +127,7 @@
             })
             .then(response => {
                 if (response.status === 401 || response.status === 403) { 
-                    window.location.href = "{% url 'entrar' %}?next=" + window.location.pathname;
+                    window.location.href = "{% url 'Echo_app:entrar' %}?next=" + window.location.pathname;
                     return Promise.reject('Unauthorized');
                 }
                 if (!response.ok) {

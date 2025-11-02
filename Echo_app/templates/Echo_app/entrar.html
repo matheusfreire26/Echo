@@ -26,7 +26,7 @@
         
         <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo" class="logo-image">
 
-        <form method="post" action="{% url 'entrar' %}" autocomplete="off">
+    <form method="post" action="{% url 'Echo_app:entrar' %}" autocomplete="off">
             {% csrf_token %}
 
             {% if request.GET.next %}
@@ -55,7 +55,7 @@
 
         <div class="extra-links">
             <a href="#">Esqueceu a senha?</a>
-            <a href="{% url 'registrar' %}">Cadastre-se</a>
+            <a href="{% url 'Echo_app:registrar' %}">Cadastre-se</a>
         </div>
         
     </div>
