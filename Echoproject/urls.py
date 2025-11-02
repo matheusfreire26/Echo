@@ -5,6 +5,7 @@ from django.urls import path, include
 # --- NOVOS IMPORTS ---
 from django.conf import settings
 from django.conf.urls.static import static
+from Echo_app import views as app_views # importa as views
 # --- FIM DOS NOVOS IMPORTS ---
 
 urlpatterns = [
@@ -12,6 +13,8 @@ urlpatterns = [
     
     # Delega as URLs do seu app para a raiz
     path('', include('Echo_app.urls')),
+    # A URL para a lista de notificações
+    path('notificacoes/', app_views.lista_notificacoes, name='lista_notificacoes'),
 ]
 
 # --- BLOCO ADICIONADO ---
