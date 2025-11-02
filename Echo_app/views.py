@@ -15,7 +15,8 @@ from django.shortcuts import render
 
 # Importe os modelos da sua aplicação
 # ASSUMINDO que você tem um modelo Categoria em .models
-from .models import Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria
+from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
+from django.db.models import Q # Importe o Q para consultas complexas
 
 User = get_user_model()
 
@@ -283,16 +284,48 @@ def salvar_noticia(request, noticia_id):
 @login_required
 def lista_notificacoes(request):
     """
-    Exibe a lista de notificações do usuário.
+    Exibe a lista de notificações do usuário, separadas por
+    "Recomendadas" (baseadas nas preferências) e "Outras".
     """
-    notificacoes = Notificacao.objects.filter(usuario=request.user)
-    nao_lidas_count = notificacoes.filter(lida=False).count()
     
+    # 1. Busca todas as notificações do usuário
+    todas_notificacoes = Notificacao.objects.filter(usuario=request.user)
+    
+    # 2. Busca as categorias preferidas do usuário
+    #    (Usando a mesma lógica da sua view 'perfil')
+    categorias_preferidas = Categoria.objects.none() # Começa com uma lista vazia
+    try:
+        perfil = request.user.perfil 
+        categorias_preferidas = perfil.categorias_de_interesse.all()
+    except PerfilUsuario.DoesNotExist:
+        # Se o usuário não tiver perfil/preferências, não faz nada
+        pass
+
+    # 3. Separa as notificações
+    
+    # Notificações recomendadas são aquelas ligadas a uma notícia
+    # cuja categoria ESTÁ na lista de preferidas.
+    recomendadas = todas_notificacoes.filter(
+        noticia__categoria__in=categorias_preferidas
+    ).order_by('lida', '-data_criacao')
+    
+    # Outras notificações são todas as que NÃO estão na lista de recomendadas
+    # (Isso inclui notificações manuais ou de outras categorias)
+    outras = todas_notificacoes.exclude(
+        id__in=recomendadas.values_list('id', flat=True)
+    ).order_by('lida', '-data_criacao')
+    
+    # Contagem de não lidas
+    nao_lidas_count = todas_notificacoes.filter(lida=False).count()
+
     context = {
-        'notificacoes': notificacoes,
+        'notificacoes_recomendadas': recomendadas, # <-- Lista 1
+        'notificacoes_outras': outras,         # <-- Lista 2
         'nao_lidas_count': nao_lidas_count
     }
-    return render(request, 'Echo_app/lista_notificacoes.html', context)
+    # ATENÇÃO: Verifique o nome do seu template!
+    # Na sua captura de tela, o nome era 'notificacao.html'
+    return render(request, 'Echo_app/notificacao.html', context)
 
 @login_required
 @require_POST 
