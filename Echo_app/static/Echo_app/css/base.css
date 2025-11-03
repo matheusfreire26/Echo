@@ -247,9 +247,39 @@ body {
     border: 2px solid var(--cor-borda);
     transition: all 0.3s ease;
     overflow: hidden;
-    text-decoration: none;
 }
 
+.partner-circle .partner-logo-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;  /* centraliza vertical */
+    justify-content: center; /* centraliza horizontal */
+    overflow: hidden; 
+    margin: auto; /* garante que qualquer espaço extra seja distribuído */
+}
+
+.partner-circle img.partner-logo {
+    width: 120%;
+    height: 120%;
+    object-fit: cover; /* Preenche todo o círculo */
+    display: block;    /* Remove espaços extras */
+    border-radius: 50%; /* Mantém o círculo */
+    transform: translate(0, 0); /* centraliza perfeitamente */
+}
+
+
+.partner-circle:nth-child(3) img.partner-logo {
+    transform: translateX(1px); /* move ligeiramente para a direita */
+}
+
+.partner-circle:nth-child(4) img.partner-logo {
+    transform: translateX(1px); /* move ligeiramente para a direita */
+}
+
+.partner-circle:nth-child(6) img.partner-logo {
+    transform: translateX(1px); /* move ligeiramente para a direita */
+}
 .partner-circle:hover {
     transform: scale(1.1);
     border-color: var(--cor-primaria);
@@ -257,9 +287,10 @@ body {
 }
 
 .partner-logo {
-    width: 70%;
-    height: 70%;
-    object-fit: contain;
+    width: 120%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .partner-placeholder {
@@ -589,3 +620,4 @@ body {
         font-size: 0.8rem;
     }
 }
+
