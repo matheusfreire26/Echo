@@ -82,3 +82,13 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
   [echo-jc.azurewebsites.net](https://jc-echo.azurewebsites.net)
   
 </details>
+
+<details>
+  <summary>- ✅ Semana 13 </summary>
+
+  Implementação da barra superior (menu, uol, perfil, barra de pesquisa e notificações)
+
+  Link dos testes automatizados das Novas Histórias
+  []()
+  
+</details>
