@@ -7,12 +7,14 @@
 <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
 {% endblock %}
 
+
 {% block content %}
 
-<!-- SEÇÃO RECOMENDADO - APENAS UMA NOTÍCIA GRANDE -->
 <section class="recommended-section">
     <div class="section-header">
-        <h2 class="section-title">Recomendado para você</h2>
+        <a href="#" class="section-title-link">
+            <h2 class="section-title">Recomendado para você</h2>
+        </a>
         <a href="#" class="see-more subtle-btn">Ver mais</a>
     </div>
 
@@ -50,22 +52,22 @@
     </div>
 </section>
 
-<!-- SEÇÃO NOTÍCIAS URGENTES - CORRIGIDA CONFORME WIREFRAME -->
 <section class="urgent-section">
     <div class="section-header">
-        <h2>Notícias urgentes</h2>
+        <a href="#" class="section-title-link">
+            <h2 class="section-title">Notícias urgentes</h2>
+        </a>
         <a href="#" class="see-more subtle-btn">Ver mais</a>
     </div>
 
     <div class="urgent-news-container">
         <div class="urgent-news-wrapper">
-            <!-- Notícia 1 - COMPLETA -->
             <div class="urgent-news-card full-view active" data-index="0">
                 <div class="urgent-image-container">
                     {% if noticias_urgentes.0 and noticias_urgentes.0.imagem %}
                         <img src="{{ noticias_urgentes.0.imagem.url }}" alt="{{ noticias_urgentes.0.titulo }}" class="urgent-image">
                     {% else %}
-                        <div class="urgent-image-placeholder">🌊</div>
+                        <div class="urgent-image-placeholder recommended-placeholder">🌊</div>
                     {% endif %}
                 </div>
                 <div class="urgent-content">
@@ -88,13 +90,12 @@
                 </div>
             </div>
 
-            <!-- Notícia 2 - PELA METADE -->
             <div class="urgent-news-card partial-view" data-index="1">
                 <div class="urgent-image-container">
                     {% if noticias_urgentes.1 and noticias_urgentes.1.imagem %}
                         <img src="{{ noticias_urgentes.1.imagem.url }}" alt="{{ noticias_urgentes.1.titulo }}" class="urgent-image">
                     {% else %}
-                        <div class="urgent-image-placeholder">📚</div>
+                        <div class="urgent-image-placeholder recommended-placeholder">📚</div>
                     {% endif %}
                 </div>
                 <div class="urgent-content">
@@ -116,13 +117,12 @@
                 </div>
             </div>
 
-            <!-- Notícia 3 - COMPLETA (fora da tela) -->
             <div class="urgent-news-card full-view" data-index="2">
                 <div class="urgent-image-container">
                     {% if noticias_urgentes.2 and noticias_urgentes.2.imagem %}
                         <img src="{{ noticias_urgentes.2.imagem.url }}" alt="{{ noticias_urgentes.2.titulo }}" class="urgent-image">
                     {% else %}
-                        <div class="urgent-image-placeholder">🚔</div>
+                        <div class="urgent-image-placeholder recommended-placeholder">🚔</div>
                     {% endif %}
                 </div>
                 <div class="urgent-content">
@@ -144,13 +144,12 @@
                 </div>
             </div>
 
-            <!-- Notícia 4 - COMPLETA (fora da tela) -->
             <div class="urgent-news-card full-view" data-index="3">
                 <div class="urgent-image-container">
                     {% if noticias_urgentes.3 and noticias_urgentes.3.imagem %}
                         <img src="{{ noticias_urgentes.3.imagem.url }}" alt="{{ noticias_urgentes.3.titulo }}" class="urgent-image">
                     {% else %}
-                        <div class="urgent-image-placeholder">🏥</div>
+                        <div class="urgent-image-placeholder recommended-placeholder">🏥</div>
                     {% endif %}
                 </div>
                 <div class="urgent-content">
@@ -172,13 +171,12 @@
                 </div>
             </div>
 
-            <!-- Notícia 5 - COMPLETA (fora da tela) -->
             <div class="urgent-news-card full-view" data-index="4">
                 <div class="urgent-image-container">
                     {% if noticias_urgentes.4 and noticias_urgentes.4.imagem %}
                         <img src="{{ noticias_urgentes.4.imagem.url }}" alt="{{ noticias_urgentes.4.titulo }}" class="urgent-image">
                     {% else %}
-                        <div class="urgent-image-placeholder">🚌</div>
+                        <div class="urgent-image-placeholder recommended-placeholder">🚌</div>
                     {% endif %}
                 </div>
                 <div class="urgent-content">
@@ -202,13 +200,97 @@
         </div>
     </div>
 
-    <!-- NAVEGAÇÃO -->
     <div class="urgent-navigation">
         <span class="nav-dot active" data-index="0"></span>
         <span class="nav-dot" data-index="1"></span>
         <span class="nav-dot" data-index="2"></span>
         <span class="nav-dot" data-index="3"></span>
         <span class="nav-dot" data-index="4"></span>
+    </div>
+</section>
+
+<section class="latest-news-section">
+    <div class="section-header">
+        <a href="#" class="section-title-link"><h2 class="section-title">Últimas notícias</h2></a>
+        <a href="#" class="see-more subtle-btn">Ver mais</a>
+    </div>
+
+    <div class="category-bubbles-container">
+        <div class="category-bubbles">
+            <a href="#" class="bubble active">Tendências</a>
+            <a href="#" class="bubble">Política</a>
+            <a href="#" class="bubble">Educação</a>
+            <a href="#" class="bubble">Tecnologia</a>
+            <a href="#" class="bubble">Meio Ambiente</a>
+        </div>
+    </div>
+
+    <div class="latest-news-list">
+        {% if ultimas_noticias %}
+            {% for noticia in ultimas_noticias %}
+            <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="latest-news-card-link">
+                <article class="latest-news-card">
+                    <div class="latest-card-image">
+                        {% if noticia.imagem %}
+                            <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
+                        {% else %}
+                            <div class="latest-image-placeholder recommended-placeholder"></div>
+                        {% endif %}
+                    </div>
+                    <div class="latest-card-content">
+                        <span class="latest-card-bar"></span>
+                        <div class="latest-card-text">
+                            <h3>{{ noticia.titulo }}</h3>
+                            <p>{{ noticia.resumo|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            {% endfor %}
+        {% else %}
+            <a href="#" class="latest-news-card-link">
+                <article class="latest-news-card">
+                    <div class="latest-card-image">
+                        <div class="latest-image-placeholder recommended-placeholder"></div>
+                    </div>
+                    <div class="latest-card-content">
+                        <span class="latest-card-bar"></span>
+                        <div class="latest-card-text">
+                            <h3>João Carlos Paes Mendonça celebra 90 anos do Grupo JCPM e defende mais investimentos no Nordeste</h3>
+                            <p>Presidente do Grupo JCPM concedeu entrevista à Rádio Jornal nesta segunda-feira e falou sobre economia...</p>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            <a href="#" class="latest-news-card-link">
+                <article class="latest-news-card">
+                    <div class="latest-card-image">
+                        <div class="latest-image-placeholder recommended-placeholder"></div>
+                    </div>
+                    <div class="latest-card-content">
+                        <span class="latest-card-bar"></span>
+                        <div class="latest-card-text">
+                            <h3>Metanol: crise completa um mês com alerta para falsificação de bebidas</h3>
+                            <p>No último boletim divulgado, na sexta-feira, foram confirmados 58 casos e 50 estavam em investigação...</p>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            <a href="#" class="latest-news-card-link">
+                <article class="latest-news-card">
+                    <div class="latest-card-image">
+                        <div class="latest-image-placeholder recommended-placeholder"></div>
+                    </div>
+                    <div class="latest-card-content">
+                        <span class="latest-card-bar"></span>
+                        <div class="latest-card-text">
+                            <h3>Prejuízo dos brasileiros com golpes digitais cresceu 21% em 2025, aponta estudo</h3>
+                            <p>Criminosos estão cada vez mais profissionalizados e concentram ações no ambiente virtual...</p>
+                        </div>
+                    </div>
+                </article>
+            </a>
+        {% endif %}
     </div>
 </section>
 
