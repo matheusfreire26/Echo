@@ -23,7 +23,8 @@ User = get_user_model()
 # ===============================================
 # Parte de Autenticação e Registro (Raul)
 # ===============================================
-
+# (As suas views 'registrar', 'entrar' e 'sair' continuam aqui, inalteradas)
+# ...
 def registrar(request):
     """
     Renderiza a página de registro e processa a criação de um novo usuário
@@ -137,14 +138,14 @@ def sair(request):
 
 
 # ===============================================
-# Parte do Dashboard (Fialho)
+# Parte do Dashboard (ATUALIZADA)
 # ===============================================
 
 @login_required
 def dashboard(request):
     """
     Exibe a página principal do usuário logado,
-    com notícias recomendadas, urgentes e categorias de interesse.
+    com notícias recomendadas, urgentes e as últimas notícias gerais.
     """
     user = request.user
     categorias_interesse = []
@@ -156,21 +157,80 @@ def dashboard(request):
     except PerfilUsuario.DoesNotExist:
         perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
     
-    # Notícias recomendadas
-    noticias_recomendadas = Noticia.recomendar_para(user)
+    # Notícias recomendadas (Pega a primeira recomendada)
+    noticias_recomendadas = Noticia.recomendar_para(user).first()
     
-    # Notícias urgentes: 2 mais recentes excluindo recomendadas
-    noticias_urgentes = Noticia.objects.exclude(pk__in=noticias_recomendadas.values_list('pk', flat=True)).order_by('-data_publicacao')[:2]
+    # Notícias urgentes: 5 mais recentes
+    try:
+        urgentes_qs = Noticia.objects.filter(urgente=True).order_by('-data_publicacao')
+        if noticias_recomendadas:
+            urgentes_qs = urgentes_qs.exclude(pk=noticias_recomendadas.pk)
+        noticias_urgentes = urgentes_qs[:5]
+    except Exception:
+        noticias_urgentes = None
+
+    # Últimas notícias: 5 mais recentes (para a aba "Tendências")
+    try:
+        ultimas_noticias = Noticia.objects.all().order_by('-data_publicacao')[:5]
+    except Exception:
+        ultimas_noticias = None
+        
+    # === ALTERAÇÃO AQUI ===
+    # Busca TODAS as categorias para os botões de filtro
+    try:
+        categorias_para_filtro = Categoria.objects.all()
+    except Exception:
+        categorias_para_filtro = None
+    # === FIM DA ALTERAÇÃO ===
 
     context = {
         "nome": user.first_name or user.username,
         "email": user.email,
-        "noticias_recomendadas": noticias_recomendadas,
+        "noticia_recomendada": noticias_recomendadas, 
         "categorias_interesse": categorias_interesse,
-        "noticias_urgentes": noticias_urgentes
+        "noticias_urgentes": noticias_urgentes,
+        "ultimas_noticias": ultimas_noticias,
+        "categorias_para_filtro": categorias_para_filtro, # <-- Variável atualizada
     }
     
     return render(request, "Echo_app/dashboard.html", context)
+
+# ===============================================
+# NOVA VIEW PARA FILTRAR NOTÍCIAS (AJAX)
+# ===============================================
+
+@login_required
+def filtrar_noticias(request):
+    """
+    Esta view é chamada pelo JavaScript (Fetch) do dashboard.
+    Ela filtra as notícias com base na categoria pedida
+    e retorna APENAS o HTML da lista de notícias.
+    """
+    categoria_nome = request.GET.get('categoria')
+    
+    if not categoria_nome:
+        return HttpResponseBadRequest("Categoria não fornecida.")
+
+    try:
+        if categoria_nome == 'Tendências':
+            # "Tendências" é o nosso botão para "Todas"
+            noticias_filtradas = Noticia.objects.all().order_by('-data_publicacao')[:5]
+        else:
+            # Filtra pela categoria exata
+            noticias_filtradas = Noticia.objects.filter(
+                categoria__nome__iexact=categoria_nome
+            ).order_by('-data_publicacao')[:5]
+            
+    except Exception as e:
+        print(f"Erro ao filtrar notícias: {e}") 
+        noticias_filtradas = None
+
+    context = {
+        'ultimas_noticias': noticias_filtradas
+    }
+    
+    # Renderiza APENAS o template parcial
+    return render(request, 'Echo_app/partials/lista_noticias.html', context)
 
 
 # ===============================================
@@ -212,6 +272,9 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
     """
     Adiciona ou remove uma interação (curtida ou salvamento) de uma notícia.
     """
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Usuário não autenticado'}, status=401)
+        
     if tipo_interacao not in ['CURTIDA', 'SALVAMENTO']:
         return HttpResponseBadRequest("Tipo de interação inválido.")
 
@@ -313,7 +376,7 @@ def marcar_notificacao_lida(request, notificacao_id):
     """
     notificacao = get_object_or_404(Notificacao, id=notificacao_id, usuario=request.user)
     notificacao.marcar_como_lida()
-    return redirect('lista_notificacoes')
+    return redirect('Echo_app:lista_notificacoes')
 
 
 @login_required
@@ -323,7 +386,7 @@ def marcar_todas_lidas(request):
     Marca todas notificações não lidas como lidas.
     """
     Notificacao.objects.filter(usuario=request.user, lida=False).update(lida=True)
-    return redirect('lista_notificacoes')
+    return redirect('Echo_app:lista_notificacoes')
 
 
 # ===============================================

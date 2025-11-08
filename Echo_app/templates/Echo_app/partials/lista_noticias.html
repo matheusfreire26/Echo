@@ -1,0 +1,25 @@
+{% if ultimas_noticias %}
+    {% for noticia in ultimas_noticias %}
+    <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="latest-news-card-link">
+        <article class="latest-news-card">
+            <div class="latest-card-image">
+                {% if noticia.imagem %}
+                    <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
+                {% else %}
+                    <div class="latest-image-placeholder recommended-placeholder"></div>
+                {% endif %}
+            </div>
+            <div class="latest-card-content">
+                <span class="latest-card-bar"></span>
+                <div class="latest-card-text">
+                    <span class="latest-card-category">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                    <h3>{{ noticia.titulo }}</h3>
+                    <p>{{ noticia.resumo|truncatewords:15 }}</p>
+                </div>
+            </div>
+        </article>
+    </a>
+    {% endfor %}
+{% else %}
+    <p class="latest-news-empty">Não há notícias disponíveis para esta categoria no momento.</p>
+{% endif %}

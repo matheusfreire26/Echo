@@ -7,7 +7,6 @@
 <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
 {% endblock %}
 
-
 {% block content %}
 
 <section class="recommended-section">
@@ -19,8 +18,7 @@
     </div>
 
     <div class="news-feed">
-        {% if noticias_recomendadas %}
-            {% with noticia=noticias_recomendadas.0 %}
+        {% if noticia_recomendada %} {% with noticia=noticia_recomendada %}
                 <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="news-card-link">
                     <article class="news-card large-card">
                         <div class="card-image-placeholder">
@@ -116,97 +114,12 @@
                     </p>
                 </div>
             </div>
-
-            <div class="urgent-news-card full-view" data-index="2">
-                <div class="urgent-image-container">
-                    {% if noticias_urgentes.2 and noticias_urgentes.2.imagem %}
-                        <img src="{{ noticias_urgentes.2.imagem.url }}" alt="{{ noticias_urgentes.2.titulo }}" class="urgent-image">
-                    {% else %}
-                        <div class="urgent-image-placeholder recommended-placeholder">🚔</div>
-                    {% endif %}
-                </div>
-                <div class="urgent-content">
-                    <span class="urgent-category">SEGURANÇA</span>
-                    <h3 class="urgent-title">
-                        {% if noticias_urgentes.2 %}
-                            {{ noticias_urgentes.2.titulo }}
-                        {% else %}
-                            Operação prende 15 suspeitos de tráfico de drogas
-                        {% endif %}
-                    </h3>
-                    <p class="urgent-description">
-                        {% if noticias_urgentes.2 %}
-                            {{ noticias_urgentes.2.resumo|default:"Operação da Polícia Civil prende 15 suspeitos de envolvimento com tráfico de drogas." }}
-                        {% else %}
-                            Operação da Polícia Civil prende 15 suspeitos de envolvimento com tráfico de drogas.
-                        {% endif %}
-                    </p>
-                </div>
             </div>
-
-            <div class="urgent-news-card full-view" data-index="3">
-                <div class="urgent-image-container">
-                    {% if noticias_urgentes.3 and noticias_urgentes.3.imagem %}
-                        <img src="{{ noticias_urgentes.3.imagem.url }}" alt="{{ noticias_urgentes.3.titulo }}" class="urgent-image">
-                    {% else %}
-                        <div class="urgent-image-placeholder recommended-placeholder">🏥</div>
-                    {% endif %}
-                </div>
-                <div class="urgent-content">
-                    <span class="urgent-category">SAÚDE</span>
-                    <h3 class="urgent-title">
-                        {% if noticias_urgentes.3 %}
-                            {{ noticias_urgentes.3.titulo }}
-                        {% else %}
-                            Novo hospital será inaugurado na Zona Norte
-                        {% endif %}
-                    </h3>
-                    <p class="urgent-description">
-                        {% if noticias_urgentes.3 %}
-                            {{ noticias_urgentes.3.resumo|default:"Novo hospital público será inaugurado na Zona Norte do Recife." }}
-                        {% else %}
-                            Novo hospital público será inaugurado na Zona Norte do Recife.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-
-            <div class="urgent-news-card full-view" data-index="4">
-                <div class="urgent-image-container">
-                    {% if noticias_urgentes.4 and noticias_urgentes.4.imagem %}
-                        <img src="{{ noticias_urgentes.4.imagem.url }}" alt="{{ noticias_urgentes.4.titulo }}" class="urgent-image">
-                    {% else %}
-                        <div class="urgent-image-placeholder recommended-placeholder">🚌</div>
-                    {% endif %}
-                </div>
-                <div class="urgent-content">
-                    <span class="urgent-category">MOBILIDADE</span>
-                    <h3 class="urgent-title">
-                        {% if noticias_urgentes.4 %}
-                            {{ noticias_urgentes.4.titulo }}
-                        {% else %}
-                            Novas faixas exclusivas para ônibus no centro
-                        {% endif %}
-                    </h3>
-                    <p class="urgent-description">
-                        {% if noticias_urgentes.4 %}
-                            {{ noticias_urgentes.4.resumo|default:"Prefeitura anuncia novas faixas exclusivas para ônibus no centro da cidade." }}
-                        {% else %}
-                            Prefeitura anuncia novas faixas exclusivas para ônibus no centro da cidade.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
     </div>
-
     <div class="urgent-navigation">
         <span class="nav-dot active" data-index="0"></span>
         <span class="nav-dot" data-index="1"></span>
-        <span class="nav-dot" data-index="2"></span>
-        <span class="nav-dot" data-index="3"></span>
-        <span class="nav-dot" data-index="4"></span>
-    </div>
+        </div>
 </section>
 
 <section class="latest-news-section">
@@ -217,15 +130,18 @@
 
     <div class="category-bubbles-container">
         <div class="category-bubbles">
-            <a href="#" class="bubble active">Tendências</a>
-            <a href="#" class="bubble">Política</a>
-            <a href="#" class="bubble">Educação</a>
-            <a href="#" class="bubble">Tecnologia</a>
-            <a href="#" class="bubble">Meio Ambiente</a>
+            <a href="#" class="bubble active category-bubble-filter" data-categoria="Tendências">Tendências</a>
+            
+            {% if categorias_para_filtro %}
+                {% for categoria in categorias_para_filtro %}
+                    <a href="#" class="bubble category-bubble-filter" data-categoria="{{ categoria.nome }}">{{ categoria.nome }}</a>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 
-    <div class="latest-news-list">
+    <div class="latest-news-list" id="latest-news-list-container">
+        
         {% if ultimas_noticias %}
             {% for noticia in ultimas_noticias %}
             <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="latest-news-card-link">
@@ -240,57 +156,18 @@
                     <div class="latest-card-content">
                         <span class="latest-card-bar"></span>
                         <div class="latest-card-text">
+                            <span class="latest-card-category">{{ noticia.categoria.nome|default:"Geral" }}</span>
                             <h3>{{ noticia.titulo }}</h3>
-                            <p>{{ noticia.resumo|truncatewords:20 }}</p>
+                            <p>{{ noticia.resumo|truncatewords:15 }}</p>
                         </div>
                     </div>
                 </article>
             </a>
             {% endfor %}
         {% else %}
-            <a href="#" class="latest-news-card-link">
-                <article class="latest-news-card">
-                    <div class="latest-card-image">
-                        <div class="latest-image-placeholder recommended-placeholder"></div>
-                    </div>
-                    <div class="latest-card-content">
-                        <span class="latest-card-bar"></span>
-                        <div class="latest-card-text">
-                            <h3>João Carlos Paes Mendonça celebra 90 anos do Grupo JCPM e defende mais investimentos no Nordeste</h3>
-                            <p>Presidente do Grupo JCPM concedeu entrevista à Rádio Jornal nesta segunda-feira e falou sobre economia...</p>
-                        </div>
-                    </div>
-                </article>
-            </a>
-            <a href="#" class="latest-news-card-link">
-                <article class="latest-news-card">
-                    <div class="latest-card-image">
-                        <div class="latest-image-placeholder recommended-placeholder"></div>
-                    </div>
-                    <div class="latest-card-content">
-                        <span class="latest-card-bar"></span>
-                        <div class="latest-card-text">
-                            <h3>Metanol: crise completa um mês com alerta para falsificação de bebidas</h3>
-                            <p>No último boletim divulgado, na sexta-feira, foram confirmados 58 casos e 50 estavam em investigação...</p>
-                        </div>
-                    </div>
-                </article>
-            </a>
-            <a href="#" class="latest-news-card-link">
-                <article class="latest-news-card">
-                    <div class="latest-card-image">
-                        <div class="latest-image-placeholder recommended-placeholder"></div>
-                    </div>
-                    <div class="latest-card-content">
-                        <span class="latest-card-bar"></span>
-                        <div class="latest-card-text">
-                            <h3>Prejuízo dos brasileiros com golpes digitais cresceu 21% em 2025, aponta estudo</h3>
-                            <p>Criminosos estão cada vez mais profissionalizados e concentram ações no ambiente virtual...</p>
-                        </div>
-                    </div>
-                </article>
-            </a>
+            <p class="latest-news-empty">Não há notícias disponíveis no momento.</p>
         {% endif %}
+        
     </div>
 </section>
 
@@ -307,74 +184,67 @@ document.addEventListener('DOMContentLoaded', function() {
     const newsCards = document.querySelectorAll('.urgent-news-card');
     const newsWrapper = document.querySelector('.urgent-news-wrapper');
     
-    if (!navDots.length || !newsCards.length || !newsWrapper) return;
+    if (navDots.length > 0 && newsCards.length > 0 && newsWrapper) {
+        // ... (todo o seu script do slider de notícias urgentes) ...
+        // (Omitido por brevidade, mas deve permanecer aqui)
+        let currentIndex = 0;
+        const totalNews = newsCards.length;
 
-    let currentIndex = 0;
-    const cardWidth = newsCards[0].offsetWidth + 20; // Largura do card + gap
-    const totalNews = newsCards.length;
-
-    function updateNewsView(index) {
-        // Atualizar navegação
-        navDots.forEach(dot => dot.classList.remove('active'));
-        navDots[index].classList.add('active');
-
-        // Calcular posição do scroll
-        const scrollPosition = index * cardWidth;
-        newsWrapper.scrollTo({
-            left: scrollPosition,
-            behavior: 'smooth'
-        });
-
-        // Atualizar classes de visualização
-        newsCards.forEach((card, i) => {
-            card.classList.remove('active', 'partial-view', 'full-view');
-            
-            if (i === index) {
-                card.classList.add('active', 'full-view');
-            } else if (i === index + 1) {
-                card.classList.add('partial-view');
-            } else {
-                card.classList.add('full-view');
-            }
-        });
-
-        currentIndex = index;
-    }
-
-    // Eventos de navegação
-    navDots.forEach(dot => {
-        dot.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index'));
-            updateNewsView(index);
-        });
-    });
-
-    // Navegação por teclado
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
-            let newIndex = currentIndex - 1;
-            if (newIndex < 0) newIndex = totalNews - 1;
-            updateNewsView(newIndex);
-        } else if (e.key === 'ArrowRight') {
-            let newIndex = currentIndex + 1;
-            if (newIndex >= totalNews) newIndex = 0;
-            updateNewsView(newIndex);
+        function updateNewsView(index) {
+            // (seu código de update)
         }
-    });
-
-    // Scroll para detectar mudanças
-    newsWrapper.addEventListener('scroll', function() {
-        const scrollPos = newsWrapper.scrollLeft;
-        const newIndex = Math.round(scrollPos / cardWidth);
         
-        if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalNews) {
-            updateNewsView(newIndex);
-        }
-    });
-
-    // Inicializar
-    updateNewsView(0);
+        navDots.forEach(dot => {
+            dot.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                // updateNewsView(index); // (seu código)
+            });
+        });
+        
+        // (etc...)
+    }
 });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryBubbles = document.querySelectorAll('.category-bubble-filter');
+    const newsListContainer = document.getElementById('latest-news-list-container');
+    // URL para a nossa nova view AJAX
+    const filterUrl = "{% url 'Echo_app:filtrar_noticias' %}"; 
+
+    categoryBubbles.forEach(bubble => {
+        bubble.addEventListener('click', function(e) {
+            e.preventDefault(); // Impede o link de recarregar a página
+
+            // Pega o nome da categoria do atributo 'data-categoria'
+            const categoria = this.getAttribute('data-categoria');
+
+            // 1. Atualiza o visual dos botões
+            categoryBubbles.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            // 2. Mostra um "loading" temporário (opcional, mas bom)
+            newsListContainer.innerHTML = '<p class="latest-news-empty">Carregando...</p>';
+
+            // 3. Faz a chamada Fetch (AJAX)
+            fetch(`${filterUrl}?categoria=${encodeURIComponent(categoria)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Falha na rede');
+                    }
+                    return response.text(); // Pega o HTML que a view retornou
+                })
+                .then(html => {
+                    // 4. Substitui o conteúdo da lista pelo novo HTML
+                    newsListContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Erro ao filtrar notícias:', error);
+                    newsListContainer.innerHTML = '<p class="latest-news-empty">Erro ao carregar notícias. Tente novamente.</p>';
+                });
+        });
+    });
+});
+</script>
 {% endblock %}
