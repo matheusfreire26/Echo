@@ -38,7 +38,7 @@
     white-space: nowrap;
     transition: all 0.3s ease;
     flex-shrink: 0;
-    cursor: pointer; /* Adicionado para o clique */
+    cursor: pointer; 
 }
 
 .bubble.active,
@@ -52,7 +52,7 @@
 /* SEÇÕES DE TELA INTEIRA */
 .recommended-section,
 .urgent-section {
-    min-height: 100vh;
+    /* min-height: 100vh; (Removido para permitir alturas naturais) */
     display: flex;
     flex-direction: column;
     background: var(--cor-surface);
@@ -125,7 +125,9 @@
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-/* SEÇÃO RECOMENDADO ... */
+/* ===============================================
+   SEÇÃO RECOMENDADO (CARD GRANDE - RESTAURADO)
+   =============================================== */
 .recommended-section .news-feed {
     flex: 1;
     display: flex;
@@ -133,6 +135,7 @@
     justify-content: center;
     padding: 0 20px 80px;
 }
+
 .news-card-link {
     text-decoration: none;
     color: inherit;
@@ -140,6 +143,7 @@
     width: 100%;
     max-width: 1400px;
 }
+
 .news-card.large-card {
     background: var(--cor-surface);
     border-radius: 25px;
@@ -148,26 +152,31 @@
     transition: all 0.4s ease;
     border: 3px solid #f8f9fa;
 }
+
 .news-card.large-card:hover {
     transform: translateY(-12px);
     box-shadow: 0 20px 60px rgba(220, 38, 38, 0.3);
     border-color: var(--cor-primaria);
 }
+
 .large-card .card-image-placeholder {
     height: 600px;
     overflow: hidden;
     background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-primaria-hover) 100%);
     position: relative;
 }
+
 .large-card .card-image-placeholder img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
 }
+
 .news-card.large-card:hover .card-image-placeholder img {
     transform: scale(1.05);
 }
+
 .image-placeholder {
     width: 100%;
     height: 100%;
@@ -178,12 +187,16 @@
     background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-primaria-hover) 100%);
     color: white;
 }
+
 .recommended-placeholder {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* Gradiente azul */
 }
+
+
 .card-content {
     padding: 50px;
 }
+
 .card-content h3 {
     font-size: 42px;
     font-weight: 800;
@@ -192,6 +205,8 @@
     line-height: 1.2;
     letter-spacing: -0.5px;
 }
+
+/* === O ESTILO QUE VOCÊ PEDIU (RESTAURADO) === */
 .news-description {
     color: var(--cor-texto-secundario);
     font-size: 20px;
@@ -206,6 +221,7 @@
     border-left: 4px solid var(--cor-primaria);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
+
 .card-meta {
     display: flex;
     justify-content: space-between;
@@ -215,6 +231,7 @@
     padding-top: 25px;
     border-top: 2px solid #f0f0f0;
 }
+
 .category {
     background: var(--cor-primaria);
     color: white;
@@ -225,14 +242,19 @@
     letter-spacing: 1px;
     font-size: 14px;
 }
+/* === FIM DOS ESTILOS RESTAURADOS === */
 
-/* SEÇÃO NOTÍCIAS URGENTES ... */
+
+/* ===============================================
+   SEÇÃO NOTÍCIAS URGENTES (SLIDER)
+   =============================================== */
 .urgent-news-container {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    overflow: hidden; 
+    overflow: hidden;
 }
+
 .urgent-news-wrapper {
     display: flex;
     gap: 20px;
@@ -244,6 +266,7 @@
     scrollbar-width: none;  
 }
 .urgent-news-wrapper::-webkit-scrollbar { display: none; }
+
 .urgent-news-card {
     flex: 0 0 100%; 
     max-width: calc(100% - 60px); 
@@ -262,6 +285,15 @@
 .urgent-news-card.partial-view {
     opacity: 0.3;
 }
+
+/* Link <a> que envolve o card */
+.card-link-wrapper {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
 .urgent-image-container {
     width: 100%;
     height: 250px;
@@ -281,6 +313,7 @@
     color: white;
     font-size: 3rem;
 }
+
 .urgent-content {
     padding: 20px;
 }
@@ -307,13 +340,15 @@
     color: var(--cor-texto-secundario);
     line-height: 1.5;
 }
+
+/* NAVEGAÇÃO (PONTOS) URGENTE */
 .urgent-navigation {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-top: 25px;
 }
-.nav-dot {
+.urgent-nav-dot { 
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -321,15 +356,15 @@
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
-.nav-dot:hover { background-color: var(--cor-texto-secundario); }
-.nav-dot.active {
+.urgent-nav-dot:hover { background-color: var(--cor-texto-secundario); }
+.urgent-nav-dot.active {
     background-color: var(--cor-primaria);
     transform: scale(1.2);
 }
 
 
-/* ESTADOS VAZIOS */
-.empty-state {
+/* ESTADOS VAZIOS (AGORA EM DOIS LUGARES) */
+.empty-state { /* Para a página inteira (se não houver recomendados) */
     text-align: center;
     padding: 100px 50px;
     background: var(--cor-surface);
@@ -345,8 +380,20 @@
     line-height: 1.6;
     font-size: 20px;
 }
+.empty-state-slider { /* Para dentro de um slider */
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+    font-style: italic;
+    color: var(--cor-texto-secundario);
+    font-size: 1rem;
+}
 
-.bottom-spacer { height: 50px; }
+
+/* ESPAÇO PARA A NAVEGAÇÃO INFERIOR */
+.bottom-spacer {
+    height: 50px;
+}
 
 
 /* =====================================
@@ -425,7 +472,6 @@
     overflow: hidden; 
 }
 
-/* === ESTILO ADICIONADO PARA A CATEGORIA === */
 .latest-card-category {
     font-size: 0.75rem;
     font-weight: 700;
@@ -454,7 +500,6 @@
     text-overflow: ellipsis;
 }
 
-/* === ESTILO ADICIONADO PARA MENSAGEM VAZIA === */
 .latest-news-empty {
     color: var(--cor-texto-secundario);
     text-align: center;
@@ -494,11 +539,14 @@
     .urgent-image-container { height: 180px; }
     .section-header h2 { font-size: 22px; }
     .see-more.subtle-btn { font-size: 14px; padding: 10px 18px; }
+    
     .large-card .card-image-placeholder { height: 280px; }
     .card-content h3 { font-size: 24px; }
     .news-description, .urgent-description { font-size: 15px; }
+    
     .category-bubbles { justify-content: flex-start; gap: 8px; }
     .bubble { padding: 10px 18px; font-size: 13px; }
+    
     .latest-card-text h3 { font-size: 0.9rem; }
     .latest-card-text p { font-size: 0.8rem; }
 }
@@ -512,4 +560,3 @@
 .news-card {
     animation: fadeIn 0.7s ease-out;
 }
-/* Não animar .urgent-news ou .latest-news-card, pois eles são carregados por JS */

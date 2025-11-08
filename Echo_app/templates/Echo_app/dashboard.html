@@ -18,7 +18,8 @@
     </div>
 
     <div class="news-feed">
-        {% if noticia_recomendada %} {% with noticia=noticia_recomendada %}
+        {% if noticia_recomendada %}
+            {% with noticia=noticia_recomendada %}
                 <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="news-card-link">
                     <article class="news-card large-card">
                         <div class="card-image-placeholder">
@@ -30,9 +31,11 @@
                         </div>
                         <div class="card-content">
                             <h3>{{ noticia.titulo }}</h3>
-                            <p class="news-description">A CESAR School conquistou o seu primeiro título da Copa Estudantil Metropolitana de Futebol ao derrotar o Colégio Santa Helena por 4 a 1 na final.
-                                O destaque da partida foi Matheus Freire (que abiu o placar), sendo Arthur Moury eleito o melhor jogador de todo o torneio.
-                                Com esta vitória histórica, a CESAR School garantiu a vaga para o Campeonato Estadual, afirmando-se como uma nova força no desporto escolar.</p>
+                            
+                            <p class="news-description">
+                                {{ noticia.conteudo|striptags|truncatewords:40 }}
+                            </p>
+
                             <div class="card-meta">
                                 <span class="category">{{ noticia.categoria.nome|default:"Geral" }}</span>
                                 <span>{{ noticia.data_publicacao|date:"d M, Y" }}</span>
@@ -60,66 +63,42 @@
 
     <div class="urgent-news-container">
         <div class="urgent-news-wrapper">
-            <div class="urgent-news-card full-view active" data-index="0">
-                <div class="urgent-image-container">
-                    {% if noticias_urgentes.0 and noticias_urgentes.0.imagem %}
-                        <img src="{{ noticias_urgentes.0.imagem.url }}" alt="{{ noticias_urgentes.0.titulo }}" class="urgent-image">
-                    {% else %}
-                        <div class="urgent-image-placeholder recommended-placeholder">🌊</div>
-                    {% endif %}
+            
+            {% if noticias_urgentes %}
+                {% for noticia in noticias_urgentes %}
+                <div class="urgent-news-card {% if forloop.first %}full-view active{% else %}full-view{% endif %}" data-index="{{ forloop.counter0 }}">
+                    
+                    <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="card-link-wrapper">
+                        <div class="urgent-image-container">
+                            {% if noticia.imagem %}
+                                <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="urgent-image">
+                            {% else %}
+                                <div class="urgent-image-placeholder recommended-placeholder">🚨</div>
+                            {% endif %}
+                        </div>
+                        <div class="urgent-content">
+                            <span class="urgent-category">{{ noticia.categoria.nome|default:"URGENTE" }}</span>
+                            <h3 class="urgent-title">{{ noticia.titulo }}</h3>
+                            <p class="urgent-time">{{ noticia.data_publicacao|timesince }} atrás</p>
+                            <p class="urgent-description">{{ noticia.conteudo|striptags|truncatewords:15 }}</p>
+                        </div>
+                    </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state-slider">
+                    <p>Nenhuma notícia urgente no momento.</p>
                 </div>
-                <div class="urgent-content">
-                    <span class="urgent-category">PERNAMBUCO</span>
-                    <h3 class="urgent-title">
-                        {% if noticias_urgentes.0 %}
-                            {{ noticias_urgentes.0.titulo }}
-                        {% else %}
-                            Jaboatão entrega projeto para conter avanço do mar ao Governo de Pernambuco
-                        {% endif %}
-                    </h3>
-                    <p class="urgent-time">5min atrás</p>
-                    <p class="urgent-description">
-                        {% if noticias_urgentes.0 %}
-                            {{ noticias_urgentes.0.resumo|default:"Em maio de 2018, a nova empresa de JABOATÃO É uma vez que o governo é um bom e mais grande." }}
-                        {% else %}
-                            Em maio de 2018, a nova empresa de JABOATÃO É uma vez que o governo é um bom e mais grande.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
+            {% endif %}
 
-            <div class="urgent-news-card partial-view" data-index="1">
-                <div class="urgent-image-container">
-                    {% if noticias_urgentes.1 and noticias_urgentes.1.imagem %}
-                        <img src="{{ noticias_urgentes.1.imagem.url }}" alt="{{ noticias_urgentes.1.titulo }}" class="urgent-image">
-                    {% else %}
-                        <div class="urgent-image-placeholder recommended-placeholder">📚</div>
-                    {% endif %}
-                </div>
-                <div class="urgent-content">
-                    <span class="urgent-category">EDUCAÇÃO</span>
-                    <h3 class="urgent-title">
-                        {% if noticias_urgentes.1 %}
-                            {{ noticias_urgentes.1.titulo }}
-                        {% else %}
-                            Após críticas, Governo de Pernambuco suspende sorteio para ingresso em Escolas Técnicas
-                        {% endif %}
-                    </h3>
-                    <p class="urgent-description">
-                        {% if noticias_urgentes.1 %}
-                            {{ noticias_urgentes.1.resumo|default:"Após críticas, Governo de Pernambuco suspende sorte para ingresso em Escolas Técnicas." }}
-                        {% else %}
-                            Após críticas, Governo de Pernambuco suspende sorte para ingresso em Escolas Técnicas.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-            </div>
-    </div>
-    <div class="urgent-navigation">
-        <span class="nav-dot active" data-index="0"></span>
-        <span class="nav-dot" data-index="1"></span>
         </div>
+    </div>
+
+    <div class="urgent-navigation">
+        {% for noticia in noticias_urgentes %}
+            <span class="urgent-nav-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+        {% endfor %}
+    </div>
 </section>
 
 <section class="latest-news-section">
@@ -131,7 +110,6 @@
     <div class="category-bubbles-container">
         <div class="category-bubbles">
             <a href="#" class="bubble active category-bubble-filter" data-categoria="Tendências">Tendências</a>
-            
             {% if categorias_para_filtro %}
                 {% for categoria in categorias_para_filtro %}
                     <a href="#" class="bubble category-bubble-filter" data-categoria="{{ categoria.nome }}">{{ categoria.nome }}</a>
@@ -141,33 +119,7 @@
     </div>
 
     <div class="latest-news-list" id="latest-news-list-container">
-        
-        {% if ultimas_noticias %}
-            {% for noticia in ultimas_noticias %}
-            <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="latest-news-card-link">
-                <article class="latest-news-card">
-                    <div class="latest-card-image">
-                        {% if noticia.imagem %}
-                            <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
-                        {% else %}
-                            <div class="latest-image-placeholder recommended-placeholder"></div>
-                        {% endif %}
-                    </div>
-                    <div class="latest-card-content">
-                        <span class="latest-card-bar"></span>
-                        <div class="latest-card-text">
-                            <span class="latest-card-category">{{ noticia.categoria.nome|default:"Geral" }}</span>
-                            <h3>{{ noticia.titulo }}</h3>
-                            <p>{{ noticia.resumo|truncatewords:15 }}</p>
-                        </div>
-                    </div>
-                </article>
-            </a>
-            {% endfor %}
-        {% else %}
-            <p class="latest-news-empty">Não há notícias disponíveis no momento.</p>
-        {% endif %}
-        
+        {% include 'Echo_app/partials/lista_noticias.html' %}
     </div>
 </section>
 
@@ -180,71 +132,115 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const navDots = document.querySelectorAll('.nav-dot');
+
+    // === CÓDIGO DO SLIDER DE NOTÍCIAS URGENTES ===
+    const navDots = document.querySelectorAll('.urgent-nav-dot');
     const newsCards = document.querySelectorAll('.urgent-news-card');
     const newsWrapper = document.querySelector('.urgent-news-wrapper');
     
     if (navDots.length > 0 && newsCards.length > 0 && newsWrapper) {
-        // ... (todo o seu script do slider de notícias urgentes) ...
-        // (Omitido por brevidade, mas deve permanecer aqui)
         let currentIndex = 0;
         const totalNews = newsCards.length;
+        
+        function getCardWidth() {
+            if (newsCards.length === 0) return 0;
+            return newsCards[0].offsetWidth + 20; 
+        }
 
         function updateNewsView(index) {
-            // (seu código de update)
+            if (newsCards.length === 0) return; 
+
+            const cardWidth = getCardWidth();
+            
+            navDots.forEach(dot => dot.classList.remove('active'));
+            navDots.forEach((dot, i) => {
+                if (i >= totalNews) {
+                    dot.style.display = 'none';
+                } else {
+                    dot.style.display = 'block';
+                }
+            });
+            if(navDots[index]) {
+                navDots[index].classList.add('active');
+            }
+
+            const scrollPosition = index * cardWidth;
+            newsWrapper.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
+
+            newsCards.forEach((card, i) => {
+                card.classList.remove('active', 'partial-view', 'full-view');
+                if (i === index) {
+                    card.classList.add('active', 'full-view');
+                } else if (i === index + 1) {
+                    card.classList.add('partial-view');
+                } else {
+                    card.classList.add('full-view');
+                }
+            });
+            currentIndex = index;
         }
-        
+
         navDots.forEach(dot => {
             dot.addEventListener('click', function() {
                 const index = parseInt(this.getAttribute('data-index'));
-                // updateNewsView(index); // (seu código)
+                if (index < totalNews) {
+                    updateNewsView(index);
+                }
             });
         });
-        
-        // (etc...)
+
+        let scrollTimer;
+        newsWrapper.addEventListener('scroll', function() {
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => {
+                const cardWidth = getCardWidth();
+                if (cardWidth === 0) return;
+                
+                const scrollPos = newsWrapper.scrollLeft;
+                const newIndex = Math.round(scrollPos / cardWidth);
+                
+                if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalNews) {
+                    updateNewsView(newIndex);
+                }
+            }, 150);
+        });
+
+        updateNewsView(0);
+        window.addEventListener('resize', () => updateNewsView(currentIndex));
+    }
+
+    // === CÓDIGO DO FILTRO DE CATEGORIAS (AJAX) ===
+    const categoryBubbles = document.querySelectorAll('.category-bubble-filter');
+    const newsListContainer = document.getElementById('latest-news-list-container');
+    const filterUrl = "{% url 'Echo_app:filtrar_noticias' %}"; 
+
+    if (categoryBubbles.length > 0 && newsListContainer && filterUrl) {
+        categoryBubbles.forEach(bubble => {
+            bubble.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                const categoria = this.getAttribute('data-categoria');
+
+                categoryBubbles.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                newsListContainer.innerHTML = '<p class="latest-news-empty">Carregando...</p>';
+
+                fetch(`${filterUrl}?categoria=${encodeURIComponent(categoria)}`)
+                    .then(response => response.ok ? response.text() : Promise.reject('Falha na rede'))
+                    .then(html => {
+                        newsListContainer.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Erro ao filtrar notícias:', error);
+                        newsListContainer.innerHTML = '<p class="latest-news-empty">Erro ao carregar notícias. Tente novamente.</p>';
+                    });
+            });
+        });
     }
 });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const categoryBubbles = document.querySelectorAll('.category-bubble-filter');
-    const newsListContainer = document.getElementById('latest-news-list-container');
-    // URL para a nossa nova view AJAX
-    const filterUrl = "{% url 'Echo_app:filtrar_noticias' %}"; 
-
-    categoryBubbles.forEach(bubble => {
-        bubble.addEventListener('click', function(e) {
-            e.preventDefault(); // Impede o link de recarregar a página
-
-            // Pega o nome da categoria do atributo 'data-categoria'
-            const categoria = this.getAttribute('data-categoria');
-
-            // 1. Atualiza o visual dos botões
-            categoryBubbles.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-
-            // 2. Mostra um "loading" temporário (opcional, mas bom)
-            newsListContainer.innerHTML = '<p class="latest-news-empty">Carregando...</p>';
-
-            // 3. Faz a chamada Fetch (AJAX)
-            fetch(`${filterUrl}?categoria=${encodeURIComponent(categoria)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Falha na rede');
-                    }
-                    return response.text(); // Pega o HTML que a view retornou
-                })
-                .then(html => {
-                    // 4. Substitui o conteúdo da lista pelo novo HTML
-                    newsListContainer.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Erro ao filtrar notícias:', error);
-                    newsListContainer.innerHTML = '<p class="latest-news-empty">Erro ao carregar notícias. Tente novamente.</p>';
-                });
-        });
-    });
-});
-</script>
 {% endblock %}

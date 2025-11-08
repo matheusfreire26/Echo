@@ -12,14 +12,12 @@ User = get_user_model()  # Define o modelo de usuário usado no projeto
 class Noticia(models.Model):  # Modelo que representa uma notícia
     titulo = models.CharField(max_length=255, verbose_name="Título")
     
-    # --- CAMPO DE IMAGEM ADICIONADO ---
     imagem = models.ImageField(
         upload_to='noticias/',  # Subpasta dentro de MEDIA_ROOT onde as imagens serão salvas
         blank=True,             # Permite notícias sem imagem
         null=True,              # Permite valor nulo no banco de dados
         verbose_name="Imagem da Notícia"
     )
-    # --- FIM DO CAMPO ADICIONADO ---
     
     conteudo = models.TextField(verbose_name="Conteúdo Completo")
     data_publicacao = models.DateTimeField(default=timezone.now, verbose_name="Data de Publicação")
@@ -27,6 +25,10 @@ class Noticia(models.Model):  # Modelo que representa uma notícia
     curtidas_count = models.PositiveIntegerField(default=0, verbose_name="Total de Curtidas")
     salvamentos_count = models.PositiveIntegerField(default=0, verbose_name="Total de Salvamentos")
     categoria = models.ForeignKey('Categoria', on_delete=models.SET_NULL, null=True, blank=True, related_name='noticias', verbose_name="Categoria")
+    
+    # ================== CAMPO EM FALTA ADICIONADO AQUI ==================
+    urgente = models.BooleanField(default=False, verbose_name="É Urgente?")
+    # ==================================================================
 
     class Meta:
         verbose_name = "Notícia"
@@ -42,27 +44,23 @@ class Noticia(models.Model):  # Modelo que representa uma notícia
         if not usuario.is_authenticated:
             return Noticia.objects.all()
 
-        # Tenta buscar o perfil para preferências de categoria
         try:
-            perfil = usuario.perfil # Usando related_name='perfil' de PerfilUsuario
+            perfil = usuario.perfil 
             if perfil.categorias_de_interesse.exists():
-                return Noticia.objects.filter(categoria__in=perfil.categorias_de_interesse.all()).order_by('-data_publicacao')[:10] # Limita a 10 por exemplo
-        except AttributeError: # Caso o related_name não seja 'perfil' ou não exista PerfilUsuario
+                return Noticia.objects.filter(categoria__in=perfil.categorias_de_interesse.all()).order_by('-data_publicacao')[:10] 
+        except AttributeError: 
             pass
-        except PerfilUsuario.DoesNotExist: # Caso o perfil ainda não exista
+        except PerfilUsuario.DoesNotExist: 
              pass
 
-        # Fallback para histórico (se existir)
-        # Note: HistoricoInteresse não está no código fornecido, assumindo que existe
         try:
             historico = usuario.historico_interesse.order_by('-pontuacao')
             if historico.exists():
                 top_categorias = [h.categoria for h in historico[:3]]
                 return Noticia.objects.filter(categoria__in=top_categorias).order_by('-data_publicacao')[:10]
-        except AttributeError: # Se o related_name historico_interesse não existir
+        except AttributeError: 
             pass
 
-        # Fallback final: retorna as últimas notícias
         return Noticia.objects.all().order_by('-data_publicacao')[:10] # Retorna as 10 mais recentes
 
 
@@ -210,14 +208,12 @@ class PerfilUsuario(models.Model):  # Perfil do usuário
         verbose_name="Data de Criação"
     )  # Data de criação automática
 
-    # --- CAMPO ADICIONADO PARA CORRIGIR O ERRO ---
     categorias_de_interesse = models.ManyToManyField(
         Categoria,  # Liga este perfil a múltiplas Categorias
         blank=True, # Permite que um perfil seja criado sem nenhuma categoria
         related_name="perfis_interessados", # Nome da relação inversa
         verbose_name="Categorias de Interesse"
     )
-    # --- FIM DO CAMPO ADICIONADO ---
 
     class Meta:
         verbose_name = "Perfil de Usuário"

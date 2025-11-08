@@ -23,8 +23,7 @@ User = get_user_model()
 # ===============================================
 # Parte de Autenticação e Registro (Raul)
 # ===============================================
-# (As suas views 'registrar', 'entrar' e 'sair' continuam aqui, inalteradas)
-# ...
+
 def registrar(request):
     """
     Renderiza a página de registro e processa a criação de um novo usuário
@@ -165,23 +164,23 @@ def dashboard(request):
         urgentes_qs = Noticia.objects.filter(urgente=True).order_by('-data_publicacao')
         if noticias_recomendadas:
             urgentes_qs = urgentes_qs.exclude(pk=noticias_recomendadas.pk)
-        noticias_urgentes = urgentes_qs[:5]
+        noticias_urgentes = urgentes_qs[:5] 
     except Exception:
         noticias_urgentes = None
 
-    # Últimas notícias: 5 mais recentes (para a aba "Tendências")
+    # === ALTERAÇÃO AQUI ===
+    # Últimas notícias: 5 mais recentes (para a aba "Tendências"), EXCLUINDO urgentes
     try:
-        ultimas_noticias = Noticia.objects.all().order_by('-data_publicacao')[:5]
+        ultimas_noticias = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
     except Exception:
         ultimas_noticias = None
         
-    # === ALTERAÇÃO AQUI ===
     # Busca TODAS as categorias para os botões de filtro
     try:
         categorias_para_filtro = Categoria.objects.all()
     except Exception:
         categorias_para_filtro = None
-    # === FIM DA ALTERAÇÃO ===
+    # === FIM DAS ALTERAÇÕES ===
 
     context = {
         "nome": user.first_name or user.username,
@@ -190,10 +189,11 @@ def dashboard(request):
         "categorias_interesse": categorias_interesse,
         "noticias_urgentes": noticias_urgentes,
         "ultimas_noticias": ultimas_noticias,
-        "categorias_para_filtro": categorias_para_filtro, # <-- Variável atualizada
+        "categorias_para_filtro": categorias_para_filtro,
     }
     
     return render(request, "Echo_app/dashboard.html", context)
+
 
 # ===============================================
 # NOVA VIEW PARA FILTRAR NOTÍCIAS (AJAX)
@@ -213,12 +213,15 @@ def filtrar_noticias(request):
 
     try:
         if categoria_nome == 'Tendências':
-            # "Tendências" é o nosso botão para "Todas"
-            noticias_filtradas = Noticia.objects.all().order_by('-data_publicacao')[:5]
+            # "Tendências" é o nosso botão para "Todas" (NÃO URGENTES)
+            # === ALTERAÇÃO AQUI ===
+            noticias_filtradas = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
         else:
-            # Filtra pela categoria exata
+            # Filtra pela categoria exata, TAMBÉM NÃO URGENTES
+            # === ALTERAÇÃO AQUI ===
             noticias_filtradas = Noticia.objects.filter(
-                categoria__nome__iexact=categoria_nome
+                categoria__nome__iexact=categoria_nome,
+                urgente=False 
             ).order_by('-data_publicacao')[:5]
             
     except Exception as e:
@@ -504,7 +507,8 @@ def criar_noticia(request):
             conteudo=conteudo,
             categoria=categoria,
             autor=request.user,
-            imagem=imagem
+            imagem=imagem,
+            urgente=request.POST.get('urgente') == 'on' # Captura o status de urgente
         )
 
         return redirect("Echo_app:dashboard")
