@@ -5,8 +5,8 @@
 
 /* Reset e Fonte */
 body {
-    background-color: #f7f7f7; /* Fundo levemente cinza */
-    font-family: -apple-system, BlinkMacMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background-color: #f7f7f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: #333;
 }
 
@@ -15,35 +15,34 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     color: #333;
-    padding: 20px 15px 0; /* Padding superior e lateral */
+    padding: 20px 15px 0; 
     margin: 0;
-    /* Adiciona padding no topo para afastar do cabeçalho fixo */
-    padding-top: calc(20px + var(--header-height, 0px)); /* Ajuste dinâmico se houver variável CSS para altura do header */
+    padding-top: calc(20px + var(--header-height, 0px));
 }
 
 /* Container Principal e Card */
 .perfil-card {
     background-color: #fff;
     max-width: 100%;
-    margin: 15px auto 30px;
+    margin: 15px auto 30px; /* Mantém a margem 'auto' para centralizar */
     padding: 0 0 10px 0;
-    box-shadow: none; /* Em mobile, sem sombra para visual limpo */
+    box-shadow: none;
 }
 
 /* ====================================
-   1. HEADER E AVATAR - AJUSTADO
+   1. HEADER E AVATAR 
    ==================================== */
 .perfil-header {
     display: flex;
-    align-items: flex-start; /* Alinhar a saudação com o topo da imagem */
+    align-items: flex-start;
     padding: 15px;
-    padding-bottom: 25px; /* Mais espaço para o divisor */
+    padding-bottom: 25px;
 }
 
 .perfil-avatar-container {
     position: relative;
-    width: 100px; /* Aumentado de 90px para 100px */
-    height: 100px; /* Aumentado de 90px para 100px para círculo perfeito */
+    width: 100px;
+    height: 100px; 
     margin-right: 15px;
     flex-shrink: 0;
 }
@@ -62,8 +61,8 @@ body {
     right: 0;
     background-color: #fff;
     border-radius: 50%;
-    width: 30px; /* Aumentado para melhor toque */
-    height: 30px; /* Aumentado para melhor toque */
+    width: 30px; 
+    height: 30px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -72,21 +71,21 @@ body {
 }
 
 .edit-avatar-icon svg {
-    width: 16px; /* Aumentado */
-    height: 16px; /* Aumentado */
-    color: #cc0000; /* Cor vermelha JC */
+    width: 16px; 
+    height: 16px; 
+    color: #cc0000;
 }
 
 .perfil-info {
     display: flex;
     flex-direction: column;
-    padding-top: 10px; /* Ajuste fino para alinhar com a foto */
+    padding-top: 10px;
 }
 
 .saudacao {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #cc0000; /* Vermelho vibrante JC */
+    color: #cc0000;
     margin: 0 0 2px 0;
     line-height: 1.2;
 }
@@ -109,14 +108,13 @@ body {
     text-decoration: none;
     transition: background-color 0.2s;
     max-width: fit-content;
-    white-space: nowrap; /* Garante que o texto não quebre */
+    white-space: nowrap;
 }
 
 .edit-profile-btn:hover {
     background-color: #a30000;
 }
 
-/* Divisor abaixo do cabeçalho */
 .perfil-divider {
     border: none;
     border-top: 1px solid #eee;
@@ -125,7 +123,7 @@ body {
 
 
 /* ====================================
-   2. ITENS DO MENU - AJUSTADO PARA ÍCONES E ESPAÇAMENTO
+   2. ITENS DO MENU - AJUSTE PARA EMOJIS
    ==================================== */
 .menu-opcoes {
     display: flex;
@@ -136,115 +134,77 @@ body {
 .menu-item {
     display: flex;
     align-items: center;
-    padding: 15px 0; /* Espaçamento vertical grande */
+    padding: 15px 0;
     color: #333;
     text-decoration: none;
     font-size: 1rem;
     font-weight: 500;
-    border-bottom: 1px solid #eee; /* Linha divisória fina */
+    border-bottom: 1px solid #eee;
     position: relative;
     transition: background-color 0.1s;
-    line-height: 1.2; /* Garante altura de linha consistente */
+    line-height: 1.2;
 }
 
 .menu-item:last-child {
-    border-bottom: none; /* O último item não tem borda */
+    border-bottom: none;
 }
 
 .menu-item:hover {
     background-color: #fafafa;
 }
 
-/* Ícone SVG dentro do item de menu - CORREÇÃO DE TAMANHO E COR */
+/* Estilo para o span que contém o emoji */
 .menu-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px; /* Aumentado para melhor visualização */
-    height: 20px; /* Aumentado para melhor visualização */
+    font-size: 1.4rem; /* Tamanho do emoji */
+    width: 25px; /* Espaço reservado para alinhamento */
+    height: 25px;
     margin-right: 15px;
-    color: #555; /* Cor cinza sutil para os ícones */
-    flex-shrink: 0; /* Impede que o ícone encolha */
+    flex-shrink: 0;
 }
-
-.menu-icon svg {
-    width: 100%;
-    height: 100%;
-    /* Removido fill: currentColor; se houver, para que o stroke funcione como cor primária */
-    /* Para SVGs que usam stroke para cor */
-    stroke: currentColor;
-    fill: none; /* Garante que o interior não seja preenchido, se o SVG for um outline */
-}
-
 
 /* Seta de navegação (>) */
 .menu-item::after {
-    content: '>'; /* Usando o caractere > diretamente, é mais leve */
+    content: '>'; 
     position: absolute;
     right: 0;
-    font-size: 1.2rem; /* Tamanho ajustado para ser mais discreto */
+    font-size: 1.2rem;
     font-weight: 400;
-    color: #aaa; /* Cor mais suave */
+    color: #aaa;
 }
 
-/* Divisor dentro da lista de itens */
 .menu-divider {
     border: none;
-    border-top: 5px solid #f7f7f7; /* Linha cinza grossa para separar blocos */
-    margin: 0 -15px; /* Estende a linha para a lateral do padding */
+    border-top: 5px solid #f7f7f7;
+    margin: 0 -15px;
 }
 
-/* Estilos específicos para ações de saída/exclusão */
-.menu-item.acao-logout .menu-icon svg,
-.menu-item.acao-deletar .menu-icon svg {
-    /* Garante que o stroke também mude de cor */
-    stroke: currentColor;
-}
+/* Removed specific color styles for logout/delete icons as emojis handle their own color */
 
-.menu-item.acao-deletar .menu-icon {
-    color: #cc0000; /* Lixeira vermelha */
-}
-.menu-item.acao-logout .menu-icon {
-    color: #555; /* Sair da conta é padrão cinza */
-}
 
-/* Mídias queries para telas maiores (desktop) */
+/* ====================================
+   3. MÍDIA QUERIES (CENTRALIZAÇÃO)
+   ==================================== */
 @media (min-width: 768px) {
+    /* Centraliza o título principal no desktop */
     .main-title {
-        padding-left: 30px; /* Mais espaço nas laterais em desktop */
-        padding-right: 30px;
+        text-align: center;
+        padding: 30px 30px 15px; /* Mais padding no topo e menos no fundo */
     }
-
+    
     .perfil-card {
-        max-width: 600px; /* Limita a largura do card em telas maiores */
-        border-radius: 8px; /* Cantos arredondados */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra suave */
+        max-width: 600px; /* Limita a largura do card */
+        margin-left: auto;
+        margin-right: auto; /* Garante a centralização horizontal */
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding-bottom: 20px;
     }
 
     .perfil-header {
-        padding: 20px 30px 30px; /* Mais padding no header */
-    }
-
-    .edit-avatar-icon {
-        width: 32px;
-        height: 32px;
-    }
-    .edit-avatar-icon svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .perfil-info {
-        padding-top: 15px;
-    }
-
-    .saudacao {
-        font-size: 1.2rem;
-    }
-
-    .user-email {
-        font-size: 0.95rem;
+        padding: 20px 30px 30px; 
     }
 
     .edit-profile-btn {
@@ -261,17 +221,7 @@ body {
         font-size: 1.05rem;
     }
 
-    .menu-icon {
-        width: 22px;
-        height: 22px;
-        margin-right: 20px;
-    }
-    
-    .menu-item::after {
-        font-size: 1.3rem;
-    }
-
     .menu-divider {
-        margin: 0 -30px; /* Ajusta a margem para o padding maior */
+        margin: 0 -30px; 
     }
 }
