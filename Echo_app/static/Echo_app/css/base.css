@@ -78,7 +78,7 @@ app-content {
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 100px;
     background-color: var(--cor-surface);
     border-bottom: 1px solid var(--cor-borda);
     display: flex;
@@ -115,13 +115,13 @@ app-content {
 }
 
 .logo-img {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
 }
 
 .brand-name {
-    font-size: 1.5rem;
+    font-size: 2.1rem;
     font-weight: 700;
 }
 
@@ -134,14 +134,14 @@ app-content {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     transition: background-color 0.2s, color 0.2s;
 }
 .nav-icon svg {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
 }
 .nav-icon:hover {
     background-color: var(--cor-fundo);
@@ -226,12 +226,12 @@ app-content {
 
 .search-input-header {
     width: 100%;
-    height: 40px; /* Altura ideal */
+    height: 54px; /* Altura ideal */
     padding: 8px 15px 8px 45px; /* Mais padding à esquerda para o ícone */
     border: 1px solid var(--cor-borda); /* Borda sutil */
     border-radius: 20px; /* Cantos bem arredondados para um visual atraente */
     background-color: var(--cor-fundo); /* Fundo cinza claro */
-    font-size: 1em;
+    font-size: 1.1em;
     color: var(--cor-texto);
     outline: none; /* Remove a borda de foco padrão */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -250,8 +250,8 @@ app-content {
     position: absolute;
     left: 15px; /* Posição do ícone dentro do campo */
     color: var(--cor-texto-secundario);
-    width: 22px; /* Tamanho do ícone */
-    height: 22px;
+    width: 28px; /* Tamanho do ícone */
+    height: 28px;
     pointer-events: none; /* Garante que o clique passe para o input */
 }
 
@@ -285,13 +285,13 @@ app-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1.5rem;
+    gap: 6.5rem;
     flex-wrap: wrap;
 }
 
 .partner-circle {
-    width: 60px;
-    height: 60px;
+    width: 120px;
+    height: 120px;
     border-radius: 100%;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     display: flex;
