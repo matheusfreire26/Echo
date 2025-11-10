@@ -1,0 +1,37 @@
+/* Echo_app/static/Echo_app/css/custom.css */
+
+.notificacao-link {
+    /* Remove a cor azul e o sublinhado padrão dos links */
+    text-decoration: none;
+    color: inherit; 
+}
+
+.notificacao-link:hover .notificacao-card {
+    /* Efeito sutil ao passar o mouse */
+    background-color: #f8f9fa; /* Um cinza bem claro */
+    border-left: 4px solid #0d6efd; /* Borda azul à esquerda */
+}
+
+.notificacao-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s ease-in-out, border-left 0.2s ease-in-out;
+    border-left: 4px solid transparent; /* Borda inicial transparente */
+}
+
+.notificacao-imagem {
+    width: 80px;  /* Largura fixa */
+    height: 80px; /* Altura fixa */
+    object-fit: cover; /* Garante que a imagem cubra o espaço */
+    border-radius: 0.375rem; /* Bordas arredondadas */
+    margin-right: 1rem;
+    flex-shrink: 0; /* Impede que a imagem encolha */
+}
+
+.notificacao-corpo {
+    flex-grow: 1; /* Faz o texto ocupar o espaço restante */
+}

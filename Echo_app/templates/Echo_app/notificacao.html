@@ -1,4 +1,5 @@
 {% extends 'Echo_app/base.html' %} 
+{% load static %} 
 {% block content %}
 <div class="container mt-4" style="max-width: 900px;">
     
@@ -14,36 +15,57 @@
 
     <h4>Recomendadas para você</h4>
     <p class="text-muted">Com base nas suas categorias de interesse.</p>
-    <div class="list-group mb-4">
+    <div class="notificacao-list mb-4">
         
         {% for notificacao in notificacoes_recomendadas %}
             <a href="{% if notificacao.noticia %}{% url 'Echo_app:noticia_detalhe' notificacao.noticia.pk %}{% else %}#{% endif %}" 
-               class="list-group-item list-group-item-action {% if not notificacao.lida %}list-group-item-primary fw-bold{% endif %}">
+               class="notificacao-link">
                 
-                <div class="d-flex w-100 justify-content-between">
-                    <p class="mb-1">{{ notificacao.manchete }}</p>
-                    <small class="text-muted">{{ notificacao.data_criacao|timesince }} atrás</small>
+                <div class="notificacao-card {% if not notificacao.lida %}list-group-item-primary{% endif %}">
+                    
+                    {% if notificacao.noticia.imagem %}
+                        <img src="{{ notificacao.noticia.imagem.url }}" alt="Capa" class="notificacao-imagem">
+                    {% else %}
+                        <img src="{% static 'Echo_app/images/placeholder.png' %}" alt="Sem Imagem" class="notificacao-imagem">
+                    {% endif %}
+                    
+                    <div class="notificacao-corpo">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 fw-bold">{{ notificacao.manchete }}</p>
+                            <small class="text-muted">{{ notificacao.data_criacao|timesince }} atrás</small>
+                        </div>
+                        {% if notificacao.noticia.categoria %}
+                            <small class="text-muted">Tópico: {{ notificacao.noticia.categoria.nome }}</small>
+                        {% endif %}
+                    </div>
                 </div>
-                
-                {% if notificacao.noticia.categoria %}
-                    <small class="text-muted">Tópico: {{ notificacao.noticia.categoria.nome }}</small>
-                {% endif %}
             </a>
         
         {% empty %}
-            <a href="#" class="list-group-item list-group-item-action list-group-item-primary fw-bold">
-                <div class="d-flex w-100 justify-content-between">
-                    <p class="mb-1">Exemplo: Nova reportagem sobre Tecnologia!</p>
-                    <small class="text-muted">10 minutos atrás</small>
+            <a href="#" class="notificacao-link">
+                <div class="notificacao-card list-group-item-primary">
+                    <img src="{% static 'Echo_app/images/exemplo_tech.png' %}" alt="Tecnologia" class="notificacao-imagem">
+                    <div class="notificacao-corpo">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 fw-bold">Exemplo: Nova reportagem sobre Tecnologia!</p>
+                            <small class="text-muted">10 minutos atrás</small>
+                        </div>
+                        <small class="text-muted">Tópico: Tecnologia</small>
+                    </div>
                 </div>
-                <small class="text-muted">Tópico: Tecnologia</small>
             </a>
-            <a href="#" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                    <p class="mb-1">Exemplo: Destaques da rodada de Esportes</p>
-                    <small class="text-muted">1 hora atrás</small>
+            
+            <a href="#" class="notificacao-link">
+                <div class="notificacao-card">
+                    <img src="{% static 'Echo_app/images/exemplo_esportes.png' %}" alt="Esportes" class="notificacao-imagem">
+                    <div class="notificacao-corpo">
+                        <div class="d-flex w-100 justify-content-between">
+                            <p class="mb-1 fw-bold">Exemplo: Destaques da rodada de Esportes</p>
+                            <small class="text-muted">1 hora atrás</small>
+                        </div>
+                        <small class="text-muted">Tópico: Esportes</small>
+                    </div>
                 </div>
-                <small class="text-muted">Tópico: Esportes</small>
             </a>
         
         {% endfor %} </div> <h4>Outras Notificações</h4>
@@ -58,7 +80,7 @@
             </div>
         
         {% empty %}
-            <div class="list-group-item">
+             <div class="list-group-item">
                 <p class="mb-0 text-muted">Você não tem outras notificações.</p>
             </div>
         
