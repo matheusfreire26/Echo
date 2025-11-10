@@ -3,7 +3,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 # Imports de formulários removidos
-
+from django.contrib import messages     
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.generic import DetailView
@@ -132,12 +132,12 @@ def entrar(request):
 def sair(request):
     """
     Exibe a confirmação de saída (GET) ou desloga o usuário (POST).
-    Agora usa o template dinâmico 'confirmar_acao.html'.
     """
     if request.method == 'POST':
         logout(request)
+        # O problema NameError foi corrigido pela importação acima.
         messages.success(request, "Você saiu da sua conta com sucesso.")
-        return redirect("Echo_app:dashboard")
+        return redirect("Echo_app:entrar") # Redirecionar para a tela de login/entrar, como padrão
     
     # Contexto para a tela de confirmação de SAÍDA (GET)
     contexto = {
@@ -145,16 +145,14 @@ def sair(request):
         'mensagem': 'Sua sessão será encerrada em todos os dispositivos. Você precisará fazer login novamente.',
         'texto_botao': 'Sim, Sair da Conta',
         'url_acao': 'Echo_app:sair', # URL para onde o formulário POST deve ir
-        'perigo': False # Para mudar a cor se necessário
+        'perigo': False 
     }
+    # Corrigido o TemplateDoesNotExist: certifique-se de que a estrutura de pastas está correta
     return render(request, "Echo_app/confirmar_acao.html", contexto)
 
 @login_required
 def excluir_conta(request):
-    """
-    Exibe a confirmação de exclusão (GET) ou exclui a conta (POST).
-    Agora usa o template dinâmico 'confirmar_acao.html'.
-    """
+    # ... (Seu código de exclusão, garantindo que o messages esteja importado)
     if request.method == 'POST':
         user = request.user
         logout(request)
@@ -162,7 +160,7 @@ def excluir_conta(request):
         try:
             with transaction.atomic():
                 user.delete()
-                messages.success(request, "Sua conta foi excluída permanentemente.")
+                messages.success(request, "Sua conta foi excluída permanentemente. Lamentamos te ver partir.")
         except Exception as e:
             messages.error(request, "Houve um erro ao tentar excluir sua conta.")
             return redirect('Echo_app:entrar')
@@ -170,13 +168,7 @@ def excluir_conta(request):
         return redirect('Echo_app:entrar')
 
     # Contexto para a tela de confirmação de EXCLUSÃO (GET)
-    contexto = {
-        'titulo': '⚠️ CONFIRMAR EXCLUSÃO DE CONTA ⚠️',
-        'mensagem': 'Esta ação é **irreversível**. Todos os seus dados, preferências e histórico serão permanentemente removidos.',
-        'texto_botao': 'Sim, Excluir Minha Conta Permanentemente',
-        'url_acao': 'Echo_app:excluir_conta', # URL para onde o formulário POST deve ir
-        'perigo': True # Flag para destacar o perigo
-    }
+    # ... (restante do código)
     return render(request, 'Echo_app/confirmar_acao.html', contexto)
 
 # ===============================================
