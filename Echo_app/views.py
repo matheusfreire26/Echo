@@ -130,34 +130,37 @@ def entrar(request):
 
 def sair(request):
     """
-    Desloga o usuário e redireciona para a página de login.
+    Desloga o usuário e redireciona para o dashboard.
     """
     logout(request)
-    return redirect("Echo_app:entrar")
+    return redirect("Echo_app:dashboard")
 
 
 # ===============================================
 # Parte do Dashboard (ATUALIZADA)
 # ===============================================
 
-@login_required
+
 def dashboard(request):
     """
-    Exibe a página principal do usuário logado,
+    Exibe a página principal do usuário logado ou visitante,
     com notícias recomendadas, urgentes e as últimas notícias gerais.
     """
     user = request.user
     categorias_interesse = []
+    noticias_recomendadas = None
 
-    # Obtém o perfil e categorias de interesse
-    try:
-        perfil = user.perfil 
-        categorias_interesse = perfil.categorias_de_interesse.all()
-    except PerfilUsuario.DoesNotExist:
-        perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
-    
-    # Notícias recomendadas (Pega a primeira recomendada)
-    noticias_recomendadas = Noticia.recomendar_para(user).first()
+    # Verifica se o usuário está autenticado
+    if user.is_authenticated:
+        # Obtém o perfil e categorias de interesse
+        try:
+            perfil = user.perfil 
+            categorias_interesse = perfil.categorias_de_interesse.all()
+        except PerfilUsuario.DoesNotExist:
+            perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
+        
+        # Notícias recomendadas (Pega a primeira recomendada)
+        noticias_recomendadas = Noticia.recomendar_para(user).first()
     
     # Notícias urgentes: 5 mais recentes
     try:
@@ -168,7 +171,6 @@ def dashboard(request):
     except Exception:
         noticias_urgentes = None
 
-    # === ALTERAÇÃO AQUI ===
     # Últimas notícias: 5 mais recentes (para a aba "Tendências"), EXCLUINDO urgentes
     try:
         ultimas_noticias = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
@@ -180,16 +182,16 @@ def dashboard(request):
         categorias_para_filtro = Categoria.objects.all()
     except Exception:
         categorias_para_filtro = None
-    # === FIM DAS ALTERAÇÕES ===
 
     context = {
-        "nome": user.first_name or user.username,
-        "email": user.email,
+        "nome": user.first_name or user.username if user.is_authenticated else "Visitante",
+        "email": user.email if user.is_authenticated else "",
         "noticia_recomendada": noticias_recomendadas, 
         "categorias_interesse": categorias_interesse,
         "noticias_urgentes": noticias_urgentes,
         "ultimas_noticias": ultimas_noticias,
         "categorias_para_filtro": categorias_para_filtro,
+        "usuario_autenticado": user.is_authenticated,  # Flag para o template
     }
     
     return render(request, "Echo_app/dashboard.html", context)
@@ -199,12 +201,12 @@ def dashboard(request):
 # NOVA VIEW PARA FILTRAR NOTÍCIAS (AJAX)
 # ===============================================
 
-@login_required
 def filtrar_noticias(request):
     """
     Esta view é chamada pelo JavaScript (Fetch) do dashboard.
     Ela filtra as notícias com base na categoria pedida
     e retorna APENAS o HTML da lista de notícias.
+    Não requer login.
     """
     categoria_nome = request.GET.get('categoria')
     
@@ -213,12 +215,8 @@ def filtrar_noticias(request):
 
     try:
         if categoria_nome == 'Tendências':
-            # "Tendências" é o nosso botão para "Todas" (NÃO URGENTES)
-            # === ALTERAÇÃO AQUI ===
             noticias_filtradas = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
         else:
-            # Filtra pela categoria exata, TAMBÉM NÃO URGENTES
-            # === ALTERAÇÃO AQUI ===
             noticias_filtradas = Noticia.objects.filter(
                 categoria__nome__iexact=categoria_nome,
                 urgente=False 
@@ -232,9 +230,7 @@ def filtrar_noticias(request):
         'ultimas_noticias': noticias_filtradas
     }
     
-    # Renderiza APENAS o template parcial
     return render(request, 'Echo_app/partials/lista_noticias.html', context)
-
 
 # ===============================================
 # Parte de Notícias e Interações (Teteu)

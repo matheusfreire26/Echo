@@ -1,4 +1,4 @@
-# Echo_app/urls.py (VERSÃO COMPLETA E CORRIGIDA)
+# Echo_app/urls.py (O ARQUIVO DENTRO DO SEU APP)
 
 from django.urls import path
 from . import views  # Importa o views.py
@@ -13,7 +13,9 @@ urlpatterns = [
     path("sair/", views.sair, name="sair"),
     path("perfil/", views.perfil, name="perfil"),
     
-    # Página Principal
+    # ✅ Página Principal
+    # Como o arquivo principal já enviou a rota vazia ("") para cá,
+    # esta linha faz o 'match' final e carrega o dashboard.
     path("", views.dashboard, name="dashboard"),
 
     # Notícias (Criação e Interação)
