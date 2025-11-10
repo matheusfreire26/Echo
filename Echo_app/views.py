@@ -11,7 +11,8 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.db import IntegrityError 
 from django.db.models import Q  # Para consultas complexas
-from django.shortcuts import render     
+from django.shortcuts import render  
+from django.db import transaction   
 
 # Importa os modelos da aplicação
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
@@ -150,11 +151,15 @@ def sair(request):
     # Corrigido o TemplateDoesNotExist: certifique-se de que a estrutura de pastas está correta
     return render(request, "Echo_app/confirmar_acao.html", contexto)
 
-@login_required
+login_required
 def excluir_conta(request):
-    # ... (Seu código de exclusão, garantindo que o messages esteja importado)
+    """
+    Exibe a confirmação de exclusão (GET) ou exclui a conta (POST).
+    Usa o template dinâmico 'confirmar_acao.html'.
+    """
     if request.method == 'POST':
         user = request.user
+        # Se for POST, realiza a ação destrutiva
         logout(request)
         
         try:
@@ -167,8 +172,16 @@ def excluir_conta(request):
             
         return redirect('Echo_app:entrar')
 
-    # Contexto para a tela de confirmação de EXCLUSÃO (GET)
-    # ... (restante do código)
+    # ESTE BLOCO (GET) ESTAVA FALTANDO OU INCOMPLETO
+    # Aqui, definimos o contexto para a tela de confirmação
+    contexto = {
+        'titulo': '⚠️ CONFIRMAR EXCLUSÃO DE CONTA ⚠️',
+        'mensagem': 'Esta ação é **irreversível**. Todos os seus dados, preferências e histórico serão permanentemente removidos.',
+        'texto_botao': 'Sim, Excluir Minha Conta Permanentemente',
+        'url_acao': 'Echo_app:excluir_conta', # URL para onde o formulário POST deve ir
+        'perigo': True 
+    }
+    # Fim da correção. Agora o render tem o contexto.
     return render(request, 'Echo_app/confirmar_acao.html', contexto)
 
 # ===============================================
