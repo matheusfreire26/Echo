@@ -77,7 +77,8 @@
         </button>
         
         {# LINK DE CANCELAMENTO (CORRIGIDO PARA VOLTAR AO PERFIL) #}
-        <a href="{% url 'Echo_app:perfil' %}" class="btn-cancelar">
+        {# LINK DE CANCELAMENTO (APLICANDO CORREÇÃO DE CACHE) #}
+        <a href="{% url 'Echo_app:perfil' %}?cache={% now 'U' %}" class="btn-cancelar">
             Cancelar e Voltar
         </a>
     </form>

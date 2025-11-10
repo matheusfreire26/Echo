@@ -132,23 +132,28 @@ def entrar(request):
 
 def sair(request):
     """
-    Exibe a confirmação de saída (GET) ou desloga o usuário (POST).
+    Desloga o usuário (POST) e redireciona para a tela de login.
     """
     if request.method == 'POST':
+        # 1. Executa o logout
         logout(request)
-        # O problema NameError foi corrigido pela importação acima.
+        
+        # 2. Adiciona a mensagem (opcional, pode ser ignorada após logout)
         messages.success(request, "Você saiu da sua conta com sucesso.")
-        return redirect("Echo_app:entrar") # Redirecionar para a tela de login/entrar, como padrão
-    
-    # Contexto para a tela de confirmação de SAÍDA (GET)
+            
+        # 3. REDIRECIONA DEFINITIVAMENTE para a tela de LOGIN
+        return redirect("Echo_app:entrar") 
+
+
+    # Se for GET (página de confirmação)
     contexto = {
+        # ... (contexto que usa confirmar_acao.html)
         'titulo': 'Tem certeza que deseja sair?',
-        'mensagem': 'Sua sessão será encerrada em todos os dispositivos. Você precisará fazer login novamente.',
+        'mensagem': 'Sua sessão será encerrada...',
         'texto_botao': 'Sim, Sair da Conta',
-        'url_acao': 'Echo_app:sair', # URL para onde o formulário POST deve ir
+        'url_acao': 'Echo_app:sair', 
         'perigo': False 
     }
-    # Corrigido o TemplateDoesNotExist: certifique-se de que a estrutura de pastas está correta
     return render(request, "Echo_app/confirmar_acao.html", contexto)
 
 login_required
