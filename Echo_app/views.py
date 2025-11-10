@@ -141,7 +141,35 @@ def sair(request):
     # Se for GET, exibe a página de confirmação
     return render(request, "Echo_app/confirmar_saida.html")
 
-# ... (Restante do seu código)
+@login_required
+def excluir_conta(request):
+    """
+    Exibe a confirmação de exclusão (GET) ou exclui a conta (POST).
+    Agora usa o template dinâmico 'confirmar_acao.html'.
+    """
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        
+        try:
+            with transaction.atomic():
+                user.delete()
+                messages.success(request, "Sua conta foi excluída permanentemente.")
+        except Exception as e:
+            messages.error(request, "Houve um erro ao tentar excluir sua conta.")
+            return redirect('Echo_app:entrar')
+            
+        return redirect('Echo_app:entrar')
+
+    # Contexto para a tela de confirmação de EXCLUSÃO (GET)
+    contexto = {
+        'titulo': '⚠️ CONFIRMAR EXCLUSÃO DE CONTA ⚠️',
+        'mensagem': 'Esta ação é **irreversível**. Todos os seus dados, preferências e histórico serão permanentemente removidos.',
+        'texto_botao': 'Sim, Excluir Minha Conta Permanentemente',
+        'url_acao': 'Echo_app:excluir_conta', # URL para onde o formulário POST deve ir
+        'perigo': True # Flag para destacar o perigo
+    }
+    return render(request, 'Echo_app/confirmar_acao.html', contexto)
 
 # ===============================================
 # Parte do Dashboard (ATUALIZADA)
