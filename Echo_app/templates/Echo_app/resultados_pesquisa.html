@@ -1,0 +1,109 @@
+{% extends 'Echo_app/base.html' %}
+{% load static %}
+
+{% block title %}Resultados da Pesquisa - Echo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
+<style>
+    .search-results-header {
+        padding: 20px 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .search-results-header h1 {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .search-term {
+        color: #d32f2f;
+        font-weight: 600;
+    }
+    
+    .results-count {
+        color: #666;
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .no-results h2 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .no-results p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .back-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #d32f2f;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    
+    .back-button:hover {
+        background-color: #b71c1c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="search-results-section">
+    <div class="search-results-header">
+        <h1>Resultados da pesquisa por: <span class="search-term">"{{ termo_pesquisa }}"</span></h1>
+        <p class="results-count">{{ total_resultados }} resultado{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}</p>
+    </div>
+    
+    {% if noticias %}
+        <div class="latest-news-list">
+            {% for noticia in noticias %}
+                <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="news-item-link">
+                    <article class="news-item">
+                        <div class="news-item-image">
+                            {% if noticia.imagem %}
+                                <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
+                            {% else %}
+                                <div class="image-placeholder">📰</div>
+                            {% endif %}
+                        </div>
+                        <div class="news-item-content">
+                            <h3 class="news-item-title">{{ noticia.titulo }}</h3>
+                            <p class="news-item-description">
+                                {{ noticia.conteudo|striptags|truncatewords:30 }}
+                            </p>
+                            <div class="news-item-meta">
+                                <span class="news-item-category">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                                <span class="news-item-date">{{ noticia.data_publicacao|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                    </article>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <h2>Nenhum resultado encontrado</h2>
+            <p>Não encontramos nenhuma notícia que corresponda à sua pesquisa por "{{ termo_pesquisa }}".</p>
+            <p>Tente usar termos diferentes ou verifique a ortografia.</p>
+            <a href="{% url 'Echo_app:dashboard' %}" class="back-button">Voltar ao Dashboard</a>
+        </div>
+    {% endif %}
+</section>
+
+<div class="bottom-spacer"></div>
+{% endblock %}

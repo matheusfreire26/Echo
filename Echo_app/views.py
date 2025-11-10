@@ -232,6 +232,70 @@ def filtrar_noticias(request):
     
     return render(request, 'Echo_app/partials/lista_noticias.html', context)
 
+
+# ===============================================
+# VIEW PARA PESQUISAR NOTÍCIAS
+# ===============================================
+
+def pesquisar_noticias(request):
+    """
+    Busca notícias por título ou conteúdo com base no termo de pesquisa.
+    Retorna os resultados em formato HTML ou JSON.
+    """
+    termo_pesquisa = request.GET.get('q', '').strip()
+    
+    if not termo_pesquisa:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Termo de pesquisa não fornecido'
+            }, status=400)
+        return redirect('Echo_app:dashboard')
+    
+    # Busca notícias que contenham o termo no título ou conteúdo
+    try:
+        noticias_encontradas = Noticia.objects.filter(
+            Q(titulo__icontains=termo_pesquisa) | 
+            Q(conteudo__icontains=termo_pesquisa)
+        ).order_by('-data_publicacao')[:20]
+        
+        # Se for requisição AJAX, retorna JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            resultados = []
+            for noticia in noticias_encontradas:
+                resultados.append({
+                    'id': noticia.id,
+                    'titulo': noticia.titulo,
+                    'conteudo': noticia.conteudo[:150] + '...' if len(noticia.conteudo) > 150 else noticia.conteudo,
+                    'categoria': noticia.categoria.nome if noticia.categoria else 'Geral',
+                    'data_publicacao': noticia.data_publicacao.strftime('%d/%m/%Y'),
+                    'imagem_url': noticia.imagem.url if noticia.imagem else None,
+                    'url': f"/noticia/{noticia.id}/"
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'resultados': resultados,
+                'total': len(resultados)
+            })
+        
+        # Se não for AJAX, renderiza uma página de resultados
+        context = {
+            'termo_pesquisa': termo_pesquisa,
+            'noticias': noticias_encontradas,
+            'total_resultados': noticias_encontradas.count()
+        }
+        return render(request, 'Echo_app/resultados_pesquisa.html', context)
+        
+    except Exception as e:
+        print(f"Erro ao pesquisar notícias: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': 'Erro ao realizar a pesquisa'
+            }, status=500)
+        return redirect('Echo_app:dashboard')
+
 # ===============================================
 # Parte de Notícias e Interações (Teteu)
 # ===============================================

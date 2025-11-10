@@ -31,4 +31,7 @@ urlpatterns = [
 
     # URL da API interna (AJAX para o filtro do dashboard)
     path('filtrar-noticias/', views.filtrar_noticias, name='filtrar_noticias'),
+    
+    # URL para pesquisa de notícias
+    path('pesquisar/', views.pesquisar_noticias, name='pesquisar_noticias'),
 ]

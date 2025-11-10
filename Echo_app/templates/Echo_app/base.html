@@ -285,6 +285,41 @@
             });
         }
         
+        // --- FUNCIONALIDADE DA BARRA DE PESQUISA DO HEADER ---
+        const headerSearchInput = document.getElementById('header-search-input');
+        
+        if (headerSearchInput) {
+            // Pesquisar ao pressionar Enter
+            headerSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const termoPesquisa = this.value.trim();
+                    
+                    if (termoPesquisa.length > 0) {
+                        // Redireciona para a página de resultados
+                        window.location.href = "{% url 'Echo_app:pesquisar_noticias' %}?q=" + encodeURIComponent(termoPesquisa);
+                    }
+                }
+            });
+            
+            // Opcional: Adicionar listener ao ícone de pesquisa
+            const searchIcon = document.querySelector('.search-icon-header');
+            if (searchIcon) {
+                searchIcon.addEventListener('click', function() {
+                    const termoPesquisa = headerSearchInput.value.trim();
+                    
+                    if (termoPesquisa.length > 0) {
+                        window.location.href = "{% url 'Echo_app:pesquisar_noticias' %}?q=" + encodeURIComponent(termoPesquisa);
+                    } else {
+                        headerSearchInput.focus();
+                    }
+                });
+                
+                // Adiciona estilo de cursor pointer ao ícone
+                searchIcon.style.cursor = 'pointer';
+            }
+        }
+        
         // --- CÓDIGO DOS PRODUTOS (DOS COLEGAS) ---
         const partnerLogos = document.querySelectorAll('.partner-logo');
         partnerLogos.forEach(logo => {
