@@ -1,0 +1,43 @@
+{% extends "Echo_app/base.html" %}
+{% load static %}
+
+{% block title %}Confirmar Saída{% endblock %}
+
+{% block content %}
+<div class="perfil-card" style="max-width: 500px; margin: 50px auto; padding: 20px;">
+    
+    <h1 style="color: #333; font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; text-align: center;">
+        Tem certeza que deseja sair?
+    </h1>
+    
+    <p style="font-size: 1rem; color: #666; margin-bottom: 25px; text-align: center;">
+        Sua sessão será encerrada. Você precisará fazer login novamente.
+    </p>
+    
+    <form method="POST" action="{% url 'Echo_app:sair' %}" style="margin-top: 20px; text-align: center;">
+        {% csrf_token %}
+        
+        {# Botão de Confirmação (Estilo Vermelho) #}
+        <button type="submit" class="edit-profile-btn" 
+                style="
+                    background-color: #cc0000; 
+                    color: #fff; 
+                    font-weight: 600;
+                    padding: 8px 18px; 
+                    border: none; 
+                    border-radius: 5px; 
+                    cursor: pointer; 
+                    font-size: 0.9rem;
+                    margin-right: 15px;
+                ">
+            Sim, Sair da Conta
+        </button>
+        
+        {# Link de Cancelamento #}
+        <a href="{% url 'Echo_app:perfil' %}" 
+           style="color: #333; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+            Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}
