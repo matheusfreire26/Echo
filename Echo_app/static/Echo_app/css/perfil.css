@@ -6,27 +6,32 @@
 /* Reset e Fonte */
 body {
     background-color: #f7f7f7;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #333;
 }
 
 /* Título principal "Meu perfil" */
 .main-title {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #333;
-    padding: 20px 15px 0; 
+    text-align: center;
+    padding: 25px 15px 10px;
     margin: 0;
-    padding-top: calc(20px + var(--header-height, 0px));
+    border-bottom: 3px solid #cc0000;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Container Principal e Card */
 .perfil-card {
     background-color: #fff;
     max-width: 100%;
-    margin: 15px auto 30px; /* Mantém a margem 'auto' para centralizar */
-    padding: 0 0 10px 0;
+    margin: 20px auto 40px;
+    padding: 0 0 15px 0;
     box-shadow: none;
+    border-top: 1px solid #e6e6e6;
 }
 
 /* ====================================
@@ -35,15 +40,15 @@ body {
 .perfil-header {
     display: flex;
     align-items: flex-start;
-    padding: 15px;
+    padding: 20px;
     padding-bottom: 25px;
 }
 
 .perfil-avatar-container {
     position: relative;
     width: 100px;
-    height: 100px; 
-    margin-right: 15px;
+    height: 100px;
+    margin-right: 20px;
     flex-shrink: 0;
 }
 
@@ -61,18 +66,23 @@ body {
     right: 0;
     background-color: #fff;
     border-radius: 50%;
-    width: 30px; 
-    height: 30px; 
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 0 3px #fff, 0 1px 3px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.edit-avatar-icon:hover {
+    transform: scale(1.05);
 }
 
 .edit-avatar-icon svg {
-    width: 16px; 
-    height: 16px; 
+    width: 16px;
+    height: 16px;
     color: #cc0000;
 }
 
@@ -83,18 +93,24 @@ body {
 }
 
 .saudacao {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #cc0000;
-    margin: 0 0 2px 0;
-    line-height: 1.2;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
 }
 
 .user-email {
     font-size: 0.9rem;
     color: #666;
-    margin: 0 0 10px 0;
-    font-weight: 400;
+    margin: 0 0 8px 0;
+}
+
+.user-bio {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 10px;
 }
 
 .edit-profile-btn {
@@ -121,14 +137,45 @@ body {
     margin: 0;
 }
 
+/* ====================================
+   2. CATEGORIAS DE INTERESSE
+   ==================================== */
+.perfil-categorias {
+    padding: 15px 20px;
+}
+
+.categorias-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #cc0000;
+    margin-bottom: 8px;
+}
+
+.lista-categorias {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.categoria-item {
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    color: #333;
+}
 
 /* ====================================
-   2. ITENS DO MENU - AJUSTE PARA EMOJIS
+   3. MENU DE OPÇÕES
    ==================================== */
 .menu-opcoes {
     display: flex;
     flex-direction: column;
-    padding: 0 15px;
+    padding: 0 20px;
 }
 
 .menu-item {
@@ -141,11 +188,10 @@ body {
     font-weight: 500;
     border-bottom: 1px solid #eee;
     position: relative;
-    transition: background-color 0.1s;
+    transition: background-color 0.15s ease;
     line-height: 1.2;
-    /* CORREÇÃO DO BUG DE QUEBRA DE LINHA */
-    white-space: nowrap; 
-    overflow: hidden; 
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -157,61 +203,65 @@ body {
     background-color: #fafafa;
 }
 
-/* Estilo para o span que contém o emoji */
+/* Emoji */
 .menu-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem; /* Tamanho do emoji */
-    width: 25px; /* Espaço reservado para alinhamento */
-    height: 25px;
-    margin-right: 15px;
+    font-size: 1.4rem;
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
     flex-shrink: 0;
 }
 
-/* Seta de navegação (>) */
+/* Seta decorativa estilo jornal */
 .menu-item::after {
-    content: '>'; 
+    content: "›";
     position: absolute;
     right: 0;
     font-size: 1.2rem;
     font-weight: 400;
-    color: #aaa;
+    color: #999;
+    padding-right: 4px;
 }
 
 .menu-divider {
     border: none;
     border-top: 5px solid #f7f7f7;
-    margin: 0 -15px;
+    margin: 0 -20px;
 }
 
+/* ====================================
+   4. AÇÕES FINAIS
+   ==================================== */
+.menu-item.acao-deletar {
+    color: #cc0000;
+    font-weight: 600;
+}
+
+.menu-item.acao-deletar:hover {
+    background-color: #fff2f2;
+}
+
+.menu-item.acao-logout {
+    color: #333;
+    font-weight: 500;
+}
 
 /* ====================================
-   3. MÍDIA QUERIES (CENTRALIZAÇÃO)
+   5. RESPONSIVIDADE
    ==================================== */
 @media (min-width: 768px) {
-    /* Centraliza o título principal no desktop */
-    .main-title {
-        text-align: center;
-        padding: 30px 30px 15px; /* Mais padding no topo e menos no fundo */
-    }
-    
     .perfil-card {
-        max-width: 600px; /* Limita a largura do card */
-        margin-left: auto;
-        margin-right: auto; /* Garante a centralização horizontal */
+        max-width: 650px;
+        margin: 25px auto 50px;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        padding-bottom: 20px;
     }
 
     .perfil-header {
-        padding: 20px 30px 30px; 
-    }
-
-    .edit-profile-btn {
-        font-size: 0.9rem;
-        padding: 8px 18px;
+        padding: 25px 30px 30px;
     }
 
     .menu-opcoes {
@@ -224,27 +274,6 @@ body {
     }
 
     .menu-divider {
-        margin: 0 -30px; 
+        margin: 0 -30px;
     }
-}
-
-/* --- CORREÇÕES VISUAIS PARA AS AÇÕES FINAIS (Sair/Excluir) --- */
-
-/* 1. O 'white-space: nowrap' já está na regra .menu-item acima. */
-
-/* 2. Deixamos de remover a setinha de navegação (>) para acao-logout e acao-deletar, 
-   permitindo que .menu-item::after funcione e a seta apareça em todos os itens. 
-   O código de remoção FOI APAGADO. 
-*/
-
-/* 3. Estiliza a ação de Excluir: Mantém o vermelho e o negrito */
-.menu-item.acao-deletar {
-    color: #cc0000; /* Cor Vermelha forte, como você gostou */
-    font-weight: 600; 
-}
-
-/* 4. Estiliza a ação de Sair (se necessário) */
-.menu-item.acao-logout {
-    color: #333; /* Mantém a cor padrão */
-    font-weight: 500;
 }
