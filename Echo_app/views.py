@@ -577,6 +577,11 @@ def perfil_editar(request):
             perfil.foto_perfil = foto_perfil
             perfil.save()
 
+            
+        biografia = request.POST.get("biografia", "").strip()
+        perfil.biografia = biografia
+        perfil.save()
+
         return redirect("Echo_app:perfil")
 
     # GET
