@@ -83,8 +83,4 @@ jobs:
           rm -f .env
 
       - name: Zip artifact for deployment
-        run: |
-          cd ECHO/
-          zip release.zip ./* -r
-          cd ..
-          mv ECHO/release.zip .
+        run: zip release.zip . -r
