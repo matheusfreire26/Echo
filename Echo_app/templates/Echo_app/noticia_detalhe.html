@@ -40,6 +40,12 @@
             {% else %}
                 <div class="imagem-placeholder">Sem Imagem</div>
             {% endif %}
+            
+            {% if noticia.fotografo %}
+                <p class="text-muted text-end mt-1" style="font-size: 0.9rem;">
+                    <em>Fotógrafo: {{ noticia.fotografo }}</em>
+                </p>
+            {% endif %}
         </div>
 
         <div class="imagem-interacoes">

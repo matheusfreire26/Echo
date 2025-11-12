@@ -19,6 +19,7 @@ class Noticia(models.Model):  # Modelo que representa uma notícia
         verbose_name="Imagem da Notícia"
     )
     
+    fotografo = models.CharField(max_length=255, blank=True, null=True, verbose_name="Fotógrafo")
     conteudo = models.TextField(verbose_name="Conteúdo Completo")
     data_publicacao = models.DateTimeField(default=timezone.now, verbose_name="Data de Publicação")
     autor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='noticias_criadas', verbose_name="Autor/Editor")
