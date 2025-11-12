@@ -10,7 +10,7 @@
     "model": "Echo_app.categoria",
     "pk": 2,
     "fields": {
-        "nome": "Política"
+        "nome": "PolÃ­tica"
     }
 },
 {
@@ -31,42 +31,42 @@
     "model": "Echo_app.categoria",
     "pk": 5,
     "fields": {
-        "nome": "Saúde"
+        "nome": "SaÃºde"
     }
 },
 {
     "model": "Echo_app.categoria",
     "pk": 6,
     "fields": {
-        "nome": "Música"
+        "nome": "MÃºsica"
     }
 },
 {
     "model": "Echo_app.categoria",
     "pk": 7,
     "fields": {
-        "nome": "Mídia Social"
+        "nome": "MÃ­dia Social"
     }
 },
 {
     "model": "Echo_app.categoria",
     "pk": 8,
     "fields": {
-        "nome": "Educação"
+        "nome": "EducaÃ§Ã£o"
     }
 },
 {
     "model": "Echo_app.categoria",
     "pk": 9,
     "fields": {
-        "nome": "Ciência"
+        "nome": "CiÃªncia"
     }
 },
 {
     "model": "Echo_app.categoria",
     "pk": 10,
     "fields": {
-        "nome": "Inovação"
+        "nome": "InovaÃ§Ã£o"
     }
 },
 {
