@@ -2,22 +2,23 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# --- BASE DIR ---
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- CARREGAR VARIÁVEIS DE AMBIENTE ---
 load_dotenv(BASE_DIR / '.env')
 
-# --- CONFIGURAÇÃO DE AMBIENTE ---
-TARGET_ENV = os.getenv('TARGET_ENV', 'dev')
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+TARGET_ENV = os.getenv('TARGET_ENV')
 NOT_PROD = not TARGET_ENV.lower().startswith('prod')
 
-# --- DEBUG, SECRET KEY E DATABASE ---
 if NOT_PROD:
+    # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
-    SECRET_KEY = 'django-insecure-t1g921njm7@gxvv!whqs4s1a*x017-4sf+s_wh2fh!8$d!e6'
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = '<django-insecure-t1g921njm7@gxvv!whqs4s1a*x017-4sf+s_wh2fh!8$d!e6>'
     ALLOWED_HOSTS = []
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -27,10 +28,12 @@ if NOT_PROD:
 else:
     SECRET_KEY = os.getenv('SECRET_KEY')
     DEBUG = os.getenv('DEBUG', '0').lower() in ['true', 't', '1']
-    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(' ')
-    CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(' ')
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+    CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS').split(' ')
 
-    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', '0').lower() in ['true', 't', '1']
+    SECURE_SSL_REDIRECT = \
+        os.getenv('SECURE_SSL_REDIRECT', '0').lower() in ['true', 't', '1']
+
     if SECURE_SSL_REDIRECT:
         SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -44,6 +47,8 @@ else:
             'OPTIONS': {'sslmode': 'require'},
         }
     }
+    
+# Application definition
 
 # --- APPS INSTALADOS ---
 INSTALLED_APPS = [
@@ -96,8 +101,10 @@ TEMPLATES = [
 ROOT_URLCONF = 'Echoproject.urls'
 
 # --- STATIC FILES ---
-STATIC_URL = os.environ.get('DJANGO_STATIC_URL', '/static/')
+# STATIC_URL = "static/"
+STATIC_URL = os.environ.get('DJANGO_STATIC_URL', "/static/")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = ('whitenoise.storage.CompressedManifestStaticFilesStorage')
 STATICFILES_DIRS = [BASE_DIR / "static"]  # opcional, se você tiver uma pasta 'static' no projeto
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
