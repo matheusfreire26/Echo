@@ -2,8 +2,8 @@
    TEMA E CONFIGURAÇÃO BASE (VERMELHO)
    ===================================== */
 :root {
-    --cor-primaria: #dc3545; /* Vermelho */
-    --cor-primaria-hover: #c82333; /* Vermelho Escuro */
+    --cor-primaria: #E10F26; /* Vermelho */
+    --cor-primaria-hover: #E10F26; /* Vermelho Escuro */
     --cor-fundo: #F0F2F5;
     --cor-surface: #FFFFFF; /* Fundo dos cards */
     --cor-texto: #1C1E21;
