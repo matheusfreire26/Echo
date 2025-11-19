@@ -1,0 +1,278 @@
+{% extends 'Echo_app/base.html' %}
+{% load static %} 
+
+{% block title %}Dashboard - Echo {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Publicidade Topo -->
+<div class="ad-container ad-top">
+    <div class="ad-label">Publicidade</div>
+    <div class="ad-content">
+        <img src="https://via.placeholder.com/970x90/f0f0f0/666?text=Anúncio+970x90" alt="Publicidade" class="ad-image">
+    </div>
+</div>
+
+<section class="recommended-section">
+    <div class="section-header">
+        <a href="#" class="section-title-link">
+            <h2 class="section-title">Recomendado</h2>
+        </a>
+        <a href="#" class="see-more subtle-btn">Ver mais</a>
+    </div>
+
+    <div class="news-feed">
+        {% if noticia_recomendada %}
+            {% with noticia=noticia_recomendada %}
+                <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="news-card-link">
+                    <article class="news-card large-card">
+                        <div class="card-image-placeholder">
+                            {% if noticia.imagem %}
+                                <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
+                            {% else %}
+                                <div class="image-placeholder recommended-placeholder">📰</div>
+                            {% endif %}
+                        </div>
+                        <div class="card-content">
+                            <h3>{{ noticia.titulo }}</h3>
+                            
+                            <p class="news-description">
+                                {{ noticia.conteudo|striptags|truncatewords:40 }}
+                            </p>
+
+                            <div class="card-meta">
+                                <span class="category">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                                <span>{{ noticia.data_publicacao|date:"d M, Y" }}</span>
+                            </div>
+                        </div>
+                    </article>
+                </a>
+            {% endwith %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📰</div>
+                <p>Ainda não há notícias para você.<br>Comece a interagir com os artigos para receber recomendações personalizadas!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Publicidade entre Recomendados e Urgentes -->
+<div class="ad-container ad-between-sections">
+    <div class="ad-label">Publicidade</div>
+    <div class="ad-content">
+        <img src="https://via.placeholder.com/728x90/f0f0f0/666?text=Anúncio+728x90" alt="Publicidade" class="ad-image">
+    </div>
+</div>
+
+<section class="urgent-section">
+    <div class="section-header">
+        <a href="#" class="section-title-link">
+            <h2 class="section-title">Notícias urgentes</h2>
+        </a>
+        <a href="#" class="see-more subtle-btn">Ver mais</a>
+    </div>
+
+    <div class="urgent-news-container">
+        <div class="urgent-news-wrapper">
+            
+            {% if noticias_urgentes %}
+                {% for noticia in noticias_urgentes %}
+                <div class="urgent-news-card {% if forloop.first %}full-view active{% else %}full-view{% endif %}" data-index="{{ forloop.counter0 }}">
+                    
+                    <a href="{% url 'Echo_app:noticia_detalhe' noticia.id %}" class="card-link-wrapper">
+                        <div class="urgent-image-container">
+                            {% if noticia.imagem %}
+                                <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="urgent-image">
+                            {% else %}
+                                <div class="urgent-image-placeholder recommended-placeholder">🚨</div>
+                            {% endif %}
+                        </div>
+                        <div class="urgent-content">
+                            <span class="urgent-category">{{ noticia.categoria.nome|default:"URGENTE" }}</span>
+                            <h3 class="urgent-title">{{ noticia.titulo }}</h3>
+                            <p class="urgent-time">{{ noticia.data_publicacao|timesince }} atrás</p>
+                            <p class="urgent-description">{{ noticia.conteudo|striptags|truncatewords:15 }}</p>
+                        </div>
+                    </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state-slider">
+                    <p>Nenhuma notícia urgente no momento.</p>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="urgent-navigation">
+        {% for noticia in noticias_urgentes %}
+            <span class="urgent-nav-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Publicidade após Notícias Urgentes -->
+<div class="ad-container ad-after-urgent">
+    <div class="ad-label">Publicidade</div>
+    <div class="ad-content">
+        <img src="https://via.placeholder.com/728x90/f0f0f0/666?text=Anúncio+728x90" alt="Publicidade" class="ad-image">
+    </div>
+</div>
+
+<section class="latest-news-section">
+    <div class="section-header">
+        <a href="#" class="section-title-link"><h2 class="section-title">Últimas notícias</h2></a>
+        <a href="#" class="see-more subtle-btn">Ver mais</a>
+    </div>
+
+    <div class="category-bubbles-container">
+        <div class="category-bubbles">
+            <a href="#" class="bubble active category-bubble-filter" data-categoria="Tendências">Tendências</a>
+            {% if categorias_para_filtro %}
+                {% for categoria in categorias_para_filtro %}
+                    <a href="#" class="bubble category-bubble-filter" data-categoria="{{ categoria.nome }}">{{ categoria.nome }}</a>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="latest-news-list" id="latest-news-list-container">
+        {% include 'Echo_app/partials/lista_noticias.html' %}
+    </div>
+</section>
+
+<!-- Publicidade Rodapé -->
+<div class="ad-container ad-bottom">
+    <div class="ad-label">Publicidade</div>
+    <div class="ad-content">
+        <img src="https://via.placeholder.com/970x90/f0f0f0/666?text=Anúncio+970x90" alt="Publicidade" class="ad-image">
+    </div>
+</div>
+
+<div class="bottom-spacer"></div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // === CÓDIGO DO SLIDER DE NOTÍCIAS URGENTES ===
+    const navDots = document.querySelectorAll('.urgent-nav-dot');
+    const newsCards = document.querySelectorAll('.urgent-news-card');
+    const newsWrapper = document.querySelector('.urgent-news-wrapper');
+    
+    if (navDots.length > 0 && newsCards.length > 0 && newsWrapper) {
+        let currentIndex = 0;
+        const totalNews = newsCards.length;
+        
+        function getCardWidth() {
+            if (newsCards.length === 0) return 0;
+            return newsCards[0].offsetWidth + 20; 
+        }
+
+        function updateNewsView(index) {
+            if (newsCards.length === 0) return; 
+
+            const cardWidth = getCardWidth();
+            
+            navDots.forEach(dot => dot.classList.remove('active'));
+            navDots.forEach((dot, i) => {
+                if (i >= totalNews) {
+                    dot.style.display = 'none';
+                } else {
+                    dot.style.display = 'block';
+                }
+            });
+            if(navDots[index]) {
+                navDots[index].classList.add('active');
+            }
+
+            const scrollPosition = index * cardWidth;
+            newsWrapper.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
+
+            newsCards.forEach((card, i) => {
+                card.classList.remove('active', 'partial-view', 'full-view');
+                if (i === index) {
+                    card.classList.add('active', 'full-view');
+                } else if (i === index + 1) {
+                    card.classList.add('partial-view');
+                } else {
+                    card.classList.add('full-view');
+                }
+            });
+            currentIndex = index;
+        }
+
+        navDots.forEach(dot => {
+            dot.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                if (index < totalNews) {
+                    updateNewsView(index);
+                }
+            });
+        });
+
+        let scrollTimer;
+        newsWrapper.addEventListener('scroll', function() {
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => {
+                const cardWidth = getCardWidth();
+                if (cardWidth === 0) return;
+                
+                const scrollPos = newsWrapper.scrollLeft;
+                const newIndex = Math.round(scrollPos / cardWidth);
+                
+                if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalNews) {
+                    updateNewsView(newIndex);
+                }
+            }, 150);
+        });
+
+        updateNewsView(0);
+        window.addEventListener('resize', () => updateNewsView(currentIndex));
+    }
+
+    // === CÓDIGO DO FILTRO DE CATEGORIAS (AJAX) ===
+    const categoryBubbles = document.querySelectorAll('.category-bubble-filter');
+    const newsListContainer = document.getElementById('latest-news-list-container');
+    const filterUrl = "{% url 'Echo_app:filtrar_noticias' %}"; 
+
+    if (categoryBubbles.length > 0 && newsListContainer && filterUrl) {
+        categoryBubbles.forEach(bubble => {
+            bubble.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                const categoria = this.getAttribute('data-categoria');
+
+                categoryBubbles.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                newsListContainer.innerHTML = '<p class="latest-news-empty">Carregando...</p>';
+
+                fetch(`${filterUrl}?categoria=${encodeURIComponent(categoria)}`)
+                    .then(response => response.ok ? response.text() : Promise.reject('Falha na rede'))
+                    .then(html => {
+                        newsListContainer.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Erro ao filtrar notícias:', error);
+                        newsListContainer.innerHTML = '<p class="latest-news-empty">Erro ao carregar notícias. Tente novamente.</p>';
+                    });
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}
