@@ -1,0 +1,95 @@
+{% extends 'Echo_app/base.html' %}
+{% load static %}
+
+{% block title %}Configurações da Conta{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 800px;">
+    
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'Echo_app:perfil' %}" class="text-decoration-none text-secondary me-3 fs-4">
+            <i class="bi bi-arrow-left"></i> &larr;
+        </a>
+        <h2 class="mb-0">Configurações da Conta</h2>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-7 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">🔒 Segurança</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-3 text-muted">Alterar Senha</h6>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-secondary">{{ field.label }}</label>
+                                {{ field.errors }}
+                                <input type="{{ field.field.widget.input_type }}" 
+                                       name="{{ field.name }}" 
+                                       id="{{ field.id_for_label }}" 
+                                       class="form-control"
+                                       {% if field.help_text %}aria-describedby="{{ field.id_for_label }}_help"{% endif %}>
+                                
+                                {% if field.help_text %}
+                                    <div id="{{ field.id_for_label }}_help" class="form-text small">
+                                        {{ field.help_text|safe }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2">Atualizar Senha</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">🔔 Preferências</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifEmail" checked>
+                        <label class="form-check-label" for="notifEmail">Receber emails</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifPush" checked>
+                        <label class="form-check-label" for="notifPush">Notificações no site</label>
+                    </div>
+                    <p class="text-muted small">Estas configurações se aplicam às recomendações de notícias.</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0 fw-bold">⚠️ Zona de Perigo</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Uma vez que você excluir sua conta, não há como voltar atrás.</p>
+                    <a href="{% url 'Echo_app:excluir_conta' %}" class="btn btn-outline-danger w-100">
+                        Excluir minha conta
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

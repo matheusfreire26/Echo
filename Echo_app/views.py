@@ -15,6 +15,9 @@ from django.shortcuts import render
 from django.db import transaction   
 from django.contrib.auth.models import User
 from .models import PerfilUsuario, Categoria
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 
 # Importa os modelos da aplicação
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
@@ -646,3 +649,31 @@ def criar_noticia(request):
         "categorias": Categoria.objects.all()
     }
     return render(request, "Echo_app/criar_noticia.html", context)
+
+# ===============================================
+# Função para acessar as configurações da conta (novo)
+# ===============================================
+
+@login_required
+def configuracoes_conta(request):
+    """
+    Exibe configurações da conta, como alteração de senha e preferências.
+    """
+    if request.method == 'POST':
+        # Lógica para Alteração de Senha
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Importante: mantém o usuário logado após mudar a senha
+            update_session_auth_hash(request, user) 
+            messages.success(request, 'Sua senha foi alterada com sucesso!')
+            return redirect('Echo_app:configuracoes_conta')
+        else:
+            messages.error(request, 'Por favor, corrija os erros abaixo.')
+    else:
+        form = PasswordChangeForm(request.user)
+
+    context = {
+        'form': form
+    }
+    return render(request, 'Echo_app/configuracoes.html', context)
