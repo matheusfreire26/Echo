@@ -80,7 +80,8 @@ def registrar(request):
             except Exception as e:
                 contexto['erros'].append(f'Ocorreu um erro: {e}')
 
-    return render(request, "Echo_app/registrar.html", contexto)
+    template_name = "Echo_app/registrar.html" if not request.user.is_authenticated else "Echo_app/dashboard.html"
+    return render(request, template_name, contexto)
 
 
 def entrar(request):
