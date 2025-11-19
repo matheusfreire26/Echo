@@ -37,4 +37,6 @@ urlpatterns = [
     
     # URL para pesquisa de notícias
     path('pesquisar/', views.pesquisar_noticias, name='pesquisar_noticias'),
+
+    path('curtidas/', views.noticias_curtidas, name='noticias_curtidas'),
 ]

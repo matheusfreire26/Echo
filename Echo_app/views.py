@@ -619,3 +619,22 @@ def configuracoes_conta(request):
         'form': form
     }
     return render(request, 'Echo_app/configuracoes.html', context)
+@login_required
+def noticias_curtidas(request):
+    """
+    Exibe a lista de notícias que o usuário curtiu.
+    """
+    # Filtra todas as interações do tipo CURTIDA para o usuário atual
+    curtidas = InteracaoNoticia.objects.filter(
+        usuario=request.user, 
+        tipo='CURTIDA'  # Filtro principal: apenas curtidas
+    ).order_by('-data_interacao').select_related('noticia')
+
+    # Extrai as notícias curtidas para o template
+    noticias_curtidas_list = [interacao.noticia for interacao in curtidas]
+    
+    context = {
+        'noticias_curtidas': noticias_curtidas_list,
+        'total_curtidas': len(noticias_curtidas_list)
+    }
+    return render(request, 'Echo_app/noticias_curtidas.html', context)
