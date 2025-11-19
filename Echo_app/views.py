@@ -213,8 +213,8 @@ def dashboard(request):
         "usuario_autenticado": user.is_authenticated,
     }
     
-    return render(request, "Echo_app/dashboard.html", context)
-
+    template_name = "Echo_app/dashboard.html" if user.is_authenticated else "Echo_app/dashboard_off.html"
+    return render(request, template_name, context)
 
 # ===============================================
 # VIEW PARA FILTRAR NOTÍCIAS (AJAX)
