@@ -1,23 +1,16 @@
 # Echo/Echo_app/views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
-# Imports de formulários removidos
-from django.contrib import messages     
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.generic import DetailView
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
-from django.db import IntegrityError 
-from django.db.models import Q  # Para consultas complexas
-from django.shortcuts import render  
-from django.db import transaction   
-from django.contrib.auth.models import User
-from .models import PerfilUsuario, Categoria
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
 
 # Importa os modelos da aplicação
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
@@ -32,19 +25,16 @@ User = get_user_model()
 
 def registrar(request):
     """
-    Renderiza a página de registro e processa a criação de um novo usuário
-    usando os campos fornecidos no formulário.
+    Renderiza a página de registro e processa a criação de um novo usuário.
     """
     contexto = {'erros': [], 'dados_preenchidos': {}} 
     
-    # Busca todas as categorias para exibir no formulário
     try:
         contexto['todas_categorias'] = Categoria.objects.all()
     except:
         contexto['todas_categorias'] = []
     
     if request.method == "POST":
-        # Captura dados enviados pelo formulário
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -57,20 +47,18 @@ def registrar(request):
             'categorias_selecionadas_ids': categorias_selecionadas_ids, 
         }
 
-        # Validações básicas
         if not username or not email or not password or not password_confirm:
-            contexto['erros'].append('Todos os campos obrigatórios devem ser preenchidos: Nome de Usuário, Email e Senha.')
+            contexto['erros'].append('Todos os campos obrigatórios devem ser preenchidos.')
         
         if password != password_confirm:
             contexto['erros'].append('As senhas não coincidem.')
         
         if username and User.objects.filter(username__iexact=username).exists():
-            contexto['erros'].append('Este nome de usuário já está em uso. Por favor, escolha outro.')
+            contexto['erros'].append('Este nome de usuário já está em uso.')
         
         if email and User.objects.filter(email__iexact=email).exists():
             contexto['erros'].append('Este e-mail já está cadastrado.')
 
-        # Se não houver erros, cria o usuário
         if not contexto['erros']:
             try:
                 user = User.objects.create_user(
@@ -79,13 +67,11 @@ def registrar(request):
                     password=password
                 )
                 
-                # Salva as categorias selecionadas no perfil do usuário
                 if categorias_selecionadas_ids:
                     categorias = Categoria.objects.filter(pk__in=categorias_selecionadas_ids)
                     perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
                     perfil.categorias_de_interesse.set(categorias)
                 
-                # Loga o usuário automaticamente
                 login(request, user)
                 return redirect("Echo_app:dashboard")
                 
@@ -94,65 +80,51 @@ def registrar(request):
             except Exception as e:
                 contexto['erros'].append(f'Ocorreu um erro: {e}')
 
-    # Renderiza a página de registro com os erros/contexto
     return render(request, "Echo_app/registrar.html", contexto)
 
 
 def entrar(request):
     """
-    Renderiza a página de login e processa a autenticação do usuário.
+    Renderiza a página de login e processa a autenticação.
     """
     contexto = {}
     
     if request.method == "POST":
-        # Captura dados enviados pelo formulário
         username = request.POST.get('username')
         password = request.POST.get('password')
-        next_url = request.POST.get('next')  # Para redirecionamento após login
+        next_url = request.POST.get('next')
 
         if not username or not password:
             contexto['erro_login'] = 'Por favor, preencha o usuário e a senha.'
             contexto['username_preenchido'] = username
             return render(request, "Echo_app/entrar.html", contexto)
 
-        # Autentica o usuário
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # Login bem-sucedido
             login(request, user)
             if next_url:
                 return redirect(next_url)
             else:
                 return redirect("Echo_app:dashboard")
         else:
-            # Falha na autenticação
-            contexto['erro_login'] = 'Usuário ou senha inválidos. Tente novamente.'
+            contexto['erro_login'] = 'Usuário ou senha inválidos.'
             
         contexto['username_preenchido'] = username
             
     return render(request, "Echo_app/entrar.html", contexto)
 
 
-
 def sair(request):
     """
-    Desloga o usuário (POST) e redireciona para a tela de login.
+    Desloga o usuário e redireciona.
     """
     if request.method == 'POST':
-        # 1. Executa o logout
         logout(request)
-        
-        # 2. Adiciona a mensagem (opcional, pode ser ignorada após logout)
         messages.success(request, "Você saiu da sua conta com sucesso.")
-            
-        # 3. REDIRECIONA DEFINITIVAMENTE para a tela de LOGIN
         return redirect("Echo_app:entrar") 
 
-
-    # Se for GET (página de confirmação)
     contexto = {
-        # ... (contexto que usa confirmar_acao.html)
         'titulo': 'Tem certeza que deseja sair?',
         'mensagem': 'Sua sessão será encerrada...',
         'texto_botao': 'Sim, Sair da Conta',
@@ -161,66 +133,57 @@ def sair(request):
     }
     return render(request, "Echo_app/confirmar_acao.html", contexto)
 
-login_required
+
+@login_required  # <--- CORREÇÃO AQUI (Adicionado o @)
 def excluir_conta(request):
     """
-    Exibe a confirmação de exclusão (GET) ou exclui a conta (POST).
-    Usa o template dinâmico 'confirmar_acao.html'.
+    Exibe a confirmação de exclusão ou exclui a conta.
     """
     if request.method == 'POST':
         user = request.user
-        # Se for POST, realiza a ação destrutiva
         logout(request)
         
         try:
             with transaction.atomic():
                 user.delete()
-                messages.success(request, "Sua conta foi excluída permanentemente. Lamentamos te ver partir.")
+                messages.success(request, "Sua conta foi excluída permanentemente.")
         except Exception as e:
             messages.error(request, "Houve um erro ao tentar excluir sua conta.")
             return redirect('Echo_app:entrar')
             
         return redirect('Echo_app:entrar')
 
-    # ESTE BLOCO (GET) ESTAVA FALTANDO OU INCOMPLETO
-    # Aqui, definimos o contexto para a tela de confirmação
     contexto = {
         'titulo': '⚠️ CONFIRMAR EXCLUSÃO DE CONTA ⚠️',
-        'mensagem': 'Esta ação é **irreversível**. Todos os seus dados, preferências e histórico serão permanentemente removidos.',
+        'mensagem': 'Esta ação é **irreversível**. Todos os seus dados serão removidos.',
         'texto_botao': 'Sim, Excluir Minha Conta Permanentemente',
-        'url_acao': 'Echo_app:excluir_conta', # URL para onde o formulário POST deve ir
+        'url_acao': 'Echo_app:excluir_conta',
         'perigo': True 
     }
-    # Fim da correção. Agora o render tem o contexto.
     return render(request, 'Echo_app/confirmar_acao.html', contexto)
+
 
 # ===============================================
 # Parte do Dashboard (ATUALIZADA)
 # ===============================================
 
-
 def dashboard(request):
     """
-    Exibe a página principal do usuário logado ou visitante,
-    com notícias recomendadas, urgentes e as últimas notícias gerais.
+    Exibe a página principal.
     """
     user = request.user
     categorias_interesse = []
     noticias_recomendadas = None
 
-    # Verifica se o usuário está autenticado
     if user.is_authenticated:
-        # Obtém o perfil e categorias de interesse
         try:
             perfil = user.perfil 
             categorias_interesse = perfil.categorias_de_interesse.all()
         except PerfilUsuario.DoesNotExist:
             perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
         
-        # Notícias recomendadas (Pega a primeira recomendada)
         noticias_recomendadas = Noticia.recomendar_para(user).first()
     
-    # Notícias urgentes: 5 mais recentes
     try:
         urgentes_qs = Noticia.objects.filter(urgente=True).order_by('-data_publicacao')
         if noticias_recomendadas:
@@ -229,13 +192,11 @@ def dashboard(request):
     except Exception:
         noticias_urgentes = None
 
-    # Últimas notícias: 5 mais recentes (para a aba "Tendências"), EXCLUINDO urgentes
     try:
         ultimas_noticias = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
     except Exception:
         ultimas_noticias = None
         
-    # Busca TODAS as categorias para os botões de filtro
     try:
         categorias_para_filtro = Categoria.objects.all()
     except Exception:
@@ -249,23 +210,17 @@ def dashboard(request):
         "noticias_urgentes": noticias_urgentes,
         "ultimas_noticias": ultimas_noticias,
         "categorias_para_filtro": categorias_para_filtro,
-        "usuario_autenticado": user.is_authenticated,  # Flag para o template
+        "usuario_autenticado": user.is_authenticated,
     }
     
     return render(request, "Echo_app/dashboard.html", context)
 
 
 # ===============================================
-# NOVA VIEW PARA FILTRAR NOTÍCIAS (AJAX)
+# VIEW PARA FILTRAR NOTÍCIAS (AJAX)
 # ===============================================
 
 def filtrar_noticias(request):
-    """
-    Esta view é chamada pelo JavaScript (Fetch) do dashboard.
-    Ela filtra as notícias com base na categoria pedida
-    e retorna APENAS o HTML da lista de notícias.
-    Não requer login.
-    """
     categoria_nome = request.GET.get('categoria')
     
     if not categoria_nome:
@@ -296,28 +251,19 @@ def filtrar_noticias(request):
 # ===============================================
 
 def pesquisar_noticias(request):
-    """
-    Busca notícias por título ou conteúdo com base no termo de pesquisa.
-    Retorna os resultados em formato HTML ou JSON.
-    """
     termo_pesquisa = request.GET.get('q', '').strip()
     
     if not termo_pesquisa:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'Termo de pesquisa não fornecido'
-            }, status=400)
+            return JsonResponse({'success': False, 'error': 'Termo não fornecido'}, status=400)
         return redirect('Echo_app:dashboard')
     
-    # Busca notícias que contenham o termo no título ou conteúdo
     try:
         noticias_encontradas = Noticia.objects.filter(
             Q(titulo__icontains=termo_pesquisa) | 
             Q(conteudo__icontains=termo_pesquisa)
         ).order_by('-data_publicacao')[:20]
         
-        # Se for requisição AJAX, retorna JSON
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             resultados = []
             for noticia in noticias_encontradas:
@@ -331,13 +277,8 @@ def pesquisar_noticias(request):
                     'url': f"/noticia/{noticia.id}/"
                 })
             
-            return JsonResponse({
-                'success': True,
-                'resultados': resultados,
-                'total': len(resultados)
-            })
+            return JsonResponse({'success': True, 'resultados': resultados, 'total': len(resultados)})
         
-        # Se não for AJAX, renderiza uma página de resultados
         context = {
             'termo_pesquisa': termo_pesquisa,
             'noticias': noticias_encontradas,
@@ -346,13 +287,10 @@ def pesquisar_noticias(request):
         return render(request, 'Echo_app/resultados_pesquisa.html', context)
         
     except Exception as e:
-        print(f"Erro ao pesquisar notícias: {e}")
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'error': 'Erro ao realizar a pesquisa'
-            }, status=500)
+            return JsonResponse({'success': False, 'error': 'Erro ao pesquisar'}, status=500)
         return redirect('Echo_app:dashboard')
+
 
 # ===============================================
 # Parte de Notícias e Interações (Teteu)
@@ -361,6 +299,7 @@ def pesquisar_noticias(request):
 class NoticiaDetalheView(DetailView):
     """
     Exibe os detalhes de uma única notícia.
+    O 'Veja Também' agora prioriza as preferências do usuário.
     """
     model = Noticia
     template_name = 'Echo_app/noticia_detalhe.html'
@@ -368,21 +307,57 @@ class NoticiaDetalheView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        noticia = context['noticia']
+        noticia_atual = self.object
+        user = self.request.user
         
-        # Flags para mostrar se o usuário curtiu ou salvou
+        # --- LÓGICA PARA "VEJA TAMBÉM" (PERSONALIZADA) ---
+        
+        # 1. Começa com um QuerySet vazio
+        qs_base = Noticia.objects.none()
+
+        # 2. Tenta pegar as preferências do usuário logado
+        if user.is_authenticated:
+            try:
+                # Usa getattr para evitar erro se o perfil não existir
+                perfil = getattr(user, 'perfil', None)
+                if perfil and perfil.categorias_de_interesse.exists():
+                    # Filtra pelas categorias que o usuário escolheu
+                    qs_base = Noticia.objects.filter(categoria__in=perfil.categorias_de_interesse.all())
+            except Exception:
+                pass # Se der erro, continua com qs_base vazio
+
+        # 3. Fallback: Se não achou preferências (ou usuário anônimo), usa a categoria da notícia atual
+        if not qs_base.exists():
+            qs_base = Noticia.objects.filter(categoria=noticia_atual.categoria)
+
+        # 4. Aplica os filtros finais (Exclui a notícia atual e pega as 3 mais recentes)
+        noticias_relacionadas = qs_base.exclude(id=noticia_atual.id).order_by('-data_publicacao')[:3]
+
+        # 5. Se AINDA não tiver 3 notícias, completa com as últimas do site (Geral)
+        if len(noticias_relacionadas) < 3:
+            # IDs para não repetir
+            ids_excluidos = [noticia_atual.id] + [n.id for n in noticias_relacionadas]
+            
+            quantidade_faltante = 3 - len(noticias_relacionadas)
+            
+            mais_recentes = Noticia.objects.exclude(id__in=ids_excluidos).order_by('-data_publicacao')[:quantidade_faltante]
+            
+            # Junta as listas
+            noticias_relacionadas = list(noticias_relacionadas) + list(mais_recentes)
+
+        context['noticias_relacionadas'] = noticias_relacionadas
+        # ------------------------------------------------
+
+        # --- LÓGICA DE INTERAÇÃO (MANTIDA) ---
         context['usuario_curtiu'] = False
         context['usuario_salvou'] = False
 
         if self.request.user.is_authenticated:
-            usuario = self.request.user
-            
             context['usuario_curtiu'] = InteracaoNoticia.objects.filter(
-                usuario=usuario, noticia=noticia, tipo='CURTIDA'
+                usuario=user, noticia=noticia_atual, tipo='CURTIDA'
             ).exists()
-            
             context['usuario_salvou'] = InteracaoNoticia.objects.filter(
-                usuario=usuario, noticia=noticia, tipo='SALVAMENTO'
+                usuario=user, noticia=noticia_atual, tipo='SALVAMENTO'
             ).exists()
 
         return context
@@ -390,9 +365,6 @@ class NoticiaDetalheView(DetailView):
 
 @require_POST
 def toggle_interacao(request, noticia_id, tipo_interacao):
-    """
-    Adiciona ou remove uma interação (curtida ou salvamento) de uma notícia.
-    """
     if not request.user.is_authenticated:
         return JsonResponse({'success': False, 'error': 'Usuário não autenticado'}, status=401)
         
@@ -409,7 +381,6 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
     )
 
     if not created:
-        # Se já existia, remove
         interacao.delete()
         acao_realizada = 'removida'
         status_interacao = False
@@ -417,14 +388,12 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
         acao_realizada = 'adicionada'
         status_interacao = True
     
-    # Atualiza contadores
     if tipo_interacao == 'CURTIDA':
         noticia.curtidas_count = noticia.interacoes.filter(tipo='CURTIDA').count()
     elif tipo_interacao == 'SALVAMENTO':
         noticia.salvamentos_count = noticia.interacoes.filter(tipo='SALVAMENTO').count()
     noticia.save()
 
-    # Resposta AJAX
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
@@ -440,14 +409,12 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
 @login_required
 @require_POST
 def curtir_noticia(request, noticia_id):
-    """Atalho para curtir uma notícia"""
     return toggle_interacao(request, noticia_id, 'CURTIDA')
 
 
 @login_required
 @require_POST
 def salvar_noticia(request, noticia_id):
-    """Atalho para salvar uma notícia"""
     return toggle_interacao(request, noticia_id, 'SALVAMENTO')
 
 
@@ -457,12 +424,7 @@ def salvar_noticia(request, noticia_id):
 
 @login_required
 def lista_notificacoes(request):
-    """
-    Exibe notificações do usuário, separando recomendadas e outras.
-    """
-    
     todas_notificacoes = Notificacao.objects.filter(usuario=request.user)
-    
     categorias_preferidas = Categoria.objects.none()
     try:
         perfil = request.user.perfil 
@@ -485,16 +447,12 @@ def lista_notificacoes(request):
         'notificacoes_outras': outras,
         'nao_lidas_count': nao_lidas_count
     }
-
     return render(request, 'Echo_app/notificacao.html', context)
 
 
 @login_required
 @require_POST 
 def marcar_notificacao_lida(request, notificacao_id):   
-    """
-    Marca uma notificação específica como lida.
-    """
     notificacao = get_object_or_404(Notificacao, id=notificacao_id, usuario=request.user)
     notificacao.marcar_como_lida()
     return redirect('Echo_app:lista_notificacoes')
@@ -503,32 +461,28 @@ def marcar_notificacao_lida(request, notificacao_id):
 @login_required
 @require_POST
 def marcar_todas_lidas(request):
-    """
-    Marca todas notificações não lidas como lidas.
-    """
     Notificacao.objects.filter(usuario=request.user, lida=False).update(lida=True)
     return redirect('Echo_app:lista_notificacoes')
 
 
 # ===============================================
-# Parte do Perfil (Raul) com upload de foto
+# Parte do Perfil
 # ===============================================
 
 @login_required
 def perfil_detalhe(request):
-    """
-    Apenas EXIBE a página de perfil bonita (o seu perfil.html).
-    """
-    # Esta view é simples, só precisa renderizar o template.
-    # O seu template 'perfil.html' já pega 'request.user.email'
-    return render(request, "Echo_app/perfil.html")
+    # Garante que o perfil exista ou cria um
+    perfil, created = PerfilUsuario.objects.get_or_create(usuario=request.user)
+    
+    context = {
+        'usuario': request.user,
+        'perfil': perfil
+    }
+    return render(request, "Echo_app/perfil.html", context)
+
 
 @login_required
 def perfil_editar(request):
-    """
-    Exibe e permite a atualização do perfil do usuário.
-    Atualiza first_name, email, categorias de interesse e foto de perfil.
-    """
     usuario = request.user
     perfil, _ = PerfilUsuario.objects.get_or_create(usuario=usuario)
 
@@ -542,9 +496,9 @@ def perfil_editar(request):
         first_name = request.POST.get("first_name", "").strip()
         email = request.POST.get("email", "").strip()
         categorias_ids = request.POST.getlist("categoria")
-        foto_perfil = request.FILES.get("foto_perfil")  # captura a foto enviada
+        foto_perfil = request.FILES.get("foto_perfil")
+        biografia = request.POST.get("biografia", "").strip()
 
-        # Validações básicas
         if not email:
             erros.append("Email é obrigatório.")
         elif User.objects.filter(email__iexact=email).exclude(pk=usuario.pk).exists():
@@ -560,11 +514,11 @@ def perfil_editar(request):
                     "first_name": first_name,
                     "email": email,
                     "categorias_selecionadas_ids": categorias_ids,
+                    "biografia": biografia
                 },
             }
             return render(request, "Echo_app/perfil_editar.html", context)
 
-        # Salva alterações do perfil
         usuario.first_name = first_name
         usuario.email = email
         usuario.save()
@@ -575,19 +529,14 @@ def perfil_editar(request):
         else:
             perfil.categorias_de_interesse.clear()
 
-        # Salva a foto de perfil se enviada
         if foto_perfil:
             perfil.foto_perfil = foto_perfil
-            perfil.save()
-
-            
-        biografia = request.POST.get("biografia", "").strip()
+        
         perfil.biografia = biografia
         perfil.save()
 
         return redirect("Echo_app:perfil")
 
-    # GET
     context = {
         "usuario": usuario,
         "perfil": perfil,
@@ -597,19 +546,16 @@ def perfil_editar(request):
 
 
 # ===============================================
-# Função para criar notícia com imagem (novo)
+# Função para criar notícia
 # ===============================================
 
 @login_required
 def criar_noticia(request):
-    """
-    Permite ao usuário criar uma notícia, incluindo upload de imagem.
-    """
     if request.method == "POST":
         titulo = request.POST.get("titulo", "").strip()
         conteudo = request.POST.get("conteudo", "").strip()
         categoria_id = request.POST.get("categoria")
-        imagem = request.FILES.get("imagem")  # captura imagem enviada
+        imagem = request.FILES.get("imagem")
 
         erros = []
         if not titulo:
@@ -634,13 +580,13 @@ def criar_noticia(request):
             }
             return render(request, "Echo_app/criar_noticia.html", context)
 
-        noticia = Noticia.objects.create(
+        Noticia.objects.create(
             titulo=titulo,
             conteudo=conteudo,
             categoria=categoria,
             autor=request.user,
             imagem=imagem,
-            urgente=request.POST.get('urgente') == 'on' # Captura o status de urgente
+            urgente=request.POST.get('urgente') == 'on'
         )
 
         return redirect("Echo_app:dashboard")
@@ -650,21 +596,17 @@ def criar_noticia(request):
     }
     return render(request, "Echo_app/criar_noticia.html", context)
 
+
 # ===============================================
-# Função para acessar as configurações da conta (novo)
+# Configurações da conta
 # ===============================================
 
 @login_required
 def configuracoes_conta(request):
-    """
-    Exibe configurações da conta, como alteração de senha e preferências.
-    """
     if request.method == 'POST':
-        # Lógica para Alteração de Senha
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
-            # Importante: mantém o usuário logado após mudar a senha
             update_session_auth_hash(request, user) 
             messages.success(request, 'Sua senha foi alterada com sucesso!')
             return redirect('Echo_app:configuracoes_conta')

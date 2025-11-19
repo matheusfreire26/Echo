@@ -4,244 +4,168 @@
 {% block title %}{{ noticia.titulo }} | Echo{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/noticia_detalhe.css' %}?v=FINAL">
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/noticia_detalhe.css' %}?v=VEJA_TAMBEM">
 {% endblock %}
-
 
 {% block content %}
 
-<div class="noticia-container-with-ads">
-
-    <aside class="ad-sidebar ad-left">
-        <div class="ad-placeholder">
-            <video loop autoplay muted playsinline class="ad-video">
-                <source src="{% static 'Echo_app/images/tonho_dancando.mp4' %}" type="video/mp4">
-                Seu navegador não suporta vídeos.
-            </video>
-            
-        </div>
-    </aside>
+<main class="noticia-container">
 
     <article class="noticia-article">
-        <p class="voltar-link"><a href="{% url 'Echo_app:dashboard' %}">← Voltar para o Dashboard</a></p>
+        
+        <nav class="noticia-top-nav">
+            <a href="{% url 'Echo_app:dashboard' %}" class="btn-voltar">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+                <span>Voltar</span>
+            </a>
+        </nav>
 
-        <span class="noticia-categoria-tag">{{ noticia.categoria.nome|default:"Geral" }}</span>
+        <header class="noticia-header">
+            <div class="categoria-wrapper">
+                <span class="noticia-categoria-tag">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                <div class="categoria-underline"></div>
+            </div>
+            <h1 class="noticia-titulo">{{ noticia.titulo }}</h1>
+        </header>
 
-        <h1>{{ noticia.titulo }}</h1>
-
-        <div class="metadata">
-            <span>Publicado em: {{ noticia.data_publicacao|date:"d/m/Y H:i" }}</span> |
-            <span>Por: {{ noticia.autor.username|default:"Autor Desconhecido" }}</span>
-        </div>
-
-        <div class="noticia-imagem-principal-wrapper">
+        <figure class="noticia-imagem-wrapper">
             {% if noticia.imagem %}
                 <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="noticia-imagem-principal">
             {% else %}
                 <div class="imagem-placeholder">Sem Imagem</div>
             {% endif %}
-            
             {% if noticia.fotografo %}
-                <p class="text-muted text-end mt-1" style="font-size: 0.9rem;">
-                    <em>Fotógrafo: {{ noticia.fotografo }}</em>
-                </p>
+                <figcaption class="foto-credito">Foto: {{ noticia.fotografo }}</figcaption>
             {% endif %}
+        </figure>
+
+        <div class="info-bar">
+            <div class="autor-section">
+                <div class="autor-avatar">
+                    {% if noticia.autor.perfil.foto_perfil %}
+                         <img src="{{ noticia.autor.perfil.foto_perfil.url }}" alt="{{ noticia.autor.username }}">
+                    {% else %}
+                         <div class="avatar-placeholder">{{ noticia.autor.username|slice:":1" }}</div>
+                    {% endif %}
+                </div>
+                <div class="autor-detalhes">
+                    <span class="autor-nome">{{ noticia.autor.first_name|default:noticia.autor.username }}</span>
+                    <div class="meta-texto">
+                        <span>{{ noticia.data_publicacao|date:"d de F, Y" }}</span> • 
+                        <span>{{ noticia.data_publicacao|date:"H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="interacoes-section">
+                {% if user.is_authenticated %}
+                    {% csrf_token %}
+                    <button id="btn-curtir" data-url="{% url 'Echo_app:noticia_curtir' noticia_id=noticia.pk %}" class="icon-btn {% if usuario_curtiu %}ativo{% endif %}" title="Curtir">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
+                    </button>
+                    <button id="btn-salvar" data-url="{% url 'Echo_app:noticia_salvar' noticia_id=noticia.pk %}" class="icon-btn {% if usuario_salvou %}ativo{% endif %}" title="Salvar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
+                    </button>
+                    <button id="btn-compartilhar" class="icon-btn" title="Compartilhar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                    </button>
+                {% else %}
+                    <a href="{% url 'Echo_app:entrar' %}?next={{ request.path }}" class="login-link">Entrar</a>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="imagem-interacoes">
-            {% if user.is_authenticated %}
-                {% csrf_token %} 
-
-                <button id="btn-curtir"
-                        data-url="{% url 'Echo_app:noticia_curtir' noticia_id=noticia.pk %}"
-                        class="btn-interacao {% if usuario_curtiu %}curtida-ativa{% endif %}"
-                        title="Curtir">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                    </svg>
-                    <span class="btn-count">{{ noticia.curtidas_count }}</span>
-                    <span class="sr-only">Curtir</span>
-                </button>
-
-                <button id="btn-salvar"
-                        data-url="{% url 'Echo_app:noticia_salvar' noticia_id=noticia.pk %}"
-                        class="btn-interacao {% if usuario_salvou %}salvamento-ativa{% endif %}"
-                        title="Salvar">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                    </svg>
-                     <span class="btn-count">{{ noticia.salvamentos_count }}</span>
-                     <span class="sr-only">Salvar</span>
-                </button>
-
-                <button id="btn-compartilhar" class="btn-interacao" title="Compartilhar">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                    </svg>
-                    <span class="sr-only">Compartilhar</span>
-                </button>
-
-            {% else %}
-                <p class="login-prompt">Faça <a href="{% url 'Echo_app:entrar' %}?next={{ request.path }}">login</a> para interagir.</p>
-            {% endif %}
-        </div>
-        
-        <div class="conteudo">
+        <div class="noticia-conteudo">
             {{ noticia.conteudo|linebreaksbr }}
         </div>
 
+        {% if noticias_relacionadas %}
+        <section class="veja-tambem-section">
+            <h2 class="vt-titulo-secao">Veja também</h2>
+            
+            <div class="vt-lista">
+                {% for item in noticias_relacionadas %}
+                <a href="{% url 'Echo_app:noticia_detalhe' item.id %}" class="vt-card">
+                    <div class="vt-imagem-wrapper">
+                        {% if item.imagem %}
+                            <img src="{{ item.imagem.url }}" alt="{{ item.titulo }}">
+                        {% else %}
+                            <div class="vt-placeholder"></div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="vt-conteudo">
+                        <h3 class="vt-titulo">{{ item.titulo }}</h3>
+                        
+                        <div class="vt-meta">
+                            <div class="vt-avatar">
+                                {% if item.autor.perfil.foto_perfil %}
+                                    <img src="{{ item.autor.perfil.foto_perfil.url }}" alt="{{ item.autor.username }}">
+                                {% else %}
+                                    <span>{{ item.autor.username|slice:":1" }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <span class="vt-autor-nome">{{ item.autor.first_name|default:item.autor.username }}</span>
+                            <span class="vt-categoria">{{ item.categoria.nome|default:"Geral" }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
     </article>
 
-    <aside class="ad-sidebar ad-right">
-        <div class="ad-placeholder">
-            <video loop autoplay muted playsinline class="ad-video">
-                <source src="{% static 'Echo_app/images/tonho_dancando.mp4' %}" type="video/mp4">
-                Seu navegador não suporta vídeos.
-            </video>
-        </div>
-    </aside>
-
-</div> 
+</main> 
 {% endblock content %}
 
-
-{% block extra_js %}
-    {{ block.super }}
-    
+{% block extra_js %}{{ block.super }}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("Script de notícia_detalhe.js carregado."); // LOG 1
-
-        // --- LÓGICA DE CURTIR/SALVAR ---
+        document.addEventListener('DOMContentLoaded', function() {
         const curtirBtn = document.getElementById('btn-curtir');
         const salvarBtn = document.getElementById('btn-salvar');
-        const csrftokenInput = document.querySelector('.imagem-interacoes [name=csrfmiddlewaretoken]') || document.querySelector('form [name=csrfmiddlewaretoken]');
-        const curtidasCountSpan = document.querySelector('#btn-curtir .btn-count');
-        const salvamentosCountSpan = document.querySelector('#btn-salvar .btn-count');
+        const csrftokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
 
         if (csrftokenInput && (curtirBtn || salvarBtn)) {
             const csrftoken = csrftokenInput.value;
-            
             function fazerInteracao(event) {
+                event.preventDefault();
                 const btn = event.currentTarget;
                 const url = btn.getAttribute('data-url');
-                
                 if (!url) return; 
-
-                const tipo = btn.id.includes('curtir') ? 'curtir' : 'salvar';
-                const isActive = btn.classList.contains(tipo + '-ativa');
-
+                btn.classList.add('animating');
+                setTimeout(() => { btn.classList.remove('animating'); }, 300);
+                btn.classList.toggle('ativo');
                 fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                })
-                .then(response => {
-                    if (response.status === 401 || response.status === 403) { 
-                        window.location.href = "{% url 'Echo_app:entrar' %}?next=" + window.location.pathname;
-                        return Promise.reject('Unauthorized');
-                    }
-                    if (!response.ok) {
-                        throw new Error('Erro na rede ou resposta não-OK: ' + response.statusText);
-                    }
+                    headers: { 'X-CSRFToken': csrftoken, 'X-Requested-With': 'XMLHttpRequest' },
+                }).then(response => {
+                    if (response.status === 401) window.location.href = "{% url 'Echo_app:entrar' %}";
                     return response.json();
-                })
-                .then(data => {
-                    if (data && data.success) {
-                        if (data.status_interacao) {
-                            btn.classList.add(tipo + '-ativa');
-                            btn.title = (tipo === 'curtir') ? 'Descurtir' : 'Desalvar';
-                        } else {
-                            btn.classList.remove(tipo + '-ativa');
-                            btn.title = (tipo === 'curtir') ? 'Curtir' : 'Salvar';
-                        }
-
-                        if (tipo === 'curtir' && curtidasCountSpan) {
-                            curtidasCountSpan.textContent = data.nova_contagem;
-                        } else if (tipo === 'salvar' && salvamentosCountSpan) {
-                            salvamentosCountSpan.textContent = data.nova_contagem;
-                        }
-                    } else if (data) {
-                        console.error('Erro retornado pela view:', data.error || 'Erro desconhecido');
+                }).then(data => {
+                    if (data.success) {
+                        if (data.status_interacao) btn.classList.add('ativo');
+                        else btn.classList.remove('ativo');
                     } else {
-                        console.error('Resposta JSON inesperada ou vazia.');
+                        btn.classList.toggle('ativo');
                     }
-                })
-                .catch(error => {
-                    if (error !== 'Unauthorized') {
-                        console.error('Erro no Fetch:', error);
-                    }
-                });
+                }).catch(() => btn.classList.toggle('ativo'));
             }
-
-            if (curtirBtn) {
-                curtirBtn.addEventListener('click', fazerInteracao);
-            }
-            if (salvarBtn) {
-                salvarBtn.addEventListener('click', fazerInteracao);
-            }
-        
-        } else if (!csrftokenInput && (curtirBtn || salvarBtn)) {
-             console.warn("CSRF token input not found, interactions might fail.");
+            if (curtirBtn) curtirBtn.addEventListener('click', fazerInteracao);
+            if (salvarBtn) salvarBtn.addEventListener('click', fazerInteracao);
         }
-
-
-        // --- LÓGICA DE COMPARTILHAMENTO ---
+        
         const compartilharBtn = document.getElementById('btn-compartilhar');
-        
         if (compartilharBtn) {
-            console.log("Botão 'Compartilhar' encontrado."); // LOG 2
-
-            const shareTitle = "{{ noticia.titulo|escapejs }}";
-            const shareText = "Confira esta notícia: {{ noticia.titulo|escapejs }}";
-            const shareUrl = window.location.href;
-
-            async function compartilharNoticia() {
-                console.log("Botão 'Compartilhar' clicado."); // LOG 3
-                
-                if (navigator.share) {
-                    console.log("Tentando usar navigator.share()..."); // LOG 4
-                    try {
-                        await navigator.share({
-                            title: shareTitle,
-                            text: shareText,
-                            url: shareUrl,
-                        });
-                        console.log('Notícia compartilhada com sucesso (Web Share)!');
-                    } catch (err) {
-                        console.error('Erro ao compartilhar (Web Share):', err);
-                    }
-                } 
-                else if (navigator.clipboard && window.isSecureContext) {
-                    console.log("Tentando usar navigator.clipboard.writeText()..."); // LOG 5
-                    try {
-                        await navigator.clipboard.writeText(shareUrl);
-                        
-                        const originalContent = compartilharBtn.innerHTML;
-                        compartilharBtn.innerHTML = 'Link Copiado!';
-                        setTimeout(() => {
-                            compartilharBtn.innerHTML = originalContent;
-                        }, 2000);
-
-                    } catch (err) {
-                        console.error('Erro ao copiar link:', err);
-                        alert('Não foi possível copiar o link.');
-                    }
-                } 
-                else {
-                    console.warn("APIs de Share e Clipboard não estão disponíveis (Pode ser por HTTP ou navegador antigo)."); // LOG 6
-                    alert('Para compartilhar, copie o link da barra de endereços do seu navegador.');
+            compartilharBtn.addEventListener('click', async () => {
+                const shareData = { title: "{{ noticia.titulo|escapejs }}", url: window.location.href };
+                try { await navigator.share(shareData); } 
+                catch (err) { 
+                    try { await navigator.clipboard.writeText(window.location.href); alert("Link copiado!"); } catch (e) {} 
                 }
-            }
-
-            compartilharBtn.addEventListener('click', compartilharNoticia);
-        
-        } else {
-            console.error("ERRO: Botão 'btn-compartilhar' não foi encontrado!");
+            });
         }
-
     });
     </script>
-{% endblock %}
+    {% endblock %}
