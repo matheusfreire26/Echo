@@ -88,7 +88,36 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 
   Implementação da barra superior (menu, uol, perfil, barra de pesquisa e notificações)
 
-  Link dos testes automatizados das Novas Histórias
+  Link dos
   []()
+  
+</details>
+
+<details>
+  <summary>- ✅ Semana 14 </summary>
+
+  Implementação de últimas notícias, notificações, página do perfil e página sem login.
+
+  Link do deploy
+  []()
+
+  Link do screencast do deploy
+  []()
+
+  Link do screencast do CI/CD
+  []()
+
+  Link do screencast dos Testes Automatizados
+  []()
+  
+</details>
+
+<details>
+  <summary>- ✅ Semana 15 </summary>
+
+  Implementação do novo interior das notícias, aba de curtidas, aba de salvos, área de publicações, configurações da conta e pop-up.
+
+  Link do relatório de Programação em par
+  [Relatório](https://docs.google.com/document/d/1XjHNZ55Ojp-XdYE7mFOUtEuQm9QJk_qDLDxG13kPsxA/edit?tab=t.0)
   
 </details>
