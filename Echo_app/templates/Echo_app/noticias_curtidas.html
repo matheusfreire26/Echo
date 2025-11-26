@@ -7,37 +7,30 @@
 <!-- Link para o CSS principal (manter) -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
 
-<!-- CORREÇÃO CRÍTICA DE CSS PARA GARANTIR CLICABILIDADE (SOBRESCRITA) -->
+<!-- SOLUÇÃO FORÇADA DE CLICABILIDADE VIA CSS INLINE -->
 <style>
-    /* 1. Garante que a seção de filtros tenha uma posição e z-index alto 
-           para ficar no topo da hierarquia de clique.
-    */
+    /* O mais importante: garante que a seção de filtros está acima de tudo */
     .filter-section {
         position: relative;
-        z-index: 100; /* Alto z-index para garantir que não está coberto */
+        z-index: 1000; /* Z-INDEX EXTREMAMENTE ALTO PARA EVITAR SOBREPOSIÇÃO */
         display: flex;
         flex-direction: column;
         gap: 15px; 
         margin-bottom: 25px;
     }
     
-    /* 2. Garante que o container dos botões seja um flex container e tenha 
-           z-index ainda mais alto.
-    */
     .category-filters {
         position: relative; 
-        z-index: 110; 
+        z-index: 1010; 
         display: flex;
-        flex-wrap: nowrap; /* Impede quebras inesperadas */
+        flex-wrap: nowrap; 
         overflow-x: auto; 
         padding-bottom: 8px;
-        margin-left: -5px; 
     }
 
-    /* 3. O Link (<a>) deve ser o elemento mais importante e com cursor ativo.
-    */
+    /* O link A precisa ser um bloco forte */
     .filter-button {
-        display: inline-flex; /* Usar inline-flex para centralização e garantia de bloco */
+        display: inline-flex; 
         align-items: center;
         justify-content: center;
         white-space: nowrap;
@@ -50,25 +43,21 @@
         background-color: #f7f7f7;
         color: #333;
         cursor: pointer;
-        user-select: none; /* Impede seleção de texto acidental */
-        /* Z-index explícito para o botão, como última garantia */
-        z-index: 120; 
+        /* IMPORTANTE: Garante que a área de clique é o próprio A */
+        position: relative; 
+        z-index: 1020; 
+        user-select: none;
     }
     
     .filter-button:hover {
         background-color: #e0e0e0;
     }
     
+    /* Estado ativo (usa a cor de destaque) */
     .filter-button.active {
         background-color: #dc3545; 
         color: white;
         border-color: #dc3545;
-    }
-    
-    /* Garante que o input de pesquisa não interfira visualmente ou estruturalmente */
-    .search-form {
-        position: relative;
-        z-index: 90; 
     }
 </style>
 {% endblock %}
@@ -77,20 +66,19 @@
 
 <div class="content-container">
 
-    <!-- Título principal -->
     <h1 class="main-title">Minhas Curtidas</h1>
     
     <!-- ============================================== -->
     <!-- SEÇÃO: BARRA DE PESQUISA E FILTROS -->
+    <!-- ESTA SEÇÃO TEM Z-INDEX ALTÍSSIMO PARA GARANTIR O CLIQUE -->
     <!-- ============================================== -->
     <div class="filter-section">
         
-        <!-- Barra de Pesquisa -->
+        <!-- Barra de Pesquisa (POSTA O 'q' E MANTÉM O FILTRO ATUAL 'categoria_ativa') -->
         <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
             
             <input type="text" name="q" placeholder="Pesquisar..." class="search-input" value="{{ request.GET.q|default:'' }}">
             
-            <!-- CAMPO OCULTO: Mantém o filtro de categoria ativo durante a pesquisa. -->
             {% if categoria_ativa %}
                 <input type="hidden" name="categoria" value="{{ categoria_ativa }}">
             {% endif %}
@@ -100,16 +88,15 @@
             </button>
         </form>
         
-        <!-- Filtros de Categoria: DEVE SER CLICÁVEL -->
+        <!-- Filtros de Categoria (Links normais que recarregam a página) -->
         <div class="category-filters">
             
             {% url 'Echo_app:noticias_curtidas' as curtidas_url %}
             
-            <!-- Usa o termo de pesquisa (q_param) do GET e a variável do contexto (categoria_ativa) -->
+            <!-- Variáveis de contexto para simplificar -->
             {% with q_param=request.GET.q|default:'' %}
             
-            <!-- 1. Botão "Tudo" -->
-            <!-- Link 'Tudo' deve remover o parâmetro 'categoria' e manter 'q' -->
+            <!-- 1. Botão "Tudo" (Ativo se 'categoria_ativa' estiver vazia) -->
             <a href="{{ curtidas_url }}?q={{ q_param }}" 
                class="filter-button {% if not categoria_ativa %}active{% endif %}">
                 Tudo
@@ -118,8 +105,8 @@
             <!-- 2. Botões de Categoria -->
             {% for categoria in categorias_disponiveis %}
                 <!-- 
-                    A URL passa o slug da categoria e MANTER o termo de pesquisa.
-                    A condição 'active' usa o slug da categoria atual e a variável 'categoria_ativa' do contexto.
+                    Link: Passa o SLUG da categoria e o termo de pesquisa atual.
+                    Ativo: Compara o slug da categoria com o slug ativo vindo do Python.
                 -->
                 <a href="{{ curtidas_url }}?categoria={{ categoria.slug }}&q={{ q_param }}" 
                    class="filter-button {% if categoria_ativa|lower == categoria.slug|lower %}active{% endif %}">

@@ -618,10 +618,12 @@ def configuracoes_conta(request):
 # LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO)
 # ===============================================
 
+# ===============================================
+# LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO NO PYTHON)
+# ===============================================
+
 @login_required
 def noticias_curtidas(request):
-    usuario = request.user
-    
     # 1. Parâmetros de Filtro/Pesquisa da URL
     termo_pesquisa = request.GET.get('q', '').strip()
     # Usa o slug para o filtro. Se nada for passado, é uma string vazia.
@@ -629,29 +631,28 @@ def noticias_curtidas(request):
     
     # 2. Busca todas as interações de 'CURTIDA' do usuário
     interacoes_qs = InteracaoNoticia.objects.filter(
-        usuario=usuario, 
+        usuario=request.user, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # 3. Aplica filtro de Categoria, se houver um slug válido
+    # 3. Aplica filtro de Categoria
     if categoria_slug:
-        # **CORREÇÃO CRUCIAL:** Filtra o queryset de interações, não a lista de notícias
+        # Filtra interações que pertencem a notícias da categoria selecionada (usando o slug)
         interacoes_qs = interacoes_qs.filter(
             noticia__categoria__slug__iexact=categoria_slug
         )
         
-    # 4. Aplica filtro de Pesquisa, se houver
+    # 4. Aplica filtro de Pesquisa
     if termo_pesquisa:
+        from django.db.models import Q
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # 5. Extrai as notícias, garantindo unicidade e mantendo a ordem
-    # Mapeia as interações filtradas para as notícias
+    # 5. Extrai as notícias (e remove duplicatas mantendo a ordem)
     noticias_filtradas_lista = [item.noticia for item in interacoes_qs]
     
-    # Remove duplicatas (se houver interações repetidas), mantendo a ordem
     seen_ids = set()
     noticias_curtidas = []
     for noticia in noticias_filtradas_lista:
@@ -659,14 +660,14 @@ def noticias_curtidas(request):
             noticias_curtidas.append(noticia)
             seen_ids.add(noticia.id)
 
-    # 6. Carrega TODAS as categorias para o filtro do template
+    # 6. Carrega TODAS as categorias para o filtro do te    mplate
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        # **CORREÇÃO:** Passa o slug ativo de volta para o template para o estado 'active'
+        # **CHAVE PARA O HTML:** Passa o slug ativo de volta
         'categoria_ativa': categoria_slug 
     }
     
