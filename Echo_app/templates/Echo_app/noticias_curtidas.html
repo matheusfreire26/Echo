@@ -7,28 +7,34 @@
 <!-- Link para o CSS principal (manter) -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
 
-<!-- SOLUÇÃO FORÇADA DE CLICABILIDADE VIA CSS INLINE -->
+<!-- SOLUÇÃO ULTRA-DEFENSIVA DE CLICABILIDADE VIA CSS INLINE -->
 <style>
-    /* O mais importante: garante que a seção de filtros está acima de tudo */
+    /* * 1. A SOLUÇÃO NUCLEAR: Garantir que o clique passe pelas camadas de contêineres 
+     * para atingir o link real.
+     */
     .filter-section {
         position: relative;
-        z-index: 1000; /* Z-INDEX EXTREMAMENTE ALTO PARA EVITAR SOBREPOSIÇÃO */
+        z-index: 100000; /* Z-INDEX MÁXIMO PARA TODOS OS PAIS */
         display: flex;
         flex-direction: column;
         gap: 15px; 
         margin-bottom: 25px;
+        /* IMPORTANTE: Permite que os cliques passem por este contêiner */
+        pointer-events: none; 
     }
     
     .category-filters {
         position: relative; 
-        z-index: 1010; 
+        z-index: 100010; 
         display: flex;
         flex-wrap: nowrap; 
         overflow-x: auto; 
         padding-bottom: 8px;
+        pointer-events: none; /* Permite que os cliques passem por este contêiner */
     }
 
-    /* O link A precisa ser um bloco forte */
+    /* * 2. O LINK: Re-habilita o clique APENAS no elemento que deve ser clicável.
+     */
     .filter-button {
         display: inline-flex; 
         align-items: center;
@@ -43,21 +49,28 @@
         background-color: #f7f7f7;
         color: #333;
         cursor: pointer;
-        /* IMPORTANTE: Garante que a área de clique é o próprio A */
         position: relative; 
-        z-index: 1020; 
+        z-index: 100020; 
         user-select: none;
+        /* RE-ATIVA O CLIQUE APENAS NESTE ELEMENTO */
+        pointer-events: auto !important; 
     }
     
     .filter-button:hover {
         background-color: #e0e0e0;
     }
     
-    /* Estado ativo (usa a cor de destaque) */
     .filter-button.active {
         background-color: #dc3545; 
         color: white;
         border-color: #dc3545;
+    }
+
+    /* 3. A BARRA DE PESQUISA: Também precisa de pointer-events auto */
+    .search-form {
+        position: relative;
+        z-index: 99990; 
+        pointer-events: auto !important;
     }
 </style>
 {% endblock %}
@@ -70,11 +83,11 @@
     
     <!-- ============================================== -->
     <!-- SEÇÃO: BARRA DE PESQUISA E FILTROS -->
-    <!-- ESTA SEÇÃO TEM Z-INDEX ALTÍSSIMO PARA GARANTIR O CLIQUE -->
+    <!-- Z-INDEX FORÇADO PARA GARANTIR CLICABILIDADE -->
     <!-- ============================================== -->
     <div class="filter-section">
         
-        <!-- Barra de Pesquisa (POSTA O 'q' E MANTÉM O FILTRO ATUAL 'categoria_ativa') -->
+        <!-- Barra de Pesquisa (Clicável) -->
         <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
             
             <input type="text" name="q" placeholder="Pesquisar..." class="search-input" value="{{ request.GET.q|default:'' }}">
@@ -88,7 +101,7 @@
             </button>
         </form>
         
-        <!-- Filtros de Categoria (Links normais que recarregam a página) -->
+        <!-- Filtros de Categoria (Links normais - DEVE SER CLICÁVEL) -->
         <div class="category-filters">
             
             {% url 'Echo_app:noticias_curtidas' as curtidas_url %}
