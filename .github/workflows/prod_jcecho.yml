@@ -74,9 +74,8 @@ jobs:
           app-name: 'JCecho'
           slot-name: 'Production'
           
-      - name: Instalar Dependências
-        working-directory: src # Define a pasta 'src' como o diretório de trabalho
-        run: pip install -r requirements.txt # O caminho é relativo a 'src'
+      - name: Install dependencies
+        run: pip install -r Echo/requirements.txt
 
       - name: Cleaning testing files
         run: |
