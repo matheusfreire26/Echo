@@ -614,60 +614,63 @@ def configuracoes_conta(request):
 # LISTA DE NOTÍCIAS CURTIDAS (CORRIGIDA)
 # ===============================================
 
+# ===============================================
+# LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO)
+# ===============================================
+
 @login_required
 def noticias_curtidas(request):
     usuario = request.user
     
-    # Parâmetros de Filtro/Pesquisa da URL
+    # 1. Parâmetros de Filtro/Pesquisa da URL
     termo_pesquisa = request.GET.get('q', '').strip()
-    categoria_slug = request.GET.get('categoria', '').strip()
+    # Usa o slug para o filtro. Se nada for passado, é uma string vazia.
+    categoria_slug = request.GET.get('categoria', '').strip() 
     
-    # 1. Busca todas as interações de 'CURTIDA' do usuário
+    # 2. Busca todas as interações de 'CURTIDA' do usuário
     interacoes_qs = InteracaoNoticia.objects.filter(
         usuario=usuario, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # 2. Aplica filtro de Categoria, se houver
+    # 3. Aplica filtro de Categoria, se houver um slug válido
     if categoria_slug:
-        # Filtra interações que pertencem a notícias da categoria selecionada (usando o slug)
-        # Se o seu slug estiver em branco no banco, isso pode falhar.
-        interacoes_qs = interacoes_qs.filter(noticia__categoria__slug=categoria_slug)
+        # **CORREÇÃO CRUCIAL:** Filtra o queryset de interações, não a lista de notícias
+        interacoes_qs = interacoes_qs.filter(
+            noticia__categoria__slug__iexact=categoria_slug
+        )
         
-    # 3. Aplica filtro de Pesquisa, se houver
+    # 4. Aplica filtro de Pesquisa, se houver
     if termo_pesquisa:
-        # Filtra interações onde o título ou conteúdo da notícia contenha o termo
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # 4. Extrai as notícias, garantindo unicidade e mantendo a ordem.
-    # Usamos list comprehension para extrair a notícia de cada interação no queryset filtrado.
-    noticias_curtidas_com_duplicatas = [item.noticia for item in interacoes_qs]
+    # 5. Extrai as notícias, garantindo unicidade e mantendo a ordem
+    # Mapeia as interações filtradas para as notícias
+    noticias_filtradas_lista = [item.noticia for item in interacoes_qs]
     
-    # Remove duplicatas mantendo a ordem (necessário se o mesmo usuário puder curtir a notícia
-    # múltiplas vezes, o que o modelo InteracaoNoticia permite).
+    # Remove duplicatas (se houver interações repetidas), mantendo a ordem
     seen_ids = set()
     noticias_curtidas = []
-    for noticia in noticias_curtidas_com_duplicatas:
+    for noticia in noticias_filtradas_lista:
         if noticia.id not in seen_ids:
             noticias_curtidas.append(noticia)
             seen_ids.add(noticia.id)
 
-    # 5. Carrega TODAS as categorias para o filtro do template
+    # 6. Carrega TODAS as categorias para o filtro do template
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        # Passa o slug ativo para o HTML para manter o estado do botão
+        # **CORREÇÃO:** Passa o slug ativo de volta para o template para o estado 'active'
         'categoria_ativa': categoria_slug 
     }
     
     return render(request, 'Echo_app/noticias_curtidas.html', context)
-
 # ===============================================
 # LISTA DE NOTÍCIAS SALVAS
 # ===============================================
