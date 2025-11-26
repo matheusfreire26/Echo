@@ -622,53 +622,54 @@ def configuracoes_conta(request):
 # LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO NO PYTHON)
 # ===============================================
 
+# ===============================================
+# LISTA DE NOTÍCIAS CURTIDAS (CORRIGIDA)
+# ===============================================
+
 @login_required
 def noticias_curtidas(request):
-    # 1. Parâmetros de Filtro/Pesquisa da URL
-    termo_pesquisa = request.GET.get('q', '').strip()
-    # Usa o slug para o filtro. Se nada for passado, é uma string vazia.
-    categoria_slug = request.GET.get('categoria', '').strip() 
+    usuario = request.user
     
-    # 2. Busca todas as interações de 'CURTIDA' do usuário
+    # Pega os parâmetros da URL (ex: ?categoria=esportes&q=futebol)
+    termo_pesquisa = request.GET.get('q', '').strip()
+    categoria_nome = request.GET.get('categoria', '').strip() # Usando 'nome' ou 'slug' dependendo do seu link
+    
+    # 1. Começa pegando TODAS as curtidas do usuário
     interacoes_qs = InteracaoNoticia.objects.filter(
-        usuario=request.user, 
+        usuario=usuario, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # 3. Aplica filtro de Categoria
-    if categoria_slug:
-        # Filtra interações que pertencem a notícias da categoria selecionada (usando o slug)
-        interacoes_qs = interacoes_qs.filter(
-            noticia__categoria__slug__iexact=categoria_slug
-        )
+    # 2. Filtra por Categoria se houver
+    if categoria_nome:
+        # Tenta filtrar pelo nome exato ou slug. Ajuste 'nome' ou 'slug' conforme seu modelo Categoria
+        # Aqui estou assumindo que você vai passar o NOME da categoria no link
+        interacoes_qs = interacoes_qs.filter(noticia__categoria__nome__iexact=categoria_nome)
         
-    # 4. Aplica filtro de Pesquisa
+    # 3. Filtra por Pesquisa se houver
     if termo_pesquisa:
-        from django.db.models import Q
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # 5. Extrai as notícias (e remove duplicatas mantendo a ordem)
-    noticias_filtradas_lista = [item.noticia for item in interacoes_qs]
-    
+    # 4. Monta a lista final de notícias (sem duplicatas)
     seen_ids = set()
     noticias_curtidas = []
-    for noticia in noticias_filtradas_lista:
-        if noticia.id not in seen_ids:
-            noticias_curtidas.append(noticia)
-            seen_ids.add(noticia.id)
+    for item in interacoes_qs:
+        if item.noticia.id not in seen_ids:
+            noticias_curtidas.append(item.noticia)
+            seen_ids.add(item.noticia.id)
 
-    # 6. Carrega TODAS as categorias para o filtro do te    mplate
+    # 5. Pega todas as categorias para montar os botões lá em cima
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        # **CHAVE PARA O HTML:** Passa o slug ativo de volta
-        'categoria_ativa': categoria_slug 
+        # Passa a categoria ativa de volta para o template saber qual botão pintar de vermelho
+        'categoria_ativa': categoria_nome 
     }
     
     return render(request, 'Echo_app/noticias_curtidas.html', context)

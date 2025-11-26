@@ -4,73 +4,49 @@
 {% block title %}Minhas Curtidas{% endblock %}
 
 {% block extra_css %}
-<!-- Link para o CSS principal (manter) -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
 
-<!-- SOLUÇÃO ULTRA-DEFENSIVA DE CLICABILIDADE VIA CSS INLINE -->
+<!-- CSS EXTRA PARA GARANTIR QUE O CLIQUE FUNCIONE (IGNORANDO SOBREPOSIÇÕES) -->
 <style>
-    /* * 1. A SOLUÇÃO NUCLEAR: Garantir que o clique passe pelas camadas de contêineres 
-     * para atingir o link real.
-     */
     .filter-section {
         position: relative;
-        z-index: 100000; /* Z-INDEX MÁXIMO PARA TODOS OS PAIS */
+        z-index: 1000; /* Garante que fique acima de tudo */
         display: flex;
         flex-direction: column;
         gap: 15px; 
         margin-bottom: 25px;
-        /* IMPORTANTE: Permite que os cliques passem por este contêiner */
-        pointer-events: none; 
     }
     
     .category-filters {
-        position: relative; 
-        z-index: 100010; 
         display: flex;
         flex-wrap: nowrap; 
         overflow-x: auto; 
-        padding-bottom: 8px;
-        pointer-events: none; /* Permite que os cliques passem por este contêiner */
+        padding-bottom: 10px;
+        gap: 10px;
     }
 
-    /* * 2. O LINK: Re-habilita o clique APENAS no elemento que deve ser clicável.
-     */
     .filter-button {
-        display: inline-flex; 
-        align-items: center;
-        justify-content: center;
-        white-space: nowrap;
-        text-decoration: none;
+        display: inline-block;
         padding: 8px 16px;
-        margin-right: 8px;
-        border-radius: 9999px; 
-        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        border-radius: 20px; 
         border: 1px solid #ccc; 
-        background-color: #f7f7f7;
+        background-color: #fff;
         color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        white-space: nowrap;
         cursor: pointer;
-        position: relative; 
-        z-index: 100020; 
-        user-select: none;
-        /* RE-ATIVA O CLIQUE APENAS NESTE ELEMENTO */
-        pointer-events: auto !important; 
     }
     
     .filter-button:hover {
-        background-color: #e0e0e0;
+        background-color: #f0f0f0;
     }
     
+    /* ESTILO DO BOTÃO ATIVO (VERMELHO) */
     .filter-button.active {
-        background-color: #dc3545; 
+        background-color: #cc0000; 
         color: white;
-        border-color: #dc3545;
-    }
-
-    /* 3. A BARRA DE PESQUISA: Também precisa de pointer-events auto */
-    .search-form {
-        position: relative;
-        z-index: 99990; 
-        pointer-events: auto !important;
+        border-color: #cc0000;
     }
 </style>
 {% endblock %}
@@ -81,17 +57,14 @@
 
     <h1 class="main-title">Minhas Curtidas</h1>
     
-    <!-- ============================================== -->
-    <!-- SEÇÃO: BARRA DE PESQUISA E FILTROS -->
-    <!-- Z-INDEX FORÇADO PARA GARANTIR CLICABILIDADE -->
-    <!-- ============================================== -->
+    <!-- SEÇÃO DE FILTROS -->
     <div class="filter-section">
         
-        <!-- Barra de Pesquisa (Clicável) -->
+        <!-- BARRA DE PESQUISA -->
         <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
-            
             <input type="text" name="q" placeholder="Pesquisar..." class="search-input" value="{{ request.GET.q|default:'' }}">
             
+            <!-- Se já tem categoria selecionada, mantém ela ao pesquisar -->
             {% if categoria_ativa %}
                 <input type="hidden" name="categoria" value="{{ categoria_ativa }}">
             {% endif %}
@@ -101,119 +74,75 @@
             </button>
         </form>
         
-        <!-- Filtros de Categoria (Links normais - DEVE SER CLICÁVEL) -->
+        <!-- BOTÕES DE CATEGORIA -->
         <div class="category-filters">
             
-            {% url 'Echo_app:noticias_curtidas' as curtidas_url %}
+            <!-- URL base para facilitar -->
+            {% url 'Echo_app:noticias_curtidas' as base_url %}
             
-            <!-- Variáveis de contexto para simplificar -->
-            {% with q_param=request.GET.q|default:'' %}
-            
-            <!-- 1. Botão "Tudo" (Ativo se 'categoria_ativa' estiver vazia) -->
-            <a href="{{ curtidas_url }}?q={{ q_param }}" 
+            <!-- 1. BOTÃO TUDO -->
+            <!-- Se 'categoria_ativa' estiver vazio, este botão ganha a classe 'active' -->
+            <a href="{{ base_url }}?q={{ request.GET.q }}" 
                class="filter-button {% if not categoria_ativa %}active{% endif %}">
                 Tudo
             </a>
             
-            <!-- 2. Botões de Categoria -->
-            {% for categoria in categorias_disponiveis %}
+            <!-- 2. BOTÕES DAS OUTRAS CATEGORIAS -->
+            {% for cat in categorias_disponiveis %}
                 <!-- 
-                    Link: Passa o SLUG da categoria e o termo de pesquisa atual.
-                    Ativo: Compara o slug da categoria com o slug ativo vindo do Python.
+                    Link envia: ?categoria=NOME_DA_CATEGORIA 
+                    Se categoria_ativa for igual ao nome desta categoria, adiciona classe 'active'
                 -->
-                <a href="{{ curtidas_url }}?categoria={{ categoria.slug }}&q={{ q_param }}" 
-                   class="filter-button {% if categoria_ativa|lower == categoria.slug|lower %}active{% endif %}">
-                    {{ categoria.nome }}
+                <a href="{{ base_url }}?categoria={{ cat.nome }}&q={{ request.GET.q }}" 
+                   class="filter-button {% if categoria_ativa == cat.nome %}active{% endif %}">
+                    {{ cat.nome }}
                 </a>
             {% endfor %}
-            
-            {% endwith %}
 
         </div>
     </div>
-    <!-- ============================================== -->
-    <!-- FIM DA SEÇÃO CORRIGIDA -->
-    <!-- ============================================== -->
 
+    <!-- HEADER COM CONTADOR -->
     <div class="curtidas-header">
         <p class="curtidas-info">
             {% if categoria_ativa %}
-                Mostrando notícias curtidas na categoria <strong>"{{ categoria_ativa|title }}"</strong>.
+                Filtrando por: <strong>{{ categoria_ativa }}</strong>.
             {% endif %}
-            Total de notícias curtidas: <strong>{{ noticias_curtidas|length }}</strong>.
+            Total: <strong>{{ total_curtidas }}</strong> notícias.
         </p>
     </div>
 
+    <!-- LISTA DE NOTÍCIAS -->
     {% if noticias_curtidas %}
-        
-        <!-- Lista de Notícias no formato Jornal -->
         <div class="noticias-listagem">
-            
             {% for noticia in noticias_curtidas %}
             <article class="noticia-item">
-                
                 <a href="{% url 'Echo_app:noticia_detalhe' pk=noticia.pk %}" class="noticia-link">
                     
-                    <!-- Imagem/Placeholder -->
                     <div class="noticia-imagem-box">
                         {% if noticia.imagem %}
-                            <img 
-                                src="{{ noticia.imagem.url }}" 
-                                alt="Imagem da notícia: {{ noticia.titulo }}" 
-                                class="noticia-imagem"
-                            >
+                            <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="noticia-imagem">
                         {% else %}
-                            <div class="imagem-placeholder">
-                                <i class="fas fa-image"></i>
-                                <span>Sem Imagem</span>
-                            </div>
+                            <div class="imagem-placeholder"><span>Sem Imagem</span></div>
                         {% endif %}
                     </div>
                     
-                    <!-- Corpo do Texto -->
                     <div class="noticia-body">
-                        <!-- Categoria no estilo tag -->
-                        <span class="noticia-tag tag-{{ noticia.categoria.nome|slugify|default:'geral' }}">
-                            {{ noticia.categoria.nome|default:"Geral" }}
-                        </span>
-                        
-                        <h2 class="noticia-titulo">
-                            {{ noticia.titulo }}
-                        </h2>
-                        
-                        <p class="noticia-resumo">
-                            {{ noticia.conteudo|safe|striptags|truncatechars:150 }}
-                        </p>
-                        
+                        <span class="noticia-tag">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                        <h2 class="noticia-titulo">{{ noticia.titulo }}</h2>
+                        <p class="noticia-resumo">{{ noticia.conteudo|striptags|truncatechars:100 }}</p>
                         <div class="noticia-meta">
-                            <span class="meta-data">
-                                {{ noticia.data_publicacao|date:"d/m/Y \à\s H:i" }}
-                            </span>
-                            <!-- Ícone de Curtido para indicar que está na lista -->
-                            <span class="meta-curtida">
-                                <i class="fas fa-heart"></i>
-                            </span>
+                            <span>{{ noticia.data_publicacao|date:"d/m/Y" }}</span>
                         </div>
                     </div>
-                    
                 </a>
             </article>
             {% endfor %}
-            
         </div>
-        
     {% else %}
-        <!-- Mensagem de estado vazio (Empty State) -->
         <div class="empty-state">
-            <i class="fas fa-heart-broken empty-icon"></i>
-            <h3 class="empty-title">Nenhuma notícia curtida</h3>
-            <p class="empty-text">
-                Explore o dashboard e clique no coração nas notícias que mais te interessarem.
-            </p>
-            <a href="{% url 'Echo_app:dashboard' %}" class="empty-btn-link">
-                <i class="fas fa-arrow-left"></i>
-                Voltar para o Dashboard
-            </a>
+            <h3>Nenhuma notícia encontrada com esses filtros.</h3>
+            <a href="{% url 'Echo_app:noticias_curtidas' %}" class="empty-btn-link">Limpar Filtros</a>
         </div>
     {% endif %}
 </div>
