@@ -1,5 +1,5 @@
 /*
-* Estilos para o template noticias_curtidas.html (Lista de notícias horizontal)
+* Estilos para o template noticias_curtidas.html (Lista de notícias horizontal e Filtros)
 * Segue a identidade visual do Jornal do Commercio (cores e tipografia)
 */
 
@@ -39,6 +39,83 @@ body {
     font-size: 0.95rem;
     color: #555;
     text-align: center;
+}
+
+/* ====================================
+   SEÇÃO DE PESQUISA E FILTROS (Novo)
+   ==================================== */
+
+.filter-section {
+    padding: 20px 0 10px;
+    margin-bottom: 10px;
+}
+
+/* Barra de Pesquisa */
+.search-form {
+    display: flex;
+    margin-bottom: 15px;
+    background-color: #fff;
+    border-radius: 25px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+    flex-grow: 1;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.search-button {
+    background-color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.search-button:hover {
+    color: #cc0000;
+}
+
+/* Filtros de Categoria (Scroll Horizontal) */
+.category-filters {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Para iOS */
+    gap: 8px;
+    padding-bottom: 10px; /* Para sombra de scroll/melhor visualização */
+}
+
+.category-filters::-webkit-scrollbar {
+    display: none; /* Esconde a barra de rolagem no Webkit (Chrome, Safari) */
+}
+
+.filter-button {
+    flex-shrink: 0; /* Impede que os botões encolham */
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid #ccc;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    
+    /* Cores Inativas */
+    background-color: #fff;
+    color: #555;
+}
+
+.filter-button.active,
+.filter-button:hover {
+    /* Cores Ativas/Hover (Cor Primária Vermelha) */
+    background-color: #cc0000;
+    border-color: #cc0000;
+    color: #fff;
 }
 
 /* ====================================
@@ -192,6 +269,10 @@ body {
     
     .noticia-resumo {
         font-size: 0.95rem;
+    }
+    
+    .filter-section {
+        padding: 20px 0 10px;
     }
 }
 
