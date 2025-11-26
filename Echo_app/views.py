@@ -634,49 +634,45 @@ def configuracoes_conta(request):
 def noticias_curtidas(request):
     usuario = request.user
     
-    # Parâmetros de Filtro/Pesquisa da URL
+    # 1. Parâmetros
     termo_pesquisa = request.GET.get('q', '').strip()
-    # AGORA USAMOS O NOME, NÃO O SLUG
-    categoria_nome = request.GET.get('categoria', '').strip() 
+    categoria_nome = request.GET.get('categoria', '').strip() # AGORA É NOME
     
-    # 1. Busca todas as interações de 'CURTIDA' do usuário
+    # 2. Busca base
     interacoes_qs = InteracaoNoticia.objects.filter(
-        usuario=request.user, 
+        usuario=usuario, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # 2. Aplica filtro de Categoria (POR NOME)
+    # 3. Filtro de Categoria (POR NOME)
     if categoria_nome:
-        # Filtra onde o NOME da categoria é igual ao parâmetro da URL
         interacoes_qs = interacoes_qs.filter(
             noticia__categoria__nome__iexact=categoria_nome
         )
         
-    # 3. Aplica filtro de Pesquisa
+    # 4. Filtro de Pesquisa
     if termo_pesquisa:
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # 4. Extrai notícias únicas
+    # 5. Extrai notícias únicas
     seen_ids = set()
     noticias_curtidas = []
     for item in interacoes_qs:
-        noticia = item.noticia
-        if noticia.id not in seen_ids:
-            noticias_curtidas.append(noticia)
-            seen_ids.add(noticia.id)
+        if item.noticia.id not in seen_ids:
+            noticias_curtidas.append(item.noticia)
+            seen_ids.add(item.noticia.id)
 
-    # 5. Carrega todas as categorias
+    # 6. Carrega categorias
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        # Passa o NOME ativo para o HTML
-        'categoria_ativa': categoria_nome 
+        'categoria_ativa': categoria_nome # Passa o nome de volta pro HTML
     }
     
     return render(request, 'Echo_app/noticias_curtidas.html', context)

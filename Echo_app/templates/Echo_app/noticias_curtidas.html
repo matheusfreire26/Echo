@@ -7,15 +7,15 @@
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
 
 <style>
-    /* FORÇAR O CLIQUE A FUNCIONAR */
+    /* 1. GARANTIA DE CLICABILIDADE */
     .filter-section {
         position: relative;
-        z-index: 100000;
+        z-index: 100000; /* Máximo */
         display: flex;
         flex-direction: column;
         gap: 15px; 
         margin-bottom: 25px;
-        pointer-events: none; 
+        pointer-events: none; /* O clique passa por aqui... */
     }
     
     .category-filters {
@@ -25,9 +25,10 @@
         flex-wrap: nowrap; 
         overflow-x: auto; 
         padding-bottom: 8px;
-        pointer-events: none;
+        pointer-events: none; /* ... e por aqui */
     }
 
+    /* 2. RE-ATIVA O CLIQUE NO BOTÃO */
     .filter-button {
         display: inline-flex; 
         align-items: center;
@@ -44,7 +45,8 @@
         cursor: pointer;
         position: relative; 
         z-index: 100020; 
-        pointer-events: auto !important; /* Link clicável */
+        user-select: none;
+        pointer-events: auto !important; /* SÓ AQUI O CLIQUE PEGA */
     }
     
     .filter-button:hover {
@@ -60,7 +62,7 @@
     .search-form {
         position: relative;
         z-index: 99990; 
-        pointer-events: auto !important; 
+        pointer-events: auto !important; /* Pesquisa também clicável */
     }
 </style>
 {% endblock %}
@@ -71,9 +73,10 @@
 
     <h1 class="main-title">Minhas Curtidas</h1>
     
+    <!-- FILTROS -->
     <div class="filter-section">
         
-        <!-- Barra de Pesquisa -->
+        <!-- PESQUISA -->
         <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
             <input type="text" name="q" placeholder="Pesquisar..." class="search-input" value="{{ request.GET.q|default:'' }}">
             
@@ -86,24 +89,20 @@
             </button>
         </form>
         
-        <!-- Filtros -->
+        <!-- BOTÕES DE CATEGORIA -->
         <div class="category-filters">
             
             {% url 'Echo_app:noticias_curtidas' as curtidas_url %}
             {% with q_param=request.GET.q|default:'' %}
             
-            <!-- Botão TUDO: Fica ativo se 'categoria_ativa' for vazia -->
+            <!-- TUDO -->
             <a href="{{ curtidas_url }}?q={{ q_param }}" 
                class="filter-button {% if not categoria_ativa %}active{% endif %}">
                 Tudo
             </a>
             
-            <!-- Botões de Categoria -->
+            <!-- CATEGORIAS -->
             {% for categoria in categorias_disponiveis %}
-                <!-- 
-                   MUDANÇA IMPORTANTE: Usamos 'categoria.nome' aqui pois seu banco não tem slug.
-                   A URL ficará algo como: /curtidas/?categoria=Politica&q=...
-                -->
                 <a href="{{ curtidas_url }}?categoria={{ categoria.nome }}&q={{ q_param }}" 
                    class="filter-button {% if categoria_ativa == categoria.nome %}active{% endif %}">
                     {{ categoria.nome }}
@@ -133,7 +132,7 @@
                         {% if noticia.imagem %}
                             <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="noticia-imagem">
                         {% else %}
-                            <div class="imagem-placeholder"><i class="fas fa-image"></i><span>Sem Imagem</span></div>
+                            <div class="imagem-placeholder"><span>Sem Imagem</span></div>
                         {% endif %}
                     </div>
                     <div class="noticia-body">
@@ -151,9 +150,8 @@
         </div>
     {% else %}
         <div class="empty-state">
-            <i class="fas fa-heart-broken empty-icon"></i>
-            <h3 class="empty-title">Nenhuma notícia encontrada</h3>
-            <a href="{% url 'Echo_app:dashboard' %}" class="empty-btn-link">Voltar para o Dashboard</a>
+            <h3>Nenhuma notícia encontrada.</h3>
+            <a href="{% url 'Echo_app:dashboard' %}" class="empty-btn-link">Voltar</a>
         </div>
     {% endif %}
 </div>
