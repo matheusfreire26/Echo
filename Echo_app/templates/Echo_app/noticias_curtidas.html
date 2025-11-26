@@ -5,10 +5,50 @@
 
 {% block extra_css %}
 <!-- 
-    IMPORTANTE: Este arquivo lista_noticias_jornal.css PRECISA estar na pasta static/Echo_app/css/.
-    Ele contém a estilização para a lista e os novos filtros.
+    Ajuste de CSS - Se o link não está clicável, pode ser um problema de 'z-index' ou 'display'.
+    Ajustei o HTML para simplificar e garantir a clicabilidade.
 -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
+
+<style>
+    /* GARANTIA DE CLICABILIDADE: Se houver algum elemento flutuando sobre os botões */
+    .category-filters {
+        /* Certifica que os botões estão acima de outros elementos se houver sobreposição */
+        position: relative; 
+        z-index: 10;
+        display: flex; /* Garante que os itens são flexíveis */
+        overflow-x: auto; /* Permite scroll horizontal se houver muitas categorias */
+        padding-bottom: 8px;
+    }
+
+    .filter-button {
+        display: inline-block; /* Garante que o A se comporta como um bloco com dimensões */
+        white-space: nowrap;
+        text-decoration: none;
+        padding: 8px 16px;
+        margin-right: 8px;
+        border-radius: 9999px; /* Botões arredondados */
+        transition: background-color 0.2s, color 0.2s;
+        border: 1px solid #ccc; /* Bordas para destaque */
+        background-color: #f7f7f7;
+        color: #333;
+        cursor: pointer;
+    }
+    
+    .filter-button.active {
+        background-color: #dc3545; /* Cor de destaque (vermelho) para o ativo */
+        color: white;
+        border-color: #dc3545;
+    }
+    
+    /* Garante que o form de pesquisa não está 'esmagando' os botões */
+    .filter-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Espaçamento entre pesquisa e filtros */
+        margin-bottom: 25px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -19,18 +59,17 @@
     <h1 class="main-title">Minhas Curtidas</h1>
     
     <!-- ============================================== -->
-    <!-- SEÇÃO: BARRA DE PESQUISA E FILTROS (CORREÇÃO DE URL) -->
+    <!-- SEÇÃO: BARRA DE PESQUISA E FILTROS (CORREÇÃO DE ESTRUTURA) -->
     <!-- ============================================== -->
     <div class="filter-section">
         
-        <!-- Barra de Pesquisa (Mantém o filtro de categoria oculto se ativo) -->
+        <!-- Barra de Pesquisa (MANTÉM o filtro de categoria oculto se ativo) -->
         <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
             
             <input type="text" name="q" placeholder="Pesquisar..." class="search-input" value="{{ request.GET.q|default:'' }}">
             
             <!-- CAMPO OCULTO: Mantém o filtro de categoria ativo durante a pesquisa. -->
             {% if request.GET.categoria %}
-                <!-- CORREÇÃO: Usar o parâmetro 'categoria' no campo hidden -->
                 <input type="hidden" name="categoria" value="{{ request.GET.categoria }}">
             {% endif %}
 
@@ -39,16 +78,15 @@
             </button>
         </form>
         
-        <!-- Filtros de Categoria (CORREÇÃO: Garantindo o Active State e a URL Completa) -->
+        <!-- Filtros de Categoria: Deve ser clícavel -->
         <div class="category-filters">
             
             {% url 'Echo_app:noticias_curtidas' as curtidas_url %}
             
-            <!-- Define as variáveis de contexto para simplificar a leitura -->
             {% with q_param=request.GET.q|default:'' cat_ativa=request.GET.categoria|default:'' %}
             
-            <!-- 1. Botão "Tudo" (Fica ativo SOMENTE se NENHUMA categoria estiver selecionada) -->
-            <!-- CORREÇÃO: O link 'Tudo' deve remover o parâmetro 'categoria' e manter 'q' -->
+            <!-- 1. Botão "Tudo" -->
+            <!-- Link 'Tudo' deve remover o parâmetro 'categoria' e manter 'q' -->
             <a href="{{ curtidas_url }}?q={{ q_param }}" 
                class="filter-button {% if not cat_ativa %}active{% endif %}">
                 Tudo
@@ -56,10 +94,7 @@
             
             <!-- 2. Botões de Categoria -->
             {% for categoria in categorias_disponiveis %}
-                <!-- 
-                    CORREÇÃO CRÍTICA AQUI: A URL DEVE SER COMPLETA. 
-                    Passa o SLUG da categoria e MANTÉM o termo de pesquisa (q_param).
-                -->
+                <!-- A URL deve passar o SLUG da categoria e MANTER o termo de pesquisa -->
                 <a href="{{ curtidas_url }}?categoria={{ categoria.slug }}&q={{ q_param }}" 
                    class="filter-button {% if cat_ativa == categoria.slug %}active{% endif %}">
                     {{ categoria.nome }}
@@ -75,6 +110,7 @@
     <!-- ============================================== -->
 
     <div class="curtidas-header">
+        <!-- Correção: Garante que a variável correta está sendo usada. A view define 'categoria_ativa' mas 'request.GET.categoria' é mais robusto aqui. -->
         <p class="curtidas-info">
             {% if request.GET.categoria %}
                 Mostrando notícias curtidas na categoria <strong>"{{ request.GET.categoria|title }}"</strong>.
@@ -85,7 +121,7 @@
 
     {% if noticias_curtidas %}
         
-        <!-- Lista de Notícias no formato Jornal (Conteúdo aprovado) -->
+        <!-- Lista de Notícias no formato Jornal -->
         <div class="noticias-listagem">
             
             {% for noticia in noticias_curtidas %}
