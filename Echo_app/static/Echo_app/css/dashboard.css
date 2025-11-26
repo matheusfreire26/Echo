@@ -37,9 +37,9 @@
 }
 
 .ad-image {
-    max-width: 100%;
-    width: 100%;
-    height: 300px;
+    max-width: 65%;
+    width: 65%;
+    height: 150px;
     display: block;
     object-fit: cover;
 }
@@ -125,7 +125,7 @@
 }
 
 .urgent-section {
-    background: linear-gradient(135deg, #fef2f2 0%, #fff 50%, #fef2f2 100%);
+    background: white;
     padding-bottom: 30px; 
 }
 
@@ -553,7 +553,7 @@
    ===================================== */
 .latest-news-section {
     padding-bottom: 40px;
-    background-color: var(--cor-fundo); 
+    background-color: white; 
 }
 
 .latest-news-list {
