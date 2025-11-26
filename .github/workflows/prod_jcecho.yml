@@ -74,3 +74,19 @@ jobs:
           app-name: 'JCecho'
           slot-name: 'Production'
           
+      - name: Install dependencies
+        run: pip install -r ECHO/requirements.txt
+
+      - name: Cleaning testing files
+        run: |
+          cd ECHO/
+          rm db.sqlite3
+          rm .env
+          cd ..
+
+      - name: Zip artifact for deployment
+        run: |
+          cd ECHO/
+          zip release.zip ./* -r
+          cd ..
+          mv SECHO/release.zip .
