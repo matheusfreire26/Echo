@@ -158,6 +158,21 @@ def excluir_conta(request):
     return render(request, 'Echo_app/confirmar_acao.html', contexto)
 
 
+def esqueci_senha(request):
+    """
+    Exibe o formulário inicial para solicitar a redefinição de senha,
+    geralmente pedindo o e-mail ou nome de usuário.
+    """
+    # Se o usuário estiver autenticado, redireciona para o dashboard
+    if request.user.is_authenticated:
+        return redirect('Echo_app:dashboard')
+        
+    contexto = {
+        'titulo': 'Redefinir Senha'
+    }
+    return render(request, 'Echo_app/senha.html', contexto)
+
+
 # ===============================================
 # Parte do Dashboard
 # ===============================================
@@ -608,26 +623,6 @@ def configuracoes_conta(request):
 
 # ===============================================
 # LISTA DE NOTÍCIAS CURTIDAS
-# ===============================================
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS (CORRIGIDA)
-# ===============================================
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO)
-# ===============================================
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS (CORREÇÃO FINAL DE FILTRO NO PYTHON)
-# ===============================================
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS (CORRIGIDA)
-# ===============================================
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS (CORRIGIDA - FILTRO POR NOME)
 # ===============================================
 
 @login_required

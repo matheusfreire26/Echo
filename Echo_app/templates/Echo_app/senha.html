@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esqueceu a Senha - Echo</title>
+
+    <!-- Carrega o base.css (variáveis) e o futuro senha.css -->
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/senha.css' %}">
+
+    <!-- Estilo inline para centralizar a página (igual ao entrar.html) -->
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--cor-fundo, #f0f2f5);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-wrapper">
+        
+        <!-- 1. Logo -->
+        <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo JC" class="logo-image">
+
+        <!-- 2. Título e Instrução -->
+        <div class="header-text">
+            <h1>Esqueceu a senha?</h1>
+            <p>Digite seu e-mail para redefinir a senha.</p>
+        </div>
+
+        <!-- 3. Formulário -->
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+
+            {% if mensagens_erro %}
+                <div class="form-error">
+                    {{ mensagens_erro }}
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="id_email">E-mail:</label>
+                <input type="email" 
+                       name="email" 
+                       id="id_email" 
+                       class="form-input" 
+                       placeholder="exemplo@email.com"
+                       required>
+            </div>
+            
+            <button type="submit" class="btn-submit">Confirmar</button>
+        </form>
+
+        <!-- 4. Link de Voltar -->
+        <div class="extra-links">
+            <a href="{% url 'Echo_app:entrar' %}">Voltar para o login</a>
+        </div>
+        
+    </div>
+
+</body>
+</html>

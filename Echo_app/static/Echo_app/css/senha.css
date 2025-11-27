@@ -1,0 +1,139 @@
+/*
+ * Define as variáveis de cor locais (sobrescreve base.css).
+*/
+:root {
+    --cor-primaria: #dc3545; /* Vermelho */
+    --cor-primaria-hover: #c82333; /* Vermelho Escuro */
+    /* Outras cores herdadas do base.css */
+}
+
+/*
+ * Wrapper principal que centraliza o conteúdo.
+ * O body (no HTML) já tem display: flex para centrar na tela.
+*/
+.form-wrapper {
+    width: 100%;
+    max-width: 420px; /* Largura similar ao login */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Logo */
+.logo-image {
+    width: 120px; /* Um pouco menor que no login para dar espaço ao texto */
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Texto de Cabeçalho (Título e Instrução) */
+.header-text {
+    text-align: center;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.header-text h1 {
+    font-size: 1.8rem;
+    color: var(--cor-texto);
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.header-text p {
+    font-size: 1rem;
+    color: var(--cor-texto-secundario);
+    line-height: 1.5;
+    max-width: 80%; /* Limita largura para melhor leitura */
+    margin: 0 auto;
+}
+
+/* Estilo do formulário */
+.form-wrapper form {
+    width: 100%;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+    text-align: left;
+}
+
+/* Input arredondado */
+.form-input {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 25px; /* Borda redonda */
+    background-color: var(--cor-surface);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+}
+
+/* Botão arredondado */
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    background-color: var(--cor-primaria);
+    border: none;
+    border-radius: 25px; /* Borda redonda */
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+/* Link de Voltar */
+.extra-links {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.extra-links a {
+    font-size: 0.95rem;
+    color: var(--cor-texto-secundario);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.extra-links a:hover {
+    color: var(--cor-primaria);
+    text-decoration: underline;
+}
+
+/* Mensagem de Erro */
+.form-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--cor-primaria); 
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--cor-primaria);
+    font-size: 0.9rem;
+}
