@@ -15,43 +15,45 @@
         padding: 30px;
     }
     
-    /* GRELHA DE AVATARES */
+    /* --- AJUSTE DE TAMANHO AQUI --- */
     .avatar-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 15px;
+        /* Aumentei de 80px para 130px para ficarem maiores */
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 20px; /* Mais espaço entre eles */
         margin-top: 15px;
         margin-bottom: 30px;
     }
     .avatar-option {
         width: 100%;
-        aspect-ratio: 1;
+        aspect-ratio: 1; /* Garante que fique sempre quadrado/redondo */
         border-radius: 50%;
         cursor: pointer;
-        border: 3px solid transparent;
+        border: 4px solid transparent; /* Borda mais grossa */
         transition: all 0.2s;
         object-fit: cover;
     }
     .avatar-option:hover {
-        transform: scale(1.1);
-        border-color: #ddd;
+        transform: scale(1.05);
+        border-color: #eee;
     }
     /* Classe para destacar o avatar selecionado */
     .avatar-option.selected {
         border-color: #0D8ABC;
-        box-shadow: 0 0 10px rgba(13, 138, 188, 0.5);
-        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(13, 138, 188, 0.4);
+        transform: scale(1.05);
     }
     
     .divider {
         text-align: center;
-        margin: 20px 0;
+        margin: 30px 0;
         position: relative;
     }
     .divider span {
         background: white;
         padding: 0 15px;
         color: #777;
+        font-weight: bold;
         position: relative;
         z-index: 1;
     }
@@ -70,28 +72,25 @@
 {% block content %}
 <div class="edit-profile-container">
     <div class="edit-profile-card">
-        <h2 style="text-align: center; margin-bottom: 30px; font-weight: bold;">Editar Perfil</h2>
+        <h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; color: #333;">Editar Perfil</h2>
         
         <form method="POST" action="{% url 'Echo_app:perfil_editar' %}" enctype="multipart/form-data">
             {% csrf_token %}
             
-            <!-- IMPORTANTE: Campo oculto que guarda o nome do avatar clicado -->
+            <!-- Campo oculto -->
             <input type="hidden" name="avatar_escolhido" id="avatar_escolhido">
 
-            <!-- SEÇÃO 1: ESCOLHER AVATAR DA LISTA -->
+            <!-- SEÇÃO 1: AVATARES -->
             <div class="mb-4">
-                <h5 style="font-weight: bold; color: #333; margin-bottom: 5px;">Escolha um Avatar</h5>
-                <p style="font-size: 0.9rem; color: #666;">Clique para selecionar uma das opções:</p>
+                <h5 style="font-weight: bold; color: #333; margin-bottom: 10px; text-align: center;">Escolha seu Avatar</h5>
+                <p style="font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 20px;">Clique em uma das opções abaixo:</p>
                 
                 <div class="avatar-grid">
                     {% for avatar_file in lista_avatars %}
-                        <!-- Carrega da pasta static/avatars/avatarsX.png -->
                         <img src="{% static 'avatars/'|add:avatar_file %}" 
                              alt="Opção de Avatar" 
                              class="avatar-option"
                              onclick="selectAvatar('{{ avatar_file }}', this)">
-                    {% empty %}
-                        <p>Nenhum avatar encontrado na pasta static/avatars.</p>
                     {% endfor %}
                 </div>
             </div>
@@ -100,15 +99,15 @@
                 <span>OU</span>
             </div>
 
-            <!-- SEÇÃO 2: UPLOAD MANUAL -->
-            <div class="mb-4">
+            <!-- SEÇÃO 2: UPLOAD -->
+            <div class="mb-4" style="text-align: center;">
                 <label for="foto_perfil" style="font-weight: bold; display: block; margin-bottom: 10px;">Faça upload de sua própria foto:</label>
-                <input type="file" class="form-control" name="foto_perfil" id="foto_perfil" accept="image/*">
+                <input type="file" class="form-control" name="foto_perfil" id="foto_perfil" accept="image/*" style="max-width: 400px; margin: 0 auto;">
             </div>
 
             <hr style="margin: 30px 0;">
 
-            <!-- SEÇÃO 3: DADOS PESSOAIS -->
+            <!-- SEÇÃO 3: DADOS -->
             <h5 style="font-weight: bold; margin-bottom: 20px;">Seus Dados</h5>
             
             <div class="mb-3">
@@ -129,7 +128,7 @@
             <!-- BOTÕES -->
             <div style="display: flex; justify-content: space-between; margin-top: 30px;">
                 <a href="{% url 'Echo_app:perfil' %}" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary" style="padding: 0 40px;">Salvar Alterações</button>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 40px; font-weight: bold;">Salvar Alterações</button>
             </div>
         </form>
     </div>
@@ -137,20 +136,12 @@
 
 <script>
     function selectAvatar(filename, element) {
-        // 1. Remove a borda azul de todos os outros avatares
         document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('selected'));
-        
-        // 2. Adiciona a borda azul no que foi clicado
         element.classList.add('selected');
-        
-        // 3. Preenche o campo escondido com o nome do arquivo (ex: avatars1.png)
         document.getElementById('avatar_escolhido').value = filename;
-        
-        // 4. Limpa o campo de upload manual para não dar conflito
         document.getElementById('foto_perfil').value = "";
     }
 
-    // Se o usuário tentar enviar arquivo manual, desmarca os avatares da lista
     document.getElementById('foto_perfil').addEventListener('change', function() {
         document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('selected'));
         document.getElementById('avatar_escolhido').value = "";
