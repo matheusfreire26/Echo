@@ -1,127 +1,159 @@
 /*
  * Echo_app/static/Echo_app/css/senha_redefinir.css
- * Estilos específicos para o formulário de definição de nova senha.
+ * Estilos específicos para o formulário de definição de nova senha (image_96d1b6.png).
  */
 
+/* Variáveis de cor (se não estiverem em base.css) */
+:root {
+    --cor-primaria: #dc3545; /* Vermelho forte para o botão */
+    --cor-primaria-hover: #c82333;
+    --cor-borda: #ccc;
+    --cor-texto-principal: #333;
+    --cor-texto-secundario: #666;
+    --cor-fundo-claro: #fff;
+    --cor-erro: #dc3545;
+}
+
 /* ================================================= */
-/* Estilos do Wrapper Principal (Igual ao entrar.css) */
+/* 1. Wrapper Principal e Layout */
 /* ================================================= */
 
 .form-wrapper {
     width: 100%;
-    max-width: 400px; /* Largura padrão para formulários de autenticação */
-    padding: 30px;
-    background-color: var(--cor-fundo-claro, #fff); /* Fundo branco ou claro */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 420px; /* Largura similar ao login/código */
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
+    padding: 20px;
+    /* Remover box-shadow e background para replicar a imagem, que parece ser plano */
+    /* background-color: var(--cor-fundo-claro); */ 
 }
 
+/* Estilo da Logo (Copiado da base de senha.css) */
 .logo-image {
-    width: 80px; /* Tamanho da logo */
-    height: auto;
-    margin-bottom: 20px;
+    width: 120px; 
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 /* ================================================= */
-/* Estilos de Texto e Títulos */
+/* 2. Estilos de Texto e Títulos */
 /* ================================================= */
 
-.header-text h1 {
-    font-size: 1.8em;
-    color: var(--cor-texto-principal, #333);
-    margin-bottom: 5px;
+.header-text {
+    text-align: left; /* Título desalinhado à esquerda na imagem */
+    width: 100%;
+    margin-bottom: 25px; /* Espaço antes do primeiro campo */
 }
 
-.header-text p {
-    font-size: 0.95em;
-    color: var(--cor-texto-secundario, #666);
-    margin-bottom: 25px;
+.header-text .main-title {
+    font-size: 1.5rem;
+    color: var(--cor-texto-principal);
+    margin: 0;
+    font-weight: 500; /* Não tão negrito quanto um H1 padrão */
 }
 
 /* ================================================= */
-/* Estilos do Formulário */
+/* 3. Estilos do Formulário (Campos e Inputs) */
 /* ================================================= */
 
 .form-group {
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 25px; /* Espaçamento entre os campos */
     text-align: left;
 }
 
+/* Estilo do Label (Título do campo na imagem) */
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: 600;
-    color: var(--cor-texto-principal, #333);
-    font-size: 0.9em;
+    font-weight: 500; /* Semelhante ao título principal */
+    color: var(--cor-texto-principal);
+    font-size: 1rem;
 }
 
+/* Input Arredondado (Copiado do estilo de input arredondado) */
 .form-group input[type="password"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--cor-borda, #ccc);
-    border-radius: 6px;
+    padding: 16px 20px;
+    font-size: 1rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 25px; /* Borda redonda (Chave para o visual) */
+    background-color: var(--cor-surface, #fff);
     box-sizing: border-box;
-    font-size: 1em;
-    transition: border-color 0.3s;
 }
 
 .form-group input[type="password"]:focus {
-    border-color: var(--cor-principal, #007bff);
     outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
 }
 
-/* Estilo do botão de submit */
+/* ================================================= */
+/* 4. Botão "Alterar Senha" */
+/* ================================================= */
+
 .btn-submit {
+    /* Botão Vermelho, Arredondado, de largura total */
     width: 100%;
-    padding: 12px;
-    background-color: var(--cor-principal, #007bff);
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: white;
+    background-color: var(--cor-primaria); /* Vermelho */
     border: none;
-    border-radius: 6px;
+    border-radius: 25px; 
     cursor: pointer;
-    font-size: 1em;
-    font-weight: 600;
     margin-top: 10px;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s ease;
 }
 
 .btn-submit:hover {
-    background-color: var(--cor-principal-dark, #0056b3);
+    background-color: var(--cor-primaria-hover);
 }
 
 /* ================================================= */
-/* Mensagens de Erro e Ajuda */
+/* 5. Link de Voltar (Não está na imagem, mas mantido para usabilidade) */
 /* ================================================= */
 
-/* Erros de campo (padrão do Django) */
-.form-error-field {
-    color: var(--cor-erro, #dc3545);
-    font-size: 0.8em;
-    margin-top: 5px;
-}
-
-/* Erros globais do formulário (non_field_errors) */
-.form-error {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: var(--cor-erro-claro, #f8d7da);
-    color: var(--cor-erro, #721c24);
-    border: 1px solid var(--cor-erro-borda, #f5c6cb);
-    border-radius: 6px;
+.extra-links {
+    margin-top: 25px;
     text-align: center;
-    font-size: 0.9em;
 }
 
-/* Texto de ajuda (help_text) */
-.form-help-text {
-    display: block;
+.extra-links a {
+    font-size: 0.95rem;
+    color: var(--cor-texto-secundario);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.extra-links a:hover {
+    color: var(--cor-primaria);
+    text-decoration: underline;
+}
+
+/* Ocultar texto de ajuda do Django */
+.visually-hidden {
+    display: none !important;
+}
+
+/* Mensagens de Erro (Mantidas) */
+.form-error, .form-error-field {
+    color: var(--cor-erro);
+    font-size: 0.9em;
     margin-top: 5px;
-    font-size: 0.8em;
-    color: var(--cor-texto-secundario, #666);
+    text-align: center;
+}
+
+.form-error {
+    /* Estilo para erros globais */
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--cor-erro); 
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
 }

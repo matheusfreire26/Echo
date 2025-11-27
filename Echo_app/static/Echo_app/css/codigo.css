@@ -1,68 +1,127 @@
 /* =======================================================
    Echo_app/css/codigo.css
-   Estilos específicos para a página de Verificação de Código.
-   Assume que base.css e login.css já foram carregados.
+   Estilos específicos para a página de Verificação de Código,
+   baseados no layout de senha.css.
    ======================================================= */
 
-/* Estilos de título específicos para esta página */
+/* 1. Redefinição de Cores e Layout (Herdado de senha.css, mantendo a consistência) */
+
+.form-wrapper {
+    /* Garante que o wrapper seja centralizado e tenha a largura padrão */
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    /* O estilo do form-wrapper deve ser consistente com o login/senha */
+}
+
+/* 2. Estilo da Logo */
+.logo-image {
+    /* Estilo da logo copiado de senha.css para consistência */
+    width: 120px; 
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 25px; /* Ajuste para o espaço após o logo */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* 3. Título (Instrução) */
 .form-wrapper h2 {
-    /* Ajuste o espaçamento superior e inferior para títulos grandes */
-    margin-top: 15px;
-    margin-bottom: 25px;
-    font-size: 1.5em; /* Garante visibilidade */
-    color: var(--cor-texto-principal, #333);
+    font-size: 1.5rem;
+    color: var(--cor-texto, #333);
     text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px; /* Mais espaço antes do campo de input */
+    font-weight: 500;
 }
 
-/* Estilo para o campo de código (geralmente maior e centralizado) */
-.form-group input#id_codigo {
-    text-align: center;
-    font-size: 1.5em;
-    letter-spacing: 0.1em; /* Ajuda a separar os dígitos */
-    padding: 15px 10px;
-    /* Adapta a largura para ficar mais compacta, mas vou usar a largura padrão
-       para manter a consistência, ou você pode definir uma largura máxima: */
-    /* max-width: 200px; */ 
-    /* margin: 0 auto; /* Centraliza o input se for menor */
+/* 4. Campo de Input (Código) */
+
+/* Aplica o estilo de borda arredondada e padding do .form-input de senha.css */
+.form-wrapper form .form-group input#id_codigo {
+    /* Herda o estilo do .form-input (arredondado, padding) */
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 1rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 25px; 
+    background-color: var(--cor-surface);
+    
+    /* Estilos específicos para o código OTP */
+    text-align: center; 
+    font-size: 1.5em; 
+    letter-spacing: 0.1em;
 }
 
-/* Estilo para o texto explicativo sobre o reenvio/spam */
+/* Esconde o label "Insira o código" para replicar a imagem, onde o texto é um subtítulo */
+.form-group label[for="id_codigo"] {
+    display: none; 
+}
+
+
+/* 5. Botão "Confirmar" */
+.form-wrapper .btn-submit {
+    /* Estilo do botão Confirmar (vermelho) - Copiado do senha.css */
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    background-color: var(--cor-primaria, #dc3545); 
+    border: none;
+    border-radius: 25px; /* Borda redonda */
+    cursor: pointer;
+    margin-top: 25px; /* Espaço entre o input e o botão */
+    transition: background-color 0.2s ease;
+}
+
+.form-wrapper .btn-submit:hover {
+    background-color: var(--cor-primaria-hover, #c82333); 
+}
+
+/* 6. Texto Explicativo (Spam/Reenvio) */
 .resend-text {
     font-size: 0.9em;
     color: var(--cor-texto-secundario, #666);
-    margin: 20px 0;
+    margin: 20px 0 10px 0; /* Espaço superior e inferior */
     text-align: center;
     line-height: 1.4;
+    max-width: 80%; /* Limita a largura para seguir o layout da imagem */
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Estilo para o link "Reenviar código" */
-.extra-links a:last-child {
-    /* O link de reenvio deve se destacar, mas de forma diferente do botão principal */
-    color: var(--cor-link, #007bff); /* Azul padrão de link */
+/* 7. Link "Reenviar código" (Estilo diferente) */
+.extra-links {
+    text-align: center;
+    /* Ajusta a posição para parecer que está logo abaixo do botão e do texto */
+    margin-top: 0; 
+}
+
+.extra-links a {
+    color: var(--cor-link, #007bff); /* Cor azul para o link (igual à imagem) */
     text-decoration: none;
     font-weight: bold;
-    display: block; /* Garante que o link ocupe toda a largura para fácil clique */
-    margin-top: 15px; /* Separa do botão principal */
     font-size: 1em;
+    /* Faz o link parecer que está "solto" abaixo do botão, como na imagem */
 }
 
-.extra-links a:last-child:hover {
+.extra-links a:hover {
     text-decoration: underline;
     color: var(--cor-link-hover, #0056b3);
 }
 
-/* Ajustes no botão de submissão (se for diferente do login.css) */
-/* Seus botões já devem ser estilizados por base.css ou login.css, mas garantimos que o principal se destaque */
-.form-wrapper .btn-submit {
-    background-color: var(--cor-primaria, #d9534f); /* Vermelho/laranja */
-    color: white;
-    font-weight: bold;
-    padding: 10px 0;
-    margin-bottom: 10px; /* Espaço para o link de reenviar */
-}
-
-/* Garante que o container de links fique centralizado */
-.extra-links {
+/* Se houver form-error, aplica um estilo semelhante ao de senha.css */
+.form-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--cor-primaria, #dc3545); 
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 20px;
     text-align: center;
-    padding-top: 5px; 
+    color: var(--cor-primaria, #dc3545);
+    font-size: 0.9rem;
 }

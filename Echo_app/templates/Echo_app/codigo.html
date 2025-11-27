@@ -7,9 +7,10 @@
     <title>Verificar Código - Echo</title>
     
     <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/base.css' %}?v={% now 'U' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/codigo.css' %}?v={% now 'U' %}"> {# Será criado na próxima etapa #}
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/codigo.css' %}?v={% now 'U' %}"> 
 
     <style>
+        /* Estilo para centralizar o conteúdo na tela */
         body {
             display: flex;
             justify-content: center;
@@ -24,17 +25,23 @@
 
     <div class="form-wrapper">
         
-        <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo" class="logo-image">
+        <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo JCPE" class="logo-image">
 
-        <h2>Enviamos o código para seu e-mail!</h2>
-        
-        <form method="post" action="{% url 'Echo_app:verificar_codigo' %}"> {# Ação e nome da URL a ser definida #}
+        <div class="header-text">
+            <h2>Enviamos o código para seu e-mail!</h2>
+            <p class="code-instruction">Insira o código</p> 
+        </div>
+
+        <form method="post" action="{% url 'Echo_app:verificar_codigo' %}">
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="id_codigo">Insira o código</label>
-                <input type="text" name="codigo" id="id_codigo" class="form-input" required placeholder="Ex: 123456">
-            </div>
+                <input type="text" 
+                       name="codigo" 
+                       id="id_codigo" 
+                       class="form-input" 
+                       required 
+                       placeholder=""> </div>
 
             {# Exibir erros aqui, se houver #}
             {% if form.errors %}
@@ -48,15 +55,18 @@
             {% endif %}
             
             <button type="submit" class="btn-submit">Confirmar</button>
+            
+            <div class="resend-group">
+                <p class="resend-text">
+                    Se não recebeu o código, clique em "reenviar código" para continuar o processo de recuperação de senha. Lembre-se de conferir a caixa de spam.
+                </p>
+
+                <div class="extra-links">
+                    <a href="{% url 'Echo_app:reenviar_codigo' %}">Reenviar código</a>
+                </div>
+            </div>
+            
         </form>
-
-        <p class="resend-text">
-            Se não recebeu o código, clique em "reenviar código" para continuar o processo de recuperação de senha. Lembre-se de conferir a caixa de spam.
-        </p>
-
-        <div class="extra-links">
-            <a href="{% url 'Echo_app:reenviar_codigo' %}">Reenviar código</a> {# URL a ser definida #}
-        </div>
         
     </div>
 
