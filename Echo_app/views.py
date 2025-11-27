@@ -8,14 +8,16 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.contrib import messages
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
 
 # --- IMPORTS PARA AVATARES E RECUPERAÇÃO DE SENHA ---
 import os
 import random  # Para gerar o código OTP
 from django.conf import settings
 from django.core.files import File
-from django.core.mail import send_mail # Para envio de email (opcional)
+from django.core.mail import send_mail 
+from django.template.loader import render_to_string # NOVO: Para renderizar o template de email
+from django.utils.html import strip_tags # NOVO: Para criar a versão texto do email
 # ----------------------------------------------------
 
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
@@ -154,7 +156,7 @@ def excluir_conta(request):
 
 
 # ===============================================
-# LÓGICA DE RECUPERAÇÃO DE SENHA (OTP)
+# LÓGICA DE RECUPERAÇÃO DE SENHA (OTP) - CORRIGIDA
 # ===============================================
 
 def iniciar_redefinicao_otp(request):
@@ -162,75 +164,193 @@ def iniciar_redefinicao_otp(request):
         email = request.POST.get('email')
         try:
             user = User.objects.get(email=email)
+            
             # Gera um código de 6 dígitos
             otp = random.randint(100000, 999999)
             
-            # Salva na sessão para verificar depois
-            request.session['reset_otp'] = otp
-            request.session['reset_email'] = email
+            # Salva na sessão: ID do usuário e o código OTP
+            request.session['reset_user_id'] = user.pk
+            request.session['otp_code'] = str(otp) 
             
             # --- DEBUG: Mostra o código no terminal ---
             print(f"\n[DEBUG] CÓDIGO DE RECUPERAÇÃO PARA {email}: {otp}\n")
             # ------------------------------------------
             
-            # Aqui você poderia usar send_mail() para enviar de verdade
-            # send_mail('Seu código Echo', f'Seu código é {otp}', 'noreply@echo.com', [email])
-
-            messages.success(request, f"Código enviado para {email} (Verifique o console do servidor se não tiver email configurado).")
-            return redirect('Echo_app:verificar_otp')
+            # NOVO: Renderiza o template de email
+            email_context = {
+                'otp': otp,
+                'user': user,
+                'email_titulo': 'Código de Recuperação de Senha'
+            }
+            html_message = render_to_string('Echo_app/otp_email_body.html', email_context)
+            plain_message = strip_tags(html_message)
+            
+            try:
+                send_mail(
+                    'Seu Código de Recuperação de Senha - Echo',
+                    plain_message, # Corpo do e-mail em texto
+                    None, # Usa DEFAULT_FROM_EMAIL
+                    [email],
+                    html_message=html_message, # Corpo do e-mail em HTML
+                    fail_silently=False,
+                )
+                messages.success(request, f"Código de verificação enviado para {email}.")
+            except Exception as e:
+                messages.error(request, f"Erro ao enviar e-mail. Verifique a configuração SMTP. [DEBUG: {e}]")
+            
+            # Redireciona para a página de inserção do código (verificar_codigo)
+            return redirect('Echo_app:verificar_codigo')
             
         except User.DoesNotExist:
             messages.error(request, "Este e-mail não está cadastrado.")
             
-    return render(request, 'Echo_app/esqueci_senha.html')
+    # Template: senha.html
+    return render(request, 'Echo_app/senha.html')
 
-def verificar_otp(request):
-    if request.method == 'POST':
-        otp_digitado = request.POST.get('otp')
-        otp_sessao = request.session.get('reset_otp')
-        
-        if otp_sessao and str(otp_digitado) == str(otp_sessao):
-            # Marca como verificado
-            request.session['otp_verified'] = True
-            return redirect('Echo_app:redefinir_senha_nova')
-        else:
-            messages.error(request, "Código inválido ou expirado.")
-            
-    return render(request, 'Echo_app/verificar_otp.html')
 
-def redefinir_senha_nova(request):
-    # Segurança: Só deixa acessar se tiver verificado o OTP
-    if not request.session.get('otp_verified'):
+# ----------------------------------------------------------------------
+# 2. VERIFICAR CÓDIGO (URL: /verificar-codigo/) - CORRIGIDA
+# Template: Echo_app/codigo.html
+# ----------------------------------------------------------------------
+
+def verificar_codigo(request):
+    # Garante que há um usuário na sessão para evitar erros
+    user_pk = request.session.get('reset_user_id')
+    if not user_pk:
+        messages.error(request, "Sessão de redefinição expirada ou inválida. Reinicie o processo.")
         return redirect('Echo_app:iniciar_redefinicao_otp')
         
     if request.method == 'POST':
-        senha1 = request.POST.get('senha_nova')
-        senha2 = request.POST.get('confirmar_senha')
+        otp_digitado = request.POST.get('codigo')
+        otp_sessao = request.session.get('otp_code')
         
-        if senha1 == senha2:
-            email = request.session.get('reset_email')
-            try:
-                user = User.objects.get(email=email)
-                user.set_password(senha1)
-                user.save()
-                
-                # Limpa a sessão
-                del request.session['reset_otp']
-                del request.session['reset_email']
-                del request.session['otp_verified']
-                
-                messages.success(request, "Senha alterada com sucesso! Faça login.")
-                return redirect('Echo_app:entrar')
-            except User.DoesNotExist:
-                messages.error(request, "Erro ao encontrar usuário.")
-        else:
-            messages.error(request, "As senhas não coincidem.")
+        if otp_sessao and str(otp_digitado) == str(otp_sessao):
+            # Adiciona flag de verificação para a próxima etapa (segurança)
+            request.session['otp_verified'] = True
+            messages.success(request, "Código verificado com sucesso! Por favor, defina sua nova senha.")
             
-    return render(request, 'Echo_app/redefinir_senha.html')
+            # Redireciona para a tela final de nova senha
+            return redirect('Echo_app:redefinir_senha_final')
+        else:
+            messages.error(request, "Código inválido ou expirado.")
+            
+    # Template: codigo.html
+    return render(request, 'Echo_app/codigo.html')
+
+
+# ----------------------------------------------------------------------
+# 3. REDEFINIR SENHA FINAL (URL: /redefinir-senha-final/) - CORRIGIDA
+# Template: Echo_app/senha_redefinir.html
+# ----------------------------------------------------------------------
+
+# CORREÇÃO: Removido o @login_required
+def redefinir_senha_final(request):
+    """
+    Permite ao usuário definir uma nova senha após a verificação bem-sucedida do código OTP.
+    """
+    
+    user_pk = request.session.get('reset_user_id')
+    otp_verified = request.session.get('otp_verified', False) # Verifica se o OTP foi checado
+    
+    if not user_pk or not otp_verified:
+        messages.error(request, "Acesso negado. Por favor, complete a verificação do código.")
+        return redirect('Echo_app:iniciar_redefinicao_otp')
+        
+    try:
+        user = User.objects.get(pk=user_pk)
+    except User.DoesNotExist:
+        messages.error(request, "Erro ao encontrar usuário. Reinicie o processo.")
+        return redirect('Echo_app:iniciar_redefinicao_otp')
+        
+    if request.method == 'POST':
+        # Usa o formulário nativo do Django (SetPasswordForm)
+        form = SetPasswordForm(user, request.POST)
+        
+        if form.is_valid():
+            form.save()
+            
+            # Limpa TODAS as chaves de sessão relacionadas
+            del request.session['reset_user_id']
+            if 'otp_code' in request.session:
+                del request.session['otp_code']
+            if 'otp_verified' in request.session:
+                del request.session['otp_verified']
+
+            # NOVO: Redireciona para a tela de conclusão (senha_concluida.html)
+            messages.success(request, "Sua senha foi redefinida com sucesso!")
+            return redirect('Echo_app:senha_concluida') 
+        
+        messages.error(request, "Erro ao redefinir a senha. Verifique se as senhas são fortes e coincidem.")
+        
+    else:
+        form = SetPasswordForm(user)
+        
+    contexto = {
+        'form': form,
+    }
+    # Template: senha_redefinir.html
+    return render(request, 'Echo_app/senha_redefinir.html', contexto)
+
+
+# ----------------------------------------------------------------------
+# 4. TELA DE SUCESSO FINAL (URL: /senha-concluida/) - NOVA
+# Template: Echo_app/senha_concluida.html
+# ----------------------------------------------------------------------
+
+def senha_concluida(request):
+    # Simplesmente renderiza a tela de sucesso
+    return render(request, 'Echo_app/senha_concluida.html')
+
+
+# ----------------------------------------------------------------------
+# 5. REENVIAR CÓDIGO - CORRIGIDA
+# ----------------------------------------------------------------------
+
+def reenviar_codigo(request):
+    """
+    Reenvia o código OTP usando o ID de usuário e OTP já armazenados na sessão.
+    """
+    user_pk = request.session.get('reset_user_id')
+    otp = request.session.get('otp_code')
+    
+    if not user_pk or not otp:
+        messages.error(request, "Sessão expirada. Por favor, reinicie a redefinição de senha.")
+        return redirect('Echo_app:iniciar_redefinicao_otp')
+
+    try:
+        user = User.objects.get(pk=user_pk)
+        
+        # Reenvia o e-mail com o mesmo código OTP, usando o template HTML
+        email_context = {
+            'otp': otp,
+            'user': user,
+            'email_titulo': 'Reenvio de Código de Recuperação de Senha'
+        }
+        html_message = render_to_string('Echo_app/otp_email_body.html', email_context)
+        plain_message = strip_tags(html_message)
+
+        try:
+            send_mail(
+                'Reenvio do Seu Código de Recuperação de Senha - Echo',
+                plain_message,
+                None,
+                [user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            messages.success(request, f"Um novo código foi reenviado para {user.email}.")
+        except Exception:
+            messages.error(request, "Erro ao tentar reenviar o e-mail. Verifique a configuração SMTP.")
+            
+    except User.DoesNotExist:
+        messages.error(request, "Erro: Usuário não encontrado na sessão.")
+    
+    # Redireciona de volta para a página de verificação de código
+    return redirect('Echo_app:verificar_codigo')
 
 
 # ===============================================
-# DASHBOARD E OUTROS
+# DASHBOARD E OUTROS (Não alterados)
 # ===============================================
 
 def dashboard(request):
@@ -459,7 +579,7 @@ def perfil_detalhe(request):
 
 
 # ===============================================
-# PERFIL EDITAR COM AVATARES
+# PERFIL EDITAR COM AVATARES (Não alterado)
 # ===============================================
 
 @login_required

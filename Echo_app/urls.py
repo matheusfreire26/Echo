@@ -33,8 +33,10 @@ urlpatterns = [
     path('notificacoes/ler/<int:notificacao_id>/', views.marcar_notificacao_lida, name='marcar_notificacao_lida'),
     path('notificacoes/ler-todas/', views.marcar_todas_lidas, name='marcar_todas_lidas'),
 
-    # --- RECUPERAÇÃO DE SENHA (Agora funcional!) ---
+    # 🔑 --- RECUPERAÇÃO DE SENHA (AGORA COMPLETO) --- 🔑
     path('esqueci-senha/', views.iniciar_redefinicao_otp, name='esqueci_senha'),
-    path('verificar-otp/', views.verificar_otp, name='verificar_otp'),
-    path('redefinir-senha/', views.redefinir_senha_nova, name='redefinir_senha_nova'),
+    path('verificar-otp/', views.verificar_codigo, name='verificar_codigo'),
+    path('redefinir-senha/', views.redefinir_senha_final, name='redefinir_senha_final'),
+    path('reenviar-codigo/', views.reenviar_codigo, name='reenviar_codigo'),
+    path('senha-concluida/', views.senha_concluida, name='senha_concluida'), # Adição da nova URL
 ]

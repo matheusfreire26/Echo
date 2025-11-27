@@ -7,13 +7,13 @@
 <body>
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;">
         
-        <h2>Olá {{ user.username|default:"Usuário" }},</h2>
+        <h2>Olá {{ user.first_name|default:user.username }},</h2> 
 
         <p>Você solicitou um código de verificação para redefinição de senha da sua conta Echo.</p>
 
         <div style="text-align: center; margin: 30px 0; padding: 15px; background-color: #f5f5f5; border-radius: 8px;">
             <p style="margin: 0; font-size: 16px; color: #555;">Seu Código de Verificação:</p>
-            <h1 style="font-size: 36px; color: var(--cor-principal, #007bff); margin: 5px 0;">{{ otp_code }}</h1>
+            <h1 style="font-size: 36px; color: var(--cor-principal, #007bff); margin: 5px 0;">{{ otp }}</h1>
         </div>
 
         <p>Este código é **válido por 5 minutos**. Por favor, insira-o na tela de verificação para prosseguir com a redefinição.</p>
