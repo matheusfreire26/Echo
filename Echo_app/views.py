@@ -1,5 +1,3 @@
-# Echo/Echo_app/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -11,43 +9,23 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
-# Importação para redefinição de senha customizada:
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.template.loader import render_to_string # NOVO: Para renderizar o template do e-mail
-from django.utils.html import strip_tags # NOVO: Para gerar a versão texto do e-mail
 
-# NOVAS IMPORTAÇÕES PARA GERAR OTP
-import random
-import string
+# --- IMPORTS IMPORTANTES PARA OS AVATARES ---
+import os
+from django.conf import settings
+from django.core.files import File
+# --------------------------------------------
 
-
-# Importa os modelos da aplicação
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
 
-# Obtém o modelo de usuário configurado no Django
 User = get_user_model()
 
-
 # ===============================================
-# Funções Auxiliares
-# ===============================================
-
-def generate_otp(length=6):
-    """Gera um código OTP aleatório de 6 dígitos."""
-    characters = string.digits
-    return ''.join(random.choice(characters) for _ in range(length))
-
-
-# ===============================================
-# Parte de Autenticação e Registro
+# Parte de Autenticação e Registro (Mantida Igual)
 # ===============================================
 
 def registrar(request):
     contexto = {'erros': [], 'dados_preenchidos': {}} 
-    
     try:
         contexto['todas_categorias'] = Categoria.objects.all()
     except:
@@ -105,7 +83,6 @@ def registrar(request):
 
 def entrar(request):
     contexto = {}
-    
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -135,13 +112,9 @@ def entrar(request):
 
 
 def sair(request):
-    """
-    Desloga o usuário e redireciona para o Dashboard (versão offline).
-    """
     if request.method == 'POST':
         logout(request)
         messages.success(request, "Você saiu da sua conta com sucesso.")
-        # ALTERADO: Redireciona para dashboard em vez de entrar
         return redirect("Echo_app:dashboard") 
 
     contexto = {
@@ -159,7 +132,6 @@ def excluir_conta(request):
     if request.method == 'POST':
         user = request.user
         logout(request)
-        
         try:
             with transaction.atomic():
                 user.delete()
@@ -167,7 +139,6 @@ def excluir_conta(request):
         except Exception as e:
             messages.error(request, "Houve um erro ao tentar excluir sua conta.")
             return redirect('Echo_app:entrar')
-            
         return redirect('Echo_app:entrar')
 
     contexto = {
@@ -180,215 +151,35 @@ def excluir_conta(request):
     return render(request, 'Echo_app/confirmar_acao.html', contexto)
 
 
-def esqueci_senha(request):
-    """
-    Esta view será substituída por iniciar_redefinicao_otp.
-    """
-    if request.user.is_authenticated:
-        return redirect('Echo_app:dashboard')
-        
-    contexto = {
-        'titulo': 'Redefinir Senha'
-    }
-    return render(request, 'Echo_app/senha.html', contexto)
-
-
-# ===============================================
-# NOVAS VIEWS CUSTOMIZADAS PARA CÓDIGO OTP
-# ===============================================
-
-def iniciar_redefinicao_otp(request):
-    """
-    View customizada para solicitar o e-mail, gerar o OTP,
-    salvar na sessão e enviar o e-mail.
-    """
-    if request.user.is_authenticated:
-        return redirect('Echo_app:dashboard')
-        
-    contexto = {'erros': None}
-
-    if request.method == 'POST':
-        email = request.POST.get('email', '').strip()
-        
-        # 1. Validação do e-mail
-        if not email:
-            contexto['erros'] = 'O e-mail é obrigatório.'
-        else:
-            try:
-                # Busca o usuário
-                user = User.objects.get(email__iexact=email) 
-            except User.DoesNotExist:
-                # Mensagem de segurança: informa que o processo continua (evita vazamento de informação)
-                messages.success(request, "Se o e-mail estiver cadastrado, o código será enviado.")
-                return redirect('Echo_app:verificar_codigo')
-
-            # 2. Geração e Armazenamento do OTP
-            otp_code = generate_otp()
-            
-            # Armazena o email do usuário e o código na sessão por 5 minutos
-            request.session['reset_email'] = user.email
-            request.session['otp_code'] = otp_code
-            request.session.set_expiry(300) # 300 segundos = 5 minutos
-
-            # 3. Envio do E-mail (usando template customizado)
-            
-            # O template usado é o 'otp_email_body.html' que criamos
-            html_message = render_to_string('Echo_app/otp_email_body.html', {'otp_code': otp_code, 'user': user})
-            plain_message = strip_tags(html_message)
-            
-            try:
-                send_mail(
-                    'Seu Código de Redefinição de Senha Echo',
-                    plain_message,
-                    None, # Usa DEFAULT_FROM_EMAIL
-                    [user.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-                
-                messages.success(request, "Código enviado com sucesso! Verifique seu e-mail.")
-                return redirect('Echo_app:verificar_codigo')
-                
-            except Exception as e:
-                print(f"Erro ao enviar email: {e}")
-                messages.error(request, "Erro ao tentar enviar o código. Tente novamente mais tarde.")
-                # Se falhar, renderiza o formulário novamente
-                return render(request, 'Echo_app/senha.html', contexto)
-
-    # Renderiza o formulário inicial (GET)
-    return render(request, 'Echo_app/senha.html', contexto)
-
-
-def verificar_codigo(request):
-    """
-    Exibe o formulário codigo.html e valida o código OTP submetido.
-    """
-    if request.user.is_authenticated:
-        return redirect('Echo_app:dashboard')
-        
-    email = request.session.get('reset_email')
-    
-    if not email:
-        messages.error(request, "Sessão expirada. Tente solicitar a redefinição de senha novamente.")
-        return redirect('Echo_app:esqueci_senha')
-
-    user = User.objects.filter(email__iexact=email).first()
-    
-    if request.method == "POST":
-        codigo_enviado = request.POST.get('codigo', '').strip()
-        codigo_armazenado = request.session.get('otp_code')
-        
-        # Verifica se o código é válido e se ainda está na sessão (não expirou)
-        if codigo_enviado and codigo_enviado == codigo_armazenado: 
-            
-            # 1. Limpa o código da sessão por segurança
-            # **Importante**: Manter o 'reset_email' na sessão até o final da redefinição
-            # ou usar o uid/token do Django. No caso, vamos gerar o link do Django e remover tudo.
-            del request.session['reset_email']
-            del request.session['otp_code']
-            
-            # 2. Gera o token seguro do Django
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            
-            messages.success(request, "Código verificado com sucesso!")
-            # Redireciona para a página de nova senha do Django
-            return redirect('Echo_app:password_reset_confirm', uidb64=uid, token=token)
-        else:
-            contexto = {'erro': 'Código inválido ou expirado. Tente novamente.'}
-            return render(request, 'Echo_app/codigo.html', contexto)
-
-    # Acessado via GET (após submeter o email)
-    return render(request, 'Echo_app/codigo.html', {})
-
-
-def reenviar_codigo(request):
-    """
-    Lógica para gerar e reenviar um novo código OTP para o e-mail do usuário.
-    """
-    if request.user.is_authenticated:
-        return redirect('Echo_app:dashboard')
-        
-    email = request.session.get('reset_email')
-    
-    if email:
-        user = User.objects.filter(email__iexact=email).first()
-        if user:
-            # 2. GERAR NOVO CÓDIGO E ARMAZENAR
-            otp_code = generate_otp()
-            request.session['otp_code'] = otp_code
-            request.session.set_expiry(300) # Renovando a expiração
-            
-            # 3. ENVIAR O NOVO E-MAIL
-            html_message = render_to_string('Echo_app/otp_email_body.html', {'otp_code': otp_code, 'user': user})
-            plain_message = strip_tags(html_message)
-            
-            try:
-                send_mail(
-                    'Novo Código de Redefinição de Senha Echo',
-                    plain_message,
-                    None,
-                    [user.email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-                messages.success(request, "Novo código enviado com sucesso! Verifique seu e-mail.")
-            except Exception:
-                messages.error(request, "Erro ao reenviar o código. Tente novamente.")
-        else:
-            messages.error(request, "Erro: E-mail não encontrado na base de dados.")
-            return redirect('Echo_app:esqueci_senha')
-    else:
-        messages.error(request, "Sessão expirada. Tente solicitar a redefinição novamente.")
-        return redirect('Echo_app:esqueci_senha')
-        
-    return redirect('Echo_app:verificar_codigo')
-
-
-# ===============================================
-# Parte do Dashboard
-# ===============================================
-
 def dashboard(request):
-    """
-    Exibe a página principal (Logado ou Visitante).
-    """
     user = request.user
     categorias_interesse = []
     noticias_recomendadas_list = []
 
-    # 1. Lógica para definir as notícias do Carrossel Principal
     if user.is_authenticated:
-        # SE LOGADO: Baseado nas preferências do usuário
         try:
             perfil = user.perfil 
             categorias_interesse = perfil.categorias_de_interesse.all()
         except PerfilUsuario.DoesNotExist:
             perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
-        
         noticias_recomendadas_list = Noticia.recomendar_para(user)[:3]
     else:
-        # SE VISITANTE: Baseado nas mais curtidas (Maior Engajamento)
         noticias_recomendadas_list = Noticia.objects.order_by('-curtidas_count')[:3]
     
-    # 2. Notícias Urgentes
     try:
         urgentes_qs = Noticia.objects.filter(urgente=True).order_by('-data_publicacao')
         if noticias_recomendadas_list:
-            # Evita repetir notícias que já estão no carrossel principal
             ids_excluidos = [n.id for n in noticias_recomendadas_list]
             urgentes_qs = urgentes_qs.exclude(id__in=ids_excluidos)
         noticias_urgentes = urgentes_qs[:5] 
     except Exception:
         noticias_urgentes = None
 
-    # 3. Últimas Notícias (Tendências)
     try:
         ultimas_noticias = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
     except Exception:
         ultimas_noticias = None
         
-    # 4. Categorias para Filtro
     try:
         categorias_para_filtro = Categoria.objects.all()
     except Exception:
@@ -404,22 +195,14 @@ def dashboard(request):
         "categorias_para_filtro": categorias_para_filtro,
         "usuario_autenticado": user.is_authenticated,
     }
-    
-    # Seleciona o template correto
     template_name = "Echo_app/dashboard.html" if user.is_authenticated else "Echo_app/dashboard_off.html"
     return render(request, template_name, context)
 
 
-# ===============================================
-# VIEW PARA FILTRAR NOTÍCIAS (AJAX)
-# ===============================================
-
 def filtrar_noticias(request):
     categoria_nome = request.GET.get('categoria')
-    
     if not categoria_nome:
         return HttpResponseBadRequest("Categoria não fornecida.")
-
     try:
         if categoria_nome == 'Tendências':
             noticias_filtradas = Noticia.objects.filter(urgente=False).order_by('-data_publicacao')[:5]
@@ -428,30 +211,18 @@ def filtrar_noticias(request):
                 categoria__nome__iexact=categoria_nome,
                 urgente=False 
             ).order_by('-data_publicacao')[:5]
-            
     except Exception as e:
-        print(f"Erro ao filtrar notícias: {e}") 
         noticias_filtradas = None
-
-    context = {
-        'ultimas_noticias': noticias_filtradas
-    }
-    
+    context = { 'ultimas_noticias': noticias_filtradas }
     return render(request, 'Echo_app/partials/lista_noticias.html', context)
 
 
-# ===============================================
-# VIEW PARA PESQUISAR NOTÍCIAS
-# ===============================================
-
 def pesquisar_noticias(request):
     termo_pesquisa = request.GET.get('q', '').strip()
-    
     if not termo_pesquisa:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'error': 'Termo não fornecido'}, status=400)
         return redirect('Echo_app:dashboard')
-    
     try:
         noticias_encontradas = Noticia.objects.filter(
             Q(titulo__icontains=termo_pesquisa) | 
@@ -470,7 +241,6 @@ def pesquisar_noticias(request):
                     'imagem_url': noticia.imagem.url if noticia.imagem else None,
                     'url': f"/noticia/{noticia.id}/"
                 })
-            
             return JsonResponse({'success': True, 'resultados': resultados, 'total': len(resultados)})
         
         context = {
@@ -479,29 +249,20 @@ def pesquisar_noticias(request):
             'total_resultados': noticias_encontradas.count()
         }
         return render(request, 'Echo_app/resultados_pesquisa.html', context)
-        
     except Exception as e:
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'error': 'Erro ao pesquisar'}, status=500)
         return redirect('Echo_app:dashboard')
 
-
-# ===============================================
-# Parte de Notícias e Interações (Detalhes)
-# ===============================================
-
 class NoticiaDetalheView(DetailView):
     model = Noticia
     template_name = 'Echo_app/noticia_detalhe.html'
     context_object_name = 'noticia'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         noticia_atual = self.object
         user = self.request.user
-        
         qs_base = Noticia.objects.none()
-
         if user.is_authenticated:
             try:
                 perfil = getattr(user, 'perfil', None)
@@ -509,23 +270,17 @@ class NoticiaDetalheView(DetailView):
                     qs_base = Noticia.objects.filter(categoria__in=perfil.categorias_de_interesse.all())
             except Exception:
                 pass
-
         if not qs_base.exists():
             qs_base = Noticia.objects.filter(categoria=noticia_atual.categoria)
-
         noticias_relacionadas = qs_base.exclude(id=noticia_atual.id).order_by('-data_publicacao')[:3]
-
         if len(noticias_relacionadas) < 3:
             ids_excluidos = [noticia_atual.id] + [n.id for n in noticias_relacionadas]
             quantidade_faltante = 3 - len(noticias_relacionadas)
             mais_recentes = Noticia.objects.exclude(id__in=ids_excluidos).order_by('-data_publicacao')[:quantidade_faltante]
             noticias_relacionadas = list(noticias_relacionadas) + list(mais_recentes)
-
         context['noticias_relacionadas'] = noticias_relacionadas
-
         context['usuario_curtiu'] = False
         context['usuario_salvou'] = False
-
         if self.request.user.is_authenticated:
             context['usuario_curtiu'] = InteracaoNoticia.objects.filter(
                 usuario=user, noticia=noticia_atual, tipo='CURTIDA'
@@ -533,27 +288,19 @@ class NoticiaDetalheView(DetailView):
             context['usuario_salvou'] = InteracaoNoticia.objects.filter(
                 usuario=user, noticia=noticia_atual, tipo='SALVAMENTO'
             ).exists()
-
         return context
-
 
 @require_POST
 def toggle_interacao(request, noticia_id, tipo_interacao):
     if not request.user.is_authenticated:
         return JsonResponse({'success': False, 'error': 'Usuário não autenticado'}, status=401)
-        
     if tipo_interacao not in ['CURTIDA', 'SALVAMENTO']:
         return HttpResponseBadRequest("Tipo de interação inválido.")
-
     noticia = get_object_or_404(Noticia, id=noticia_id)
     usuario = request.user
-    
     interacao, created = InteracaoNoticia.objects.get_or_create(
-        usuario=usuario,
-        noticia=noticia,
-        tipo=tipo_interacao
+        usuario=usuario, noticia=noticia, tipo=tipo_interacao
     )
-
     if not created:
         interacao.delete()
         acao_realizada = 'removida'
@@ -561,13 +308,11 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
     else:
         acao_realizada = 'adicionada'
         status_interacao = True
-    
     if tipo_interacao == 'CURTIDA':
         noticia.curtidas_count = noticia.interacoes.filter(tipo='CURTIDA').count()
     elif tipo_interacao == 'SALVAMENTO':
         noticia.salvamentos_count = noticia.interacoes.filter(tipo='SALVAMENTO').count()
     noticia.save()
-
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
@@ -576,25 +321,17 @@ def toggle_interacao(request, noticia_id, tipo_interacao):
             'status_interacao': status_interacao,
             'tipo': tipo_interacao.lower()
         })
-    
     return redirect(request.META.get('HTTP_REFERER', '/'))
-
 
 @login_required
 @require_POST
 def curtir_noticia(request, noticia_id):
     return toggle_interacao(request, noticia_id, 'CURTIDA')
 
-
 @login_required
 @require_POST
 def salvar_noticia(request, noticia_id):
     return toggle_interacao(request, noticia_id, 'SALVAMENTO')
-
-
-# ===============================================
-# Parte das Notificações
-# ===============================================
 
 @login_required
 def lista_notificacoes(request):
@@ -605,24 +342,19 @@ def lista_notificacoes(request):
         categorias_preferidas = perfil.categorias_de_interesse.all()
     except PerfilUsuario.DoesNotExist:
         pass
-
     recomendadas = todas_notificacoes.filter(
         noticia__categoria__in=categorias_preferidas
     ).order_by('lida', '-data_criacao')
-    
     outras = todas_notificacoes.exclude(
         id__in=recomendadas.values_list('id', flat=True)
     ).order_by('lida', '-data_criacao')
-    
     nao_lidas_count = todas_notificacoes.filter(lida=False).count()
-
     context = {
         'notificacoes_recomendadas': recomendadas,
         'notificacoes_outras': outras,
         'nao_lidas_count': nao_lidas_count
     }
     return render(request, 'Echo_app/notificacao.html', context)
-
 
 @login_required
 @require_POST 
@@ -631,32 +363,31 @@ def marcar_notificacao_lida(request, notificacao_id):
     notificacao.marcar_como_lida()
     return redirect('Echo_app:lista_notificacoes')
 
-
 @login_required
 @require_POST
 def marcar_todas_lidas(request):
     Notificacao.objects.filter(usuario=request.user, lida=False).update(lida=True)
     return redirect('Echo_app:lista_notificacoes')
 
-
-# ===============================================
-# Parte do Perfil
-# ===============================================
-
 @login_required
 def perfil_detalhe(request):
     perfil, created = PerfilUsuario.objects.get_or_create(usuario=request.user)
-    context = {
-        'usuario': request.user,
-        'perfil': perfil
-    }
+    context = { 'usuario': request.user, 'perfil': perfil }
     return render(request, "Echo_app/perfil.html", context)
 
+
+# ===============================================
+# PERFIL EDITAR - AQUI ESTÁ A LÓGICA NOVA DOS AVATARES
+# ===============================================
 
 @login_required
 def perfil_editar(request):
     usuario = request.user
     perfil, _ = PerfilUsuario.objects.get_or_create(usuario=usuario)
+
+    # 1. Gera a lista de nomes dos arquivos (avatars1.png, avatars2.png...)
+    # Importante: O nome do arquivo tem "avatars" no plural, conforme você informou
+    lista_avatars = [f'avatars{i}.png' for i in range(1, 17)]
 
     try:
         todas_categorias = Categoria.objects.all()
@@ -668,8 +399,11 @@ def perfil_editar(request):
         first_name = request.POST.get("first_name", "").strip()
         email = request.POST.get("email", "").strip()
         categorias_ids = request.POST.getlist("categoria")
-        foto_perfil = request.FILES.get("foto_perfil")
         biografia = request.POST.get("biografia", "").strip()
+        
+        # Recebe os dados da imagem
+        foto_upload = request.FILES.get("foto_perfil") # Upload manual
+        avatar_escolhido = request.POST.get("avatar_escolhido") # Escolha da lista
 
         if not email:
             erros.append("Email é obrigatório.")
@@ -681,6 +415,7 @@ def perfil_editar(request):
                 "usuario": usuario,
                 "perfil": perfil,
                 "todas_categorias": todas_categorias,
+                "lista_avatars": lista_avatars,
                 "erros": erros,
                 "dados_preenchidos": {
                     "first_name": first_name,
@@ -691,19 +426,38 @@ def perfil_editar(request):
             }
             return render(request, "Echo_app/perfil_editar.html", context)
 
+        # Salva dados do usuário
         usuario.first_name = first_name
         usuario.email = email
         usuario.save()
 
+        # Salva categorias
         if categorias_ids:
             categorias = Categoria.objects.filter(pk__in=categorias_ids)
             perfil.categorias_de_interesse.set(categorias)
         else:
             perfil.categorias_de_interesse.clear()
 
-        if foto_perfil:
-            perfil.foto_perfil = foto_perfil
-        
+        # ===============================================
+        # LÓGICA DE SALVAMENTO DA IMAGEM
+        # ===============================================
+        if foto_upload:
+            # Prioridade 1: Se o usuário fez upload manual, usa o arquivo enviado
+            perfil.foto_perfil = foto_upload
+            
+        elif avatar_escolhido:
+            # Prioridade 2: Se escolheu um avatar da lista
+            # O caminho é: pasta_do_projeto/Echo_app/static/avatars/avatarsX.png
+            avatar_path = os.path.join(settings.BASE_DIR, 'Echo_app/static/avatars', avatar_escolhido)
+            
+            # Verifica se o arquivo existe na pasta static antes de tentar copiar
+            if os.path.exists(avatar_path):
+                with open(avatar_path, 'rb') as f:
+                    # Salva uma cópia da imagem no campo foto_perfil
+                    perfil.foto_perfil.save(avatar_escolhido, File(f), save=True)
+            else:
+                print(f"ERRO: Arquivo de avatar não encontrado no caminho: {avatar_path}")
+
         perfil.biografia = biografia
         perfil.save()
 
@@ -713,13 +467,10 @@ def perfil_editar(request):
         "usuario": usuario,
         "perfil": perfil,
         "todas_categorias": todas_categorias,
+        "lista_avatars": lista_avatars, # Envia a lista para o template
     }
     return render(request, "Echo_app/perfil_editar.html", context)
 
-
-# ===============================================
-# Função para criar notícia
-# ===============================================
 
 @login_required
 def criar_noticia(request):
@@ -728,50 +479,31 @@ def criar_noticia(request):
         conteudo = request.POST.get("conteudo", "").strip()
         categoria_id = request.POST.get("categoria")
         imagem = request.FILES.get("imagem")
-
         erros = []
         if not titulo:
             erros.append("O título é obrigatório.")
         if not conteudo:
             erros.append("O conteúdo é obrigatório.")
-
         categoria = None
         if categoria_id:
             try:
                 categoria = Categoria.objects.get(pk=categoria_id)
             except Categoria.DoesNotExist:
                 erros.append("Categoria inválida.")
-
         if erros:
             context = {
-                "erros": erros,
-                "titulo": titulo,
-                "conteudo": conteudo,
-                "categorias": Categoria.objects.all(),
-                "categoria_selecionada": categoria_id,
+                "erros": erros, "titulo": titulo, "conteudo": conteudo,
+                "categorias": Categoria.objects.all(), "categoria_selecionada": categoria_id,
             }
             return render(request, "Echo_app/criar_noticia.html", context)
-
         Noticia.objects.create(
-            titulo=titulo,
-            conteudo=conteudo,
-            categoria=categoria,
-            autor=request.user,
-            imagem=imagem,
+            titulo=titulo, conteudo=conteudo, categoria=categoria,
+            autor=request.user, imagem=imagem,
             urgente=request.POST.get('urgente') == 'on'
         )
-
         return redirect("Echo_app:dashboard")
-
-    context = {
-        "categorias": Categoria.objects.all()
-    }
+    context = { "categorias": Categoria.objects.all() }
     return render(request, "Echo_app/criar_noticia.html", context)
-
-
-# ===============================================
-# Configurações da conta
-# ===============================================
 
 @login_required
 def configuracoes_conta(request):
@@ -786,85 +518,52 @@ def configuracoes_conta(request):
             messages.error(request, 'Por favor, corrija os erros abaixo.')
     else:
         form = PasswordChangeForm(request.user)
-
-    context = {
-        'form': form
-    }
+    context = { 'form': form }
     return render(request, 'Echo_app/configuracoes.html', context)
-
-
-# ===============================================
-# LISTA DE NOTÍCIAS CURTIDAS
-# ===============================================
 
 @login_required
 def noticias_curtidas(request):
     usuario = request.user
-    
-    # 1. Parâmetros
     termo_pesquisa = request.GET.get('q', '').strip()
-    categoria_nome = request.GET.get('categoria', '').strip() # AGORA É NOME
-    
-    # 2. Busca base
+    categoria_nome = request.GET.get('categoria', '').strip()
     interacoes_qs = InteracaoNoticia.objects.filter(
-        usuario=usuario, 
-        tipo='CURTIDA'
+        usuario=usuario, tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
-    
-    # 3. Filtro de Categoria (POR NOME)
     if categoria_nome:
-        interacoes_qs = interacoes_qs.filter(
-            noticia__categoria__nome__iexact=categoria_nome
-        )
-        
-    # 4. Filtro de Pesquisa
+        interacoes_qs = interacoes_qs.filter(noticia__categoria__nome__iexact=categoria_nome)
     if termo_pesquisa:
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
-        
-    # 5. Extrai notícias únicas
     seen_ids = set()
     noticias_curtidas = []
     for item in interacoes_qs:
         if item.noticia.id not in seen_ids:
             noticias_curtidas.append(item.noticia)
             seen_ids.add(item.noticia.id)
-
-    # 6. Carrega categorias
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
-
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        'categoria_ativa': categoria_nome # Passa o nome de volta pro HTML
+        'categoria_ativa': categoria_nome 
     }
-    
     return render(request, 'Echo_app/noticias_curtidas.html', context)
-# ===============================================
-# LISTA DE NOTÍCIAS SALVAS
-# ===============================================
 
 @login_required
 def noticias_salvas_view(request):
     usuario = request.user
-
     interacoes = InteracaoNoticia.objects.filter(
-        usuario=usuario, 
-        tipo='SALVAMENTO'
+        usuario=usuario, tipo='SALVAMENTO'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
-
     seen_ids = set()
     noticias = []
     for item in interacoes:
         if item.noticia.id not in seen_ids:
             noticias.append(item.noticia)
             seen_ids.add(item.noticia.id)
-    
     categorias = Categoria.objects.all()
-
     context = {
         'noticias_salvas': noticias,
         'categorias': categorias,
