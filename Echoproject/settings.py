@@ -17,7 +17,7 @@ if NOT_PROD:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = True
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = '<django-insecure-t1g921njm7@gxvv!whqs4s1a*x017-4sf+s_wh2fh!8$d!e6>'
+    SECRET_KEY = '<django-insecure-t1g921njm7@gxvv!whqs4s4a*x017-4sf+s_wh2fh!8$d!e6>'
     ALLOWED_HOSTS = []
     DATABASES = {
         'default': {
@@ -115,6 +115,36 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # --- LOGIN CONFIG ---
 LOGIN_URL = 'Echo_app:entrar'  # redireciona para a página de login se usuário não autenticado
+
+# ==============================================================
+# 📧 EMAIL SETTINGS (NECESSÁRIO PARA REDEFINIÇÃO DE SENHA) 📧
+# ==============================================================
+
+# LÊ TODAS AS VARIÁVEIS DE AMBIENTE RELACIONADAS AO E-MAIL PRIMEIRO
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ['true', 't', '1']
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+if NOT_PROD:
+    # 🌟 ALTERAÇÃO APLICADA: Usa SMTP para testar o envio real em desenvolvimento.
+    # Certifique-se de que suas variáveis no .env estão corretas (Host, User, Password).
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' 
+    
+    # Em desenvolvimento, usamos um valor padrão que não causa NameError
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'test@example.com')
+else:
+    # Configurações reais para envio em produção
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+    # EM PRODUÇÃO, USAMOS EMAIL_HOST_USER como fallback (aqui ELE ESTÁ DEFINIDO)
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+
+# Configuração para Redirecionamento de Senha (Password Reset)
+# Após o usuário concluir a redefinição de senha, ele será redirecionado para a tela de login.
+PASSWORD_RESET_COMPLETE_REDIRECT_URL = 'Echo_app:entrar'
+
 
 # --- INTERNACIONALIZAÇÃO (caso ainda não tenha) ---
 LANGUAGE_CODE = 'pt-br'

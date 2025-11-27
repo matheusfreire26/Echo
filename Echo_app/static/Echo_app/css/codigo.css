@@ -1,0 +1,68 @@
+/* =======================================================
+   Echo_app/css/codigo.css
+   Estilos específicos para a página de Verificação de Código.
+   Assume que base.css e login.css já foram carregados.
+   ======================================================= */
+
+/* Estilos de título específicos para esta página */
+.form-wrapper h2 {
+    /* Ajuste o espaçamento superior e inferior para títulos grandes */
+    margin-top: 15px;
+    margin-bottom: 25px;
+    font-size: 1.5em; /* Garante visibilidade */
+    color: var(--cor-texto-principal, #333);
+    text-align: center;
+}
+
+/* Estilo para o campo de código (geralmente maior e centralizado) */
+.form-group input#id_codigo {
+    text-align: center;
+    font-size: 1.5em;
+    letter-spacing: 0.1em; /* Ajuda a separar os dígitos */
+    padding: 15px 10px;
+    /* Adapta a largura para ficar mais compacta, mas vou usar a largura padrão
+       para manter a consistência, ou você pode definir uma largura máxima: */
+    /* max-width: 200px; */ 
+    /* margin: 0 auto; /* Centraliza o input se for menor */
+}
+
+/* Estilo para o texto explicativo sobre o reenvio/spam */
+.resend-text {
+    font-size: 0.9em;
+    color: var(--cor-texto-secundario, #666);
+    margin: 20px 0;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Estilo para o link "Reenviar código" */
+.extra-links a:last-child {
+    /* O link de reenvio deve se destacar, mas de forma diferente do botão principal */
+    color: var(--cor-link, #007bff); /* Azul padrão de link */
+    text-decoration: none;
+    font-weight: bold;
+    display: block; /* Garante que o link ocupe toda a largura para fácil clique */
+    margin-top: 15px; /* Separa do botão principal */
+    font-size: 1em;
+}
+
+.extra-links a:last-child:hover {
+    text-decoration: underline;
+    color: var(--cor-link-hover, #0056b3);
+}
+
+/* Ajustes no botão de submissão (se for diferente do login.css) */
+/* Seus botões já devem ser estilizados por base.css ou login.css, mas garantimos que o principal se destaque */
+.form-wrapper .btn-submit {
+    background-color: var(--cor-primaria, #d9534f); /* Vermelho/laranja */
+    color: white;
+    font-weight: bold;
+    padding: 10px 0;
+    margin-bottom: 10px; /* Espaço para o link de reenviar */
+}
+
+/* Garante que o container de links fique centralizado */
+.extra-links {
+    text-align: center;
+    padding-top: 5px; 
+}

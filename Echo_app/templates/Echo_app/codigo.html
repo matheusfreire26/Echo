@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Código - Echo</title>
+    
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/base.css' %}?v={% now 'U' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/codigo.css' %}?v={% now 'U' %}"> {# Será criado na próxima etapa #}
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--cor-fundo, #f0f2f5);
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-wrapper">
+        
+        <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo" class="logo-image">
+
+        <h2>Enviamos o código para seu e-mail!</h2>
+        
+        <form method="post" action="{% url 'Echo_app:verificar_codigo' %}"> {# Ação e nome da URL a ser definida #}
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_codigo">Insira o código</label>
+                <input type="text" name="codigo" id="id_codigo" class="form-input" required placeholder="Ex: 123456">
+            </div>
+
+            {# Exibir erros aqui, se houver #}
+            {% if form.errors %}
+                <div class="form-error">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            {{ error }}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="btn-submit">Confirmar</button>
+        </form>
+
+        <p class="resend-text">
+            Se não recebeu o código, clique em "reenviar código" para continuar o processo de recuperação de senha. Lembre-se de conferir a caixa de spam.
+        </p>
+
+        <div class="extra-links">
+            <a href="{% url 'Echo_app:reenviar_codigo' %}">Reenviar código</a> {# URL a ser definida #}
+        </div>
+        
+    </div>
+
+</body>
+</html>

@@ -1,8 +1,9 @@
 # Echo_app/urls.py (O ARQUIVO DENTRO DO SEU APP)
 
-from django.urls import path
-from . import views  # Importa o views.py
-from .views import NoticiaDetalheView # Importa a classe específica
+from django.urls import path, reverse_lazy
+from django.contrib.auth import views as auth_views 
+from . import views 
+from .views import NoticiaDetalheView 
 
 app_name = "Echo_app"
 
@@ -15,11 +16,35 @@ urlpatterns = [
     path("perfil/", views.perfil_detalhe, name="perfil"),
     path("perfil/editar/", views.perfil_editar, name="perfil_editar"),
     path("perfil/configuracoes/", views.configuracoes_conta, name="configuracoes_conta"),
-    path("esqueci-senha/", views.esqueci_senha, name="esqueci_senha"),
+    
+    # 🌟 FLUXO DE REDEFINIÇÃO DE SENHA (Customizado para Código OTP) 🌟
+    
+    # 1. Solicitação de E-mail (USA A VIEW CUSTOMIZADA que envia o código OTP)
+    path('esqueci-senha/', views.iniciar_redefinicao_otp, name='esqueci_senha'), # <--- ALTERADO!
+
+    # 2. Rota para Verificação do Código OTP (CUSTOMIZADA - Renderiza codigo.html)
+    path('verificar-codigo/', views.verificar_codigo, name='verificar_codigo'),
+
+    # 3. Rota para Reenviar o Código (CUSTOMIZADA)
+    path('reenviar-codigo/', views.reenviar_codigo, name='reenviar_codigo'),
+
+    # 4. Rota de Confirmação (Link no E-mail) - Recebe UID e Token
+    path('reset/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name='Echo_app/senha_redefinir.html', 
+             # Redireciona para a conclusão, onde o popup será exibido.
+             success_url=reverse_lazy('Echo_app:password_reset_complete')
+         ), 
+         name='password_reset_confirm'),
+
+    # 5. Conclusão da Redefinição (Template com popup e redirecionamento JS)
+    path('reset/concluido/', 
+         auth_views.PasswordResetCompleteView.as_view(
+             template_name='Echo_app/senha_concluida.html' 
+         ), 
+         name='password_reset_complete'),
     
     # ✅ Página Principal
-    # Como o arquivo principal já enviou a rota vazia ("") para cá,
-    # esta linha faz o 'match' final e carrega o dashboard.
     path("", views.dashboard, name="dashboard"),
 
     # Notícias (Criação e Interação)

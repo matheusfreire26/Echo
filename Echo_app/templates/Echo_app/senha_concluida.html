@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucesso - Echo</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/base.css' %}">
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--cor-fundo, #f0f2f5);
+            padding: 20px;
+        }
+
+        /* ------------------ ESTILOS DO POPUP (IDÊNTICOS ao que estava no outro arquivo) ------------------ */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex; /* O popup já aparece no carregamento */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .popup-content {
+            background-color: var(--cor-fundo-claro, #fff);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 350px;
+            transform: scale(1);
+        }
+
+        .popup-logo {
+            width: 70px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .popup-message {
+            font-size: 1.1em;
+            color: var(--cor-texto-principal, #333);
+            font-weight: 600;
+        }
+        /* ------------------ FIM DOS ESTILOS DO POPUP ------------------ */
+    </style>
+</head>
+<body>
+
+    <div id="successPopupOverlay" class="popup-overlay">
+        <div class="popup-content">
+            <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo JC" class="popup-logo">
+            <p class="popup-message">Senha alterada com sucesso, retornando ao login...</p>
+        </div>
+    </div>
+    <script>
+        // JavaScript para redirecionar após 3 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginUrl = "{% url 'Echo_app:entrar' %}";
+            const redirectDelay = 3000; // 3 segundos
+
+            setTimeout(() => {
+                window.location.href = loginUrl;
+            }, redirectDelay);
+        });
+    </script>
+</body>
+</html>

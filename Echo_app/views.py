@@ -11,12 +11,34 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
+# Importação para redefinição de senha customizada:
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string # NOVO: Para renderizar o template do e-mail
+from django.utils.html import strip_tags # NOVO: Para gerar a versão texto do e-mail
+
+# NOVAS IMPORTAÇÕES PARA GERAR OTP
+import random
+import string
+
 
 # Importa os modelos da aplicação
 from .models import (Noticia, InteracaoNoticia, Notificacao, PerfilUsuario, Categoria)
 
 # Obtém o modelo de usuário configurado no Django
 User = get_user_model()
+
+
+# ===============================================
+# Funções Auxiliares
+# ===============================================
+
+def generate_otp(length=6):
+    """Gera um código OTP aleatório de 6 dígitos."""
+    characters = string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
 
 
 # ===============================================
@@ -160,10 +182,8 @@ def excluir_conta(request):
 
 def esqueci_senha(request):
     """
-    Exibe o formulário inicial para solicitar a redefinição de senha,
-    geralmente pedindo o e-mail ou nome de usuário.
+    Esta view será substituída por iniciar_redefinicao_otp.
     """
-    # Se o usuário estiver autenticado, redireciona para o dashboard
     if request.user.is_authenticated:
         return redirect('Echo_app:dashboard')
         
@@ -171,6 +191,158 @@ def esqueci_senha(request):
         'titulo': 'Redefinir Senha'
     }
     return render(request, 'Echo_app/senha.html', contexto)
+
+
+# ===============================================
+# NOVAS VIEWS CUSTOMIZADAS PARA CÓDIGO OTP
+# ===============================================
+
+def iniciar_redefinicao_otp(request):
+    """
+    View customizada para solicitar o e-mail, gerar o OTP,
+    salvar na sessão e enviar o e-mail.
+    """
+    if request.user.is_authenticated:
+        return redirect('Echo_app:dashboard')
+        
+    contexto = {'erros': None}
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        
+        # 1. Validação do e-mail
+        if not email:
+            contexto['erros'] = 'O e-mail é obrigatório.'
+        else:
+            try:
+                # Busca o usuário
+                user = User.objects.get(email__iexact=email) 
+            except User.DoesNotExist:
+                # Mensagem de segurança: informa que o processo continua (evita vazamento de informação)
+                messages.success(request, "Se o e-mail estiver cadastrado, o código será enviado.")
+                return redirect('Echo_app:verificar_codigo')
+
+            # 2. Geração e Armazenamento do OTP
+            otp_code = generate_otp()
+            
+            # Armazena o email do usuário e o código na sessão por 5 minutos
+            request.session['reset_email'] = user.email
+            request.session['otp_code'] = otp_code
+            request.session.set_expiry(300) # 300 segundos = 5 minutos
+
+            # 3. Envio do E-mail (usando template customizado)
+            
+            # O template usado é o 'otp_email_body.html' que criamos
+            html_message = render_to_string('Echo_app/otp_email_body.html', {'otp_code': otp_code, 'user': user})
+            plain_message = strip_tags(html_message)
+            
+            try:
+                send_mail(
+                    'Seu Código de Redefinição de Senha Echo',
+                    plain_message,
+                    None, # Usa DEFAULT_FROM_EMAIL
+                    [user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                
+                messages.success(request, "Código enviado com sucesso! Verifique seu e-mail.")
+                return redirect('Echo_app:verificar_codigo')
+                
+            except Exception as e:
+                print(f"Erro ao enviar email: {e}")
+                messages.error(request, "Erro ao tentar enviar o código. Tente novamente mais tarde.")
+                # Se falhar, renderiza o formulário novamente
+                return render(request, 'Echo_app/senha.html', contexto)
+
+    # Renderiza o formulário inicial (GET)
+    return render(request, 'Echo_app/senha.html', contexto)
+
+
+def verificar_codigo(request):
+    """
+    Exibe o formulário codigo.html e valida o código OTP submetido.
+    """
+    if request.user.is_authenticated:
+        return redirect('Echo_app:dashboard')
+        
+    email = request.session.get('reset_email')
+    
+    if not email:
+        messages.error(request, "Sessão expirada. Tente solicitar a redefinição de senha novamente.")
+        return redirect('Echo_app:esqueci_senha')
+
+    user = User.objects.filter(email__iexact=email).first()
+    
+    if request.method == "POST":
+        codigo_enviado = request.POST.get('codigo', '').strip()
+        codigo_armazenado = request.session.get('otp_code')
+        
+        # Verifica se o código é válido e se ainda está na sessão (não expirou)
+        if codigo_enviado and codigo_enviado == codigo_armazenado: 
+            
+            # 1. Limpa o código da sessão por segurança
+            # **Importante**: Manter o 'reset_email' na sessão até o final da redefinição
+            # ou usar o uid/token do Django. No caso, vamos gerar o link do Django e remover tudo.
+            del request.session['reset_email']
+            del request.session['otp_code']
+            
+            # 2. Gera o token seguro do Django
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            
+            messages.success(request, "Código verificado com sucesso!")
+            # Redireciona para a página de nova senha do Django
+            return redirect('Echo_app:password_reset_confirm', uidb64=uid, token=token)
+        else:
+            contexto = {'erro': 'Código inválido ou expirado. Tente novamente.'}
+            return render(request, 'Echo_app/codigo.html', contexto)
+
+    # Acessado via GET (após submeter o email)
+    return render(request, 'Echo_app/codigo.html', {})
+
+
+def reenviar_codigo(request):
+    """
+    Lógica para gerar e reenviar um novo código OTP para o e-mail do usuário.
+    """
+    if request.user.is_authenticated:
+        return redirect('Echo_app:dashboard')
+        
+    email = request.session.get('reset_email')
+    
+    if email:
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            # 2. GERAR NOVO CÓDIGO E ARMAZENAR
+            otp_code = generate_otp()
+            request.session['otp_code'] = otp_code
+            request.session.set_expiry(300) # Renovando a expiração
+            
+            # 3. ENVIAR O NOVO E-MAIL
+            html_message = render_to_string('Echo_app/otp_email_body.html', {'otp_code': otp_code, 'user': user})
+            plain_message = strip_tags(html_message)
+            
+            try:
+                send_mail(
+                    'Novo Código de Redefinição de Senha Echo',
+                    plain_message,
+                    None,
+                    [user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                messages.success(request, "Novo código enviado com sucesso! Verifique seu e-mail.")
+            except Exception:
+                messages.error(request, "Erro ao reenviar o código. Tente novamente.")
+        else:
+            messages.error(request, "Erro: E-mail não encontrado na base de dados.")
+            return redirect('Echo_app:esqueci_senha')
+    else:
+        messages.error(request, "Sessão expirada. Tente solicitar a redefinição novamente.")
+        return redirect('Echo_app:esqueci_senha')
+        
+    return redirect('Echo_app:verificar_codigo')
 
 
 # ===============================================

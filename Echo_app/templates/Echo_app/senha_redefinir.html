@@ -1,0 +1,63 @@
+{% extends "Echo_app/base.html" %} 
+{% load static %}
+
+{% block extra_head %}
+    <title>Nova Senha - Echo</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/base.css' %}">
+    
+    {# 🔑 IMPORTAÇÃO CORRIGIDA: Usa o CSS dedicado para redefinição de senha #}
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/senha_redefinir.css' %}">
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--cor-fundo, #f0f2f5);
+            padding: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    
+    <img src="{% static 'Echo_app/images/logo_JC.png' %}" alt="Logo JC" class="logo-image">
+
+    <div class="header-text">
+        <h1>Defina sua Nova Senha</h1>
+        <p>Use pelo menos 8 caracteres, evite senhas comuns.</p>
+    </div>
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+
+        {# Tratamento de erros não específicos do campo (ex: senhas não batem) #}
+        {% if form.errors %}
+            <div class="form-error">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# Renderiza os campos do formulário (password1 e password2) #}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <small class="form-help-text">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+                <div class="form-error-field">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn-submit">Alterar Senha</button>
+    </form>
+    
+</div>
+{% endblock %}
