@@ -5,8 +5,8 @@
 
 /* Variáveis de cor (se não estiverem em base.css) */
 :root {
-    --cor-primaria: #dc3545; /* Vermelho forte para o botão */
-    --cor-primaria-hover: #c82333;
+    --cor-primaria: #E10F26; /* Vermelho forte para o botão */
+    --cor-primaria-hover: #E10F26;
     --cor-borda: #ccc;
     --cor-texto-principal: #333;
     --cor-texto-secundario: #666;

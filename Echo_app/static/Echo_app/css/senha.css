@@ -2,8 +2,8 @@
  * Define as variáveis de cor locais (sobrescreve base.css).
 */
 :root {
-    --cor-primaria: #dc3545; /* Vermelho */
-    --cor-primaria-hover: #c82333; /* Vermelho Escuro */
+    --cor-primaria: #E10F26; /* Vermelho */
+    --cor-primaria-hover: #E10F26; /* Vermelho Escuro */
     /* Outras cores herdadas do base.css */
 }
 
