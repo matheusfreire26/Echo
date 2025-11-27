@@ -520,7 +520,8 @@ def perfil_editar(request):
         if foto_upload:
             perfil.foto_perfil = foto_upload
         elif avatar_escolhido:
-            avatar_path = os.path.join(settings.BASE_DIR, 'Echo_app/static/avatars', avatar_escolhido)
+            # CORREÇÃO: Buscamos em 'static/avatars' (pasta na raiz)
+            avatar_path = os.path.join(settings.BASE_DIR, 'static/avatars', avatar_escolhido)
             if os.path.exists(avatar_path):
                 with open(avatar_path, 'rb') as f:
                     perfil.foto_perfil.save(avatar_escolhido, File(f), save=True)
