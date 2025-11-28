@@ -742,22 +742,39 @@ def noticias_curtidas(request):
 @login_required
 def noticias_salvas_view(request):
     usuario = request.user
+    termo_pesquisa = request.GET.get('q', '').strip()
+    categoria_nome = request.GET.get('categoria', '').strip()
+
     interacoes = InteracaoNoticia.objects.filter(
         usuario=usuario, tipo='SALVAMENTO'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
+
+    if categoria_nome:
+        interacoes = interacoes.filter(noticia__categoria__nome__iexact=categoria_nome)
+
+    if termo_pesquisa:
+        interacoes = interacoes.filter(
+            Q(noticia__titulo__icontains=termo_pesquisa) |
+            Q(noticia__conteudo__icontains=termo_pesquisa)
+        )
+
     seen_ids = set()
     noticias = []
     for item in interacoes:
         if item.noticia.id not in seen_ids:
             noticias.append(item.noticia)
             seen_ids.add(item.noticia.id)
-    categorias = Categoria.objects.all()
+
+    categorias_disponiveis = Categoria.objects.all().order_by('nome')
+
     context = {
         'noticias_salvas': noticias,
-        'categorias': categorias,
-        'total_salvos': len(noticias)
+        'categorias_disponiveis': categorias_disponiveis,
+        'total_salvos': len(noticias),
+        'categoria_ativa': categoria_nome
     }
     return render(request, 'Echo_app/noticias_salvas.html', context)
+
 
 def jogo_da_velha_view(request):
     # O template que você criou (ou irá criar) para o jogo
