@@ -1,0 +1,46 @@
+{% extends "Echo_app/base.html" %}
+{% load static %}
+
+{% block title %}
+    Echo Games | Nossos Jogos
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/games.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="games-hub-container">
+        <h1>Echo Games</h1>
+        <p class="subtitle">Selecione um jogo para começar a diversão!</p>
+
+        <div class="games-list-grid">
+            
+            <a href="{% url 'Echo_app:jogo_da_velha' %}" class="game-card">
+                <div class="game-icon"></div>
+                <h2>Jogo da Velha</h2>
+                <p>Desafie o bot para um duelo clássico de 3 em linha.</p>
+                <span class="status-tag easy">Fácil</span>
+            </a>
+
+            <a href="{% url 'Echo_app:jogo_da_memoria' %}" class="game-card">
+                <div class="game-icon"></div>
+                <h2>Jogo da Memória</h2>
+                <p>Teste sua memória encontrando todos os pares de emojis.</p>
+                <span class="status-tag medium">Médio</span>
+            </a>
+
+            <div class="game-card disabled">
+                <div class="game-icon">🔵🔴</div>
+                <h2>Quatro em Linha</h2>
+                <p>Disponível em breve.</p>
+                <span class="status-tag coming-soon">Em Breve</span>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }} 
+    {% endblock %}

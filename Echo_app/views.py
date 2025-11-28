@@ -780,3 +780,13 @@ def jogo_da_velha_view(request):
     # O template que você criou (ou irá criar) para o jogo
     return render(request, 'Echo_app/jogo_da_velha.html')
 
+def games(request):
+    """Renderiza a página hub de jogos (games.html)."""
+    # Você pode adicionar contexto aqui se precisar passar dados futuros
+    context = {} 
+    return render(request, 'Echo_app/games.html', context)
+
+def jogo_da_memoria(request):
+    """Renderiza a página do Jogo da Memória."""
+    # Como você usa subdiretórios, o nome do template é 'Echo_app/jogo_da_memoria.html'
+    return render(request, 'Echo_app/jogo_da_memoria.html', {})

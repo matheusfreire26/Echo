@@ -40,6 +40,8 @@ urlpatterns = [
     path('reenviar-codigo/', views.reenviar_codigo, name='reenviar_codigo'),
     path('senha-concluida/', views.senha_concluida, name='senha_concluida'), # Adição da nova URL
 
-    # --- Jogo da Velha ---
+    # --- Jogos ---
     path('games/jogo-da-velha/', views.jogo_da_velha_view, name='jogo_da_velha'),
+    path('games/memoria/', views.jogo_da_memoria, name='jogo_da_memoria'),
+    path('games/', views.games, name='games'),
 ]

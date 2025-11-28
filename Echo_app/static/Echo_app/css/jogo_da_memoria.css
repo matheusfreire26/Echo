@@ -1,0 +1,125 @@
+/* --- Echo_app/static/Echo_app/css/jogo_da_memoria.css --- */
+
+/* Estilo geral do container para centralizar o jogo */
+.memory-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 420px; /* Alinha com a largura do grid */
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+#moves-counter {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #007bff;
+}
+
+#restart-button {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#restart-button:hover {
+    background-color: #218838;
+}
+
+/* GRID */
+.game-grid {
+    display: grid;
+    /* 4 colunas para um jogo de 16 cartas (8 pares) */
+    grid-template-columns: repeat(4, 100px); 
+    grid-template-rows: repeat(4, 100px);
+    gap: 10px;
+    perspective: 1000px; /* Para a animação 3D de virar a carta */
+}
+
+/* CARTA (CARD) */
+.card {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease-in-out; /* Velocidade da animação de virar */
+}
+
+/* Vira a carta quando a classe 'flipped' é adicionada */
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+/* Mantém a carta virada e inativa */
+.card.matched {
+    cursor: default;
+    /* Fundo da carta virada (card-front) quando matched */
+    background-color: #ffffff; /* Cinza bem claro */
+    opacity: 0.9; /* Levemente esmaecida */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Garante que o conteúdo da frente da carta fique cinza/apagado */
+.card.matched .card-front {
+    color: #ffffff; /* Cinza escuro para o texto/emoji */
+    background-color: transparent; /* Usa o fundo cinza da .card.matched */
+}
+
+/* Face da frente e de trás da carta */
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* Garante que o verso não seja visível */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    border: 2px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Verso da carta (invisível até ser virada) */
+.card-back {
+    background-color: #E10F26; /* Cor de fundo padrão (Azul UOL?) */
+    color: white;
+    font-size: 1.5em;
+    content: "?"; /* Adiciona um ponto de interrogação no verso */
+}
+.card-back::before {
+    content: ""; /* Símbolo da memória */
+}
+
+/* Frente da carta (virada em 180 graus inicialmente) */
+.card-front {
+    background-color: #fff;
+    transform: rotateY(180deg);
+}
+
+/* Quando o jogo trava (no setTimeout), o cursor muda */
+.game-grid.locked {
+    pointer-events: none; /* Desabilita cliques durante a verificação */
+}

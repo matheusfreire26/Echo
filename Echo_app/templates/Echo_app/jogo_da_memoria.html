@@ -1,0 +1,30 @@
+{% extends "Echo_app/base.html" %}
+{% load static %}
+
+{% block title %}
+    Echo Games | Jogo da Memória
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/jogo_da_memoria.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="memory-container">
+        <h1>Jogo da Memória</h1>
+        
+        <div class="game-info">
+            <p>Movimentos: <span id="moves-counter">0</span></p>
+            <button id="restart-button">Reiniciar</button>
+        </div>
+
+        <div id="game-grid" class="game-grid">
+            </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }} 
+    <script src="{% static 'Echo_app/js/jogo_da_memoria.js' %}"></script>
+{% endblock %}
