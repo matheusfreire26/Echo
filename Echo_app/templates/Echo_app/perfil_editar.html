@@ -6,84 +6,75 @@
 {% endblock %}
 
 {% block content %}
-<div class="edit-profile-container" style="max-width: 900px; margin: 20px auto; padding: 20px; font-family: 'Segoe UI', sans-serif;">
+<div class="edit-profile-container" style="max-width: 900px; margin: 20px auto; padding: 0 20px; font-family: 'Segoe UI', sans-serif;">
     
-    <div class="edit-profile-card" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 40px; border: 1px solid #e0e0e0;">
-        
-        <h2 style="text-align: center; margin-bottom: 40px; font-weight: 800; font-size: 2rem; color: #1a1a1a;">
-            Editar Perfil
-        </h2>
+    <h2 style="text-align: center; margin-bottom: 20px; font-weight: 700; font-size: 1.8rem; color: #1a1a1a;">
+        Editar Perfil
+    </h2>
+
+    <div class="edit-profile-card" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 20px 20px 0 20px; border: 1px solid #e0e0e0;">
         
         <form method="POST" action="{% url 'Echo_app:perfil_editar' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="avatar_escolhido" id="avatar_escolhido">
             <input type="file" name="foto_perfil" id="real-file-input" style="display: none;" accept="image/*">
 
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px;">
+            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; padding-bottom: 0;">
                 
                 <div id="avatar-display" onclick="openModal()"
                      style="
-                        width: 300px !important; 
-                        height: 300px !important; 
-                        min-width: 300px !important;
-                        min-height: 300px !important;
-                        border-radius: 50% !important; 
+                        width: 150px; 
+                        height: 150px; 
+                        min-width: 150px;
+                        min-height: 150px;
+                        border-radius: 50%; 
                         cursor: pointer; 
                         position: relative; 
-                        border: 8px solid #fff; 
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                        border: 4px solid #fff;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
                         background-color: #eee;
                         background-position: center;
-                        background-size: 480%; /* CONTROLA O ZOOM DA IMAGEM DE FUNDO */
+                        background-size: 350%;
                         background-repeat: no-repeat;
                         background-image: url('{% if perfil.foto_perfil %}{{ perfil.foto_perfil.url }}?v={% now 'U' %}{% else %}https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=0D8ABC&color=fff&size=512{% endif %}');
                      ">
                     
-                    <div style="position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; background: #1a1a1a; border: 4px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                        📷
+                    <div style="position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; background: #fff; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #333; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        ✎
                     </div>
                 </div>
                 
-                <p style="font-size: 1.2rem; color: #666; font-weight: 600; margin-top: 15px;">
-                    Toque na foto para alterar
-                </p>
             </div>
-
-            <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 250px;">
-                    <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">NOME</label>
-                    <input type="text" name="first_name" value="{{ usuario.first_name }}" required 
-                           style="width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; background: #f9f9f9; box-sizing: border-box;">
-                </div>
-                <div style="flex: 1; min-width: 250px;">
-                    <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">EMAIL</label>
-                    <input type="email" name="email" value="{{ usuario.email }}" required 
-                           style="width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; background: #f9f9f9; box-sizing: border-box;">
-                </div>
-            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; color: #333; margin: 10px 0 20px 0;">
+                Suas informações
+            </h3>
 
             <div style="margin-bottom: 25px;">
-                <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">BIOGRAFIA</label>
-                <textarea name="biografia" rows="4" 
-                          style="width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; background: #f9f9f9; box-sizing: border-box; resize: vertical;">{{ perfil.biografia|default:'' }}</textarea>
-            </div>
+                <input type="text" name="first_name" value="{{ usuario.first_name|default:'' }}" required placeholder="Nome *"
+                       style="width: 100%; padding: 15px; font-size: 1.1rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
+                
+                <input type="text" name="last_name" value="{{ usuario.last_name|default:'' }}" placeholder="Sobrenome"
+                       style="width: 100%; padding: 15px; font-size: 1.1rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
 
-            
-            <div class="form-section" style="margin-bottom: 35px;">
-                <h3 class="section-title" style="font-size: 1.2rem; font-weight: 700; color: #444; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
-                    Selecione suas Categorias de Interesse
+                <input type="tel" name="telefone" value="" placeholder="Número de telefone"
+                       style="width: 100%; padding: 15px; font-size: 1.1rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
+                
+                <input type="email" name="email" value="{{ usuario.email }}" required placeholder="Email *"
+                       style="width: 100%; padding: 15px; font-size: 1.1rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box;">
+            </div>
+            <div class="form-section" style="margin-top: 40px; margin-bottom: 35px; border-top: 1px solid #eee; padding-top: 20px;">
+                <h3 class="section-title" style="font-size: 1.4rem; font-weight: 700; color: #333; margin-bottom: 20px; padding-bottom: 0;">
+                    Categorias de interesse
                 </h3>
                 
                 {% if todas_categorias %}
-                    <div class="categories-grid">
+                    <div class="categories-grid" style="padding-bottom: 15px;">
                         {% for categoria in todas_categorias %}
                             
                             <label class="category-pill {% if categoria in perfil.categorias_de_interesse.all %}selected{% endif %}"
                                    onclick="
                                         const input = this.querySelector('input'); 
-                                        // 1. Alterna o estado do input
                                         input.checked = !input.checked; 
-                                        // 2. Alterna a classe 'selected' baseada no novo estado do input
                                         this.classList.toggle('selected', input.checked);"
                                    style="user-select: none;">
                                 
@@ -91,7 +82,13 @@
                                        {% if categoria in perfil.categorias_de_interesse.all %}checked{% endif %}
                                        style="display: none;">
                                 
-                                <span class="pill-icon">#</span>
+                                <span class="pill-icon">
+                                    {% if categoria in perfil.categorias_de_interesse.all %}
+                                        ✓
+                                    {% else %}
+                                        +
+                                    {% endif %}
+                                </span>
                                 {{ categoria.nome }}
                             </label>
                         {% endfor %}
@@ -103,15 +100,14 @@
                 {% endif %}
             </div>
             
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-            <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <div style="display: flex; gap: 15px; padding: 20px 0; border-top: 1px solid #eee; margin-top: 10px;">
                 <a href="{% url 'Echo_app:perfil' %}" 
-                   style="flex: 1; padding: 15px; border-radius: 50px; background: #fff; color: #666; font-weight: 700; border: 2px solid #ddd; text-align: center; text-decoration: none;">
+                   style="flex: 1; padding: 15px; border-radius: 50px; background: #fff; color: #dc2626; font-weight: 700; border: 2px solid #dc2626; text-align: center; text-decoration: none;">
                    Cancelar
                 </a>
                 <button type="submit" 
-                        style="flex: 2; padding: 15px; border-radius: 50px; background: #dc2626; color: white; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);">
-                    Salvar Alterações
+                        style="flex: 1; padding: 15px; border-radius: 50px; background: #dc2626; color: white; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);">
+                    Salvar
                 </button>
             </div>
         </form>

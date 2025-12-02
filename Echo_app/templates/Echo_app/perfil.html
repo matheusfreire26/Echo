@@ -15,7 +15,7 @@
         position: relative;
     }
 
-    /* 🚨 TAMANHO AUMENTADO PARA 100px 🚨 */
+    /* 🚨 TAMANHO AUMENTADO DO WRAPPER (70px) 🚨 */
     .icon-wrapper {
         width: 70px; 
         height: 70px;
@@ -32,7 +32,10 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
-        transition: opacity 0.2s;
+        transition: opacity 0.2s, transform 0.2s ease; /* Adiciona transform para a transição */
+        
+        /* 🚨 APLICAÇÃO DO ZOOM/ESCALA NOS ÍCONES 🚨 */
+        transform: scale(2.5); /* Exemplo: Aumenta a imagem para 160% do tamanho do wrapper (70px) */
     }
 
     /* 1. Ícones Curtidas */
@@ -72,8 +75,10 @@
         opacity: 0;
     }
     .acao-logout .icon-empty {
-        display: block;
+        display: block; 
         opacity: 1;
+        /* Se o ícone vazio for colorido, você pode ajustá-lo aqui.
+           Caso contrário, ele herda a escala de .icon-wrapper img */
     }
     .acao-logout:hover .icon-filled {
         display: block;
@@ -89,18 +94,15 @@
     .acao-deletar .icon-empty {
         display: block;
         opacity: 1;
+         /* Se o ícone vazio for colorido, você pode ajustá-lo aqui.
+           Caso contrário, ele herda a escala de .icon-wrapper img */
     }
     .acao-deletar:hover .icon-filled {
         display: block;
         opacity: 1;
     }
     
-    /* 🚨 NOVO: Garante que o texto do menu mantenha o tamanho 🚨
-       A classe .menu-item do perfil.css já define o font-size.
-       Vamos garantir que a tag <span> que contém o texto não seja afetada pelo tamanho dos ícones.
-       
-       Como todos os ícones agora estão em .icon-wrapper, o .menu-icon foi removido.
-    */
+    /* 🚨 NOVO: Garante que o texto do menu mantenha o tamanho 🚨 */
     .menu-item > span:not(.icon-wrapper) {
         font-size: 1.2rem !important;
         font-weight: 600 !important;
