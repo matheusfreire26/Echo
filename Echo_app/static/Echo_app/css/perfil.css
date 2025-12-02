@@ -67,13 +67,14 @@ body {
     border: 6px solid #fff;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     background-color: #f0f0f0;
+    transform: scale(5);
 }
 
 /* Ícone de editar flutuante (Estilo adaptado do HTML in-line) */
 .edit-avatar-icon {
     position: absolute;
-    bottom: 20px;
-    right: 40px;
+    bottom: 10px;
+    right: 20px;
     background-color: #fff;
     border-radius: 50%;
     width: 60px;

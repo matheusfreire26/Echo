@@ -1,6 +1,10 @@
 {% extends 'Echo_app/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'Echo_app/css/perfil_editar.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="edit-profile-container" style="max-width: 900px; margin: 20px auto; padding: 20px; font-family: 'Segoe UI', sans-serif;">
     
@@ -15,10 +19,8 @@
             <input type="hidden" name="avatar_escolhido" id="avatar_escolhido">
             <input type="file" name="foto_perfil" id="real-file-input" style="display: none;" accept="image/*">
 
-            <!-- AVATAR GIGANTE (EDITAR) -->
             <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px;">
                 
-                <!-- DIV REDONDA COM BACKGROUND-IMAGE (Garante preenchimento) -->
                 <div id="avatar-display" onclick="openModal()"
                      style="
                         width: 300px !important; 
@@ -32,7 +34,7 @@
                         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
                         background-color: #eee;
                         background-position: center;
-                        background-size: cover; /* ISSO FAZ OCUPAR TUDO */
+                        background-size: 480%; /* CONTROLA O ZOOM DA IMAGEM DE FUNDO */
                         background-repeat: no-repeat;
                         background-image: url('{% if perfil.foto_perfil %}{{ perfil.foto_perfil.url }}?v={% now 'U' %}{% else %}https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=0D8ABC&color=fff&size=512{% endif %}');
                      ">
@@ -47,7 +49,6 @@
                 </p>
             </div>
 
-            <!-- FORMULÁRIO -->
             <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 250px;">
                     <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">NOME</label>
@@ -67,7 +68,42 @@
                           style="width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; background: #f9f9f9; box-sizing: border-box; resize: vertical;">{{ perfil.biografia|default:'' }}</textarea>
             </div>
 
-            <!-- BOTÕES -->
+            
+            <div class="form-section" style="margin-bottom: 35px;">
+                <h3 class="section-title" style="font-size: 1.2rem; font-weight: 700; color: #444; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                    Selecione suas Categorias de Interesse
+                </h3>
+                
+                {% if todas_categorias %}
+                    <div class="categories-grid">
+                        {% for categoria in todas_categorias %}
+                            
+                            <label class="category-pill {% if categoria in perfil.categorias_de_interesse.all %}selected{% endif %}"
+                                   onclick="
+                                        const input = this.querySelector('input'); 
+                                        // 1. Alterna o estado do input
+                                        input.checked = !input.checked; 
+                                        // 2. Alterna a classe 'selected' baseada no novo estado do input
+                                        this.classList.toggle('selected', input.checked);"
+                                   style="user-select: none;">
+                                
+                                <input type="checkbox" name="categoria" value="{{ categoria.id }}" 
+                                       {% if categoria in perfil.categorias_de_interesse.all %}checked{% endif %}
+                                       style="display: none;">
+                                
+                                <span class="pill-icon">#</span>
+                                {{ categoria.nome }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-categories" style="text-align: center; color: #999; font-style: italic; padding: 15px;">
+                        Nenhuma categoria disponível no momento.
+                    </p>
+                {% endif %}
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
             <div style="display: flex; gap: 15px; margin-top: 30px;">
                 <a href="{% url 'Echo_app:perfil' %}" 
                    style="flex: 1; padding: 15px; border-radius: 50px; background: #fff; color: #666; font-weight: 700; border: 2px solid #ddd; text-align: center; text-decoration: none;">
@@ -82,7 +118,6 @@
     </div>
 </div>
 
-<!-- MODAL -->
 <div id="avatarModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center;">
     <div style="background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; text-align: center;">
         <span onclick="closeModal()" style="position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #999;">&times;</span>
@@ -91,11 +126,16 @@
         
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; margin-top: 30px; padding: 10px;">
             {% for avatar_file in lista_avatars %}
+            <div class="avatar-grid-item-container" 
+                onclick="selectAvatarFromGrid('{{ avatar_file }}', '{% static 'avatars/'|add:avatar_file %}')"
+                style="cursor: pointer; position: relative; width: 100%; padding-top: 100%; border-radius: 50%; overflow: hidden; background-color: #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.1)'" 
+                onmouseout="this.style.transform='scale(1)'">
+            
                 <img src="{% static 'avatars/'|add:avatar_file %}" 
-                     onclick="selectAvatarFromGrid('{{ avatar_file }}', this.src)"
-                     style="width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 4px solid transparent; object-fit: cover; background-color: #eee; transition: transform 0.2s;"
-                     onmouseover="this.style.transform='scale(1.1)'" 
-                     onmouseout="this.style.transform='scale(1)'">
+                    alt="Avatar"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(4.2);">
+            </div>
             {% endfor %}
         </div>
 
