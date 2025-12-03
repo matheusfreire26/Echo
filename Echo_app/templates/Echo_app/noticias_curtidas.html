@@ -4,13 +4,12 @@
 {% block title %}Minhas Curtidas{% endblock %}
 
 {% block extra_css %}
-<!-- Reutilizando o CSS do Dashboard para manter a identidade visual exata -->
+<!-- Reutiliza CSS do dashboard para as bolhas e CSS específico para a lista -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
-<!-- CSS específico para ajustes finos desta página, se necessário -->
 <link rel="stylesheet" href="{% static 'Echo_app/css/lista_noticias_jornal.css' %}?v={% now 'U' %}">
 
 <style>
-    /* Ajustes locais para garantir que o layout não quebre fora do dashboard */
+    /* Ajustes locais para garantir a aparência */
     .curtidas-container {
         max-width: 100%;
         padding: 20px;
@@ -35,7 +34,39 @@
         padding-left: 10px;
     }
 
-    /* Garante que os filtros (bolhas) sejam clicáveis e visíveis */
+    /* --- BARRA DE PESQUISA (RESTAURADA) --- */
+    .search-form {
+        display: flex;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+    
+    .search-input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-right: none;
+        border-radius: 25px 0 0 25px; /* Arredondado */
+        font-size: 1rem;
+        outline: none;
+        background-color: #f9f9f9;
+    }
+    
+    .search-button {
+        background-color: #cc0000;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 0 25px 25px 0; /* Arredondado */
+        cursor: pointer;
+        font-size: 1.1rem;
+    }
+    
+    .search-button:hover {
+        background-color: #a30000;
+    }
+
+    /* --- FILTROS DE CATEGORIA (BOLHAS) --- */
     .category-bubbles-container {
         margin-bottom: 20px;
         overflow-x: auto;
@@ -50,7 +81,7 @@
 
     .bubble {
         display: inline-block;
-        padding: 8px 16px;
+        padding: 8px 18px;
         border-radius: 20px;
         background-color: #f0f0f0;
         color: #333;
@@ -62,20 +93,15 @@
     }
 
     .bubble:hover {
-        background-color: #e0e0e0;
+        background-color: #cc0000;
+        color: white;
     }
 
     .bubble.active {
         background-color: #cc0000;
         color: white;
         font-weight: 600;
-    }
-    
-    /* Estilo da lista de notícias (igual ao dashboard) */
-    .latest-news-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+        box-shadow: 0 2px 5px rgba(204, 0, 0, 0.2);
     }
 </style>
 {% endblock %}
@@ -90,77 +116,92 @@
         <span style="font-size: 0.9rem; color: #666;">Total: {{ total_curtidas }}</span>
     </div>
 
-    <!-- FILTROS (BOLHAS) - IDÊNTICO AO DASHBOARD -->
+    <!-- BARRA DE PESQUISA -->
+    <form method="GET" class="search-form" action="{% url 'Echo_app:noticias_curtidas' %}">
+        <input type="text" name="q" placeholder="Pesquisar nas curtidas..." class="search-input" value="{{ request.GET.q|default:'' }}">
+        
+        <!-- Se já tem categoria selecionada, mantém ela ao pesquisar -->
+        {% if categoria_ativa %}
+            <input type="hidden" name="categoria" value="{{ categoria_ativa }}">
+        {% endif %}
+
+        <button type="submit" class="search-button">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+
+    <!-- FILTROS (BOLHAS) -->
     <div class="category-bubbles-container">
         <div class="category-bubbles">
             
-            <!-- URL base para os filtros -->
             {% url 'Echo_app:noticias_curtidas' as base_url %}
+            {% with q_param=request.GET.q|default:'' %}
             
             <!-- Botão TUDO -->
-            <!-- Se 'categoria_ativa' for vazia, este botão fica vermelho (active) -->
-            <a href="{{ base_url }}" 
+            <a href="{{ base_url }}?q={{ q_param }}" 
                class="bubble {% if not categoria_ativa %}active{% endif %}">
                 Tudo
             </a>
-
+            
             <!-- Botões das Categorias -->
             {% for cat in categorias_disponiveis %}
-                <a href="{{ base_url }}?categoria={{ cat.nome }}" 
+                <a href="{{ base_url }}?categoria={{ cat.nome }}&q={{ q_param }}" 
                    class="bubble {% if categoria_ativa == cat.nome %}active{% endif %}">
                     {{ cat.nome }}
                 </a>
             {% endfor %}
+            
+            {% endwith %}
 
         </div>
     </div>
 
-    <!-- LISTA DE NOTÍCIAS -->
+    <!-- LISTA DE NOTÍCIAS (ESTILO JORNAL) -->
     <div class="latest-news-list">
         
         {% if noticias_curtidas %}
             {% for noticia in noticias_curtidas %}
-            <!-- Card de Notícia (Estrutura idêntica ao dashboard) -->
-            <article class="news-card horizontal-card" style="display: flex; gap: 15px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px;">
-                
-                <a href="{% url 'Echo_app:noticia_detalhe' pk=noticia.pk %}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
+            <!-- Card Horizontal -->
+            <article class="noticia-item">
+                <a href="{% url 'Echo_app:noticia_detalhe' pk=noticia.pk %}" class="noticia-link">
                     
                     <!-- Imagem -->
-                    <div class="card-image" style="width: 120px; height: 90px; flex-shrink: 0; border-radius: 6px; overflow: hidden;">
+                    <div class="noticia-imagem-box">
                         {% if noticia.imagem %}
-                            <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="noticia-imagem">
                         {% else %}
-                            <div style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999;">
-                                <i class="fas fa-image"></i>
+                            <div class="imagem-placeholder">
+                                <span>Sem Imagem</span>
                             </div>
                         {% endif %}
                     </div>
 
                     <!-- Conteúdo -->
-                    <div class="card-content" style="flex-grow: 1; padding-left: 15px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="noticia-body">
                         <div>
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #cc0000; text-transform: uppercase;">
-                                {{ noticia.categoria.nome|default:"Geral" }}
-                            </span>
-                            <h3 style="font-size: 1rem; font-weight: 700; margin: 5px 0; line-height: 1.3;">
-                                {{ noticia.titulo }}
-                            </h3>
+                            <span class="noticia-tag">{{ noticia.categoria.nome|default:"Geral" }}</span>
+                            <h3 class="noticia-titulo">{{ noticia.titulo }}</h3>
                         </div>
                         
-                        <div style="font-size: 0.8rem; color: #999; display: flex; justify-content: space-between;">
-                            <span>{{ noticia.data_publicacao|date:"d M, Y" }}</span>
-                            <span style="color: #cc0000;"><i class="fas fa-heart"></i> Curtido</span>
+                        <p class="noticia-resumo">
+                            {{ noticia.conteudo|striptags|truncatechars:120 }}
+                        </p>
+
+                        <div class="noticia-meta">
+                            <span class="meta-data">{{ noticia.data_publicacao|date:"d M, Y" }}</span>
+                            <span class="meta-curtida">
+                                <i class="fas fa-heart"></i> Curtido
+                            </span>
                         </div>
                     </div>
                 </a>
-                
             </article>
             {% endfor %}
         
         {% else %}
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <h3>Nenhuma notícia encontrada nesta categoria.</h3>
-                <a href="{% url 'Echo_app:noticias_curtidas' %}" style="color: #cc0000; text-decoration: none; font-weight: 600; margin-top: 10px; display: inline-block;">Ver todas</a>
+            <div class="empty-state">
+                <h3>Nenhuma notícia encontrada.</h3>
+                <a href="{% url 'Echo_app:dashboard' %}" class="empty-btn-link">Voltar para o Dashboard</a>
             </div>
         {% endif %}
 

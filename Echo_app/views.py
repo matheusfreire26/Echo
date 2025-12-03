@@ -713,30 +713,30 @@ def configuracoes_conta(request):
 def noticias_curtidas(request):
     usuario = request.user
     
-    # Pega os parâmetros
+    # Parâmetros URL
     termo_pesquisa = request.GET.get('q', '').strip()
-    categoria_nome = request.GET.get('categoria', '').strip() # FILTRO POR NOME
+    categoria_nome = request.GET.get('categoria', '').strip()
     
-    # Busca inicial
+    # Busca Base
     interacoes_qs = InteracaoNoticia.objects.filter(
         usuario=usuario, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # Filtro de Categoria (Pelo NOME exato)
+    # Filtro Categoria (Por NOME)
     if categoria_nome:
         interacoes_qs = interacoes_qs.filter(
             noticia__categoria__nome__iexact=categoria_nome
         )
         
-    # Filtro de Pesquisa
+    # Filtro Pesquisa
     if termo_pesquisa:
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # Remove duplicatas
+    # Remove Duplicatas
     seen_ids = set()
     noticias_curtidas = []
     for item in interacoes_qs:
@@ -745,19 +745,17 @@ def noticias_curtidas(request):
             noticias_curtidas.append(noticia)
             seen_ids.add(noticia.id)
 
-    # Pega categorias para os botões
+    # Categorias para o menu
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        'categoria_ativa': categoria_nome,
-        'termo_pesquisa': termo_pesquisa
+        'categoria_ativa': categoria_nome 
     }
     
     return render(request, 'Echo_app/noticias_curtidas.html', context)
-
 
 @login_required
 def noticias_salvas_view(request):
