@@ -1,85 +1,182 @@
-/*
-* Estilos para a lista de notícias (Estilo Jornal Horizontal)
-*/
+/* Container Principal */
+.content-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 15px 60px;
+}
 
-/* Layout do Card Horizontal */
+.main-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 20px 0;
+    padding-left: 10px;
+    border-left: 5px solid #cc0000; /* Detalhe vermelho à esquerda */
+}
+
+/* =============================
+   ESTILO DO FILTRO (BOLHAS)
+   Igual ao Dashboard
+   ============================= */
+.filter-section {
+    margin-bottom: 25px;
+}
+
+.search-form {
+    display: flex;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 100;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    outline: none;
+    font-size: 1rem;
+}
+
+.search-button {
+    padding: 0 20px;
+    background-color: #cc0000;
+    color: white;
+    border: none;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.category-bubbles-container {
+    width: 100%;
+    overflow-x: auto; /* Scroll horizontal */
+    white-space: nowrap;
+    padding-bottom: 5px; /* Espaço para scrollbar invisível */
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 100;
+}
+
+/* Esconde scrollbar padrão */
+.category-bubbles-container::-webkit-scrollbar {
+    display: none;
+}
+
+.category-bubbles {
+    display: inline-flex;
+    gap: 10px;
+}
+
+/* A BOLHA */
+.bubble {
+    display: inline-block;
+    padding: 8px 18px;
+    background-color: #f2f2f2;
+    color: #333;
+    border-radius: 20px; /* Arredondado */
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.bubble:hover {
+    background-color: #e0e0e0;
+}
+
+/* BOLHA ATIVA (VERMELHA) */
+.bubble.active {
+    background-color: #cc0000;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(204,0,0,0.3);
+}
+
+/* =============================
+   LISTA DE NOTÍCIAS (Jornal)
+   ============================= */
+.curtidas-header {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.noticias-listagem {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 .noticia-item {
-    background-color: #fff;
+    background: #fff;
     border: 1px solid #eee;
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin-bottom: 15px; /* Espaço entre cards se não usar grid */
-}
-
-.noticia-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .noticia-link {
-    display: flex; /* Layout Horizontal */
+    display: flex;
     text-decoration: none;
     color: inherit;
-    height: 100%;
+    min-height: 110px;
 }
 
-/* Imagem à Esquerda */
 .noticia-imagem-box {
-    width: 140px; /* Largura fixa */
-    min-width: 140px;
-    height: auto; /* Altura automática para preencher */
+    width: 130px;
+    flex-shrink: 0;
     position: relative;
 }
 
-.noticia-imagem, .imagem-placeholder {
+.noticia-imagem {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
 }
 
 .imagem-placeholder {
-    background-color: #eee;
+    width: 100%;
+    height: 100%;
+    background: #eee;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #999;
-    font-size: 0.8rem;
 }
 
-/* Conteúdo à Direita */
 .noticia-body {
-    padding: 15px;
+    padding: 12px 15px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex-grow: 1;
+    flex: 1;
+    overflow: hidden;
 }
 
 .noticia-tag {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.7rem;
     text-transform: uppercase;
+    font-weight: 700;
     color: #cc0000;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .noticia-titulo {
     font-size: 1.1rem;
     font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 5px 0;
     color: #333;
-    margin: 0 0 8px 0;
-    line-height: 1.3;
 }
 
 .noticia-resumo {
     font-size: 0.9rem;
     color: #666;
-    line-height: 1.4;
-    margin-bottom: 10px;
-    /* Limitar linhas se desejar */
+    margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -89,24 +186,33 @@
 .noticia-meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-size: 0.8rem;
     color: #999;
-    border-top: 1px solid #f9f9f9;
+    margin-top: 8px;
     padding-top: 8px;
+    border-top: 1px solid #f9f9f9;
 }
 
 .meta-curtida i {
     color: #cc0000;
 }
 
-/* Responsividade para Mobile */
-@media (max-width: 600px) {
-    .noticia-link {
-        flex-direction: column; /* Vira vertical em telas muito pequenas */
-    }
-    .noticia-imagem-box {
-        width: 100%;
-        height: 180px;
-    }
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 10px; color: #ddd; }
+.empty-btn-link { 
+    display: inline-block; 
+    margin-top: 10px; 
+    color: #cc0000; 
+    font-weight: 600; 
+    text-decoration: none; 
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+    .noticia-imagem-box { width: 100px; }
+    .noticia-titulo { font-size: 1rem; }
 }

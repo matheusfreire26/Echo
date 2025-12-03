@@ -713,48 +713,51 @@ def configuracoes_conta(request):
 def noticias_curtidas(request):
     usuario = request.user
     
-    # Parâmetros
+    # Pega os parâmetros
     termo_pesquisa = request.GET.get('q', '').strip()
     categoria_nome = request.GET.get('categoria', '').strip() # FILTRO POR NOME
     
-    # Busca Base
+    # Busca inicial
     interacoes_qs = InteracaoNoticia.objects.filter(
         usuario=usuario, 
         tipo='CURTIDA'
     ).select_related('noticia', 'noticia__categoria').order_by('-data_interacao')
     
-    # Filtro Categoria
+    # Filtro de Categoria (Pelo NOME exato)
     if categoria_nome:
         interacoes_qs = interacoes_qs.filter(
             noticia__categoria__nome__iexact=categoria_nome
         )
         
-    # Filtro Pesquisa
+    # Filtro de Pesquisa
     if termo_pesquisa:
         interacoes_qs = interacoes_qs.filter(
             Q(noticia__titulo__icontains=termo_pesquisa) | 
             Q(noticia__conteudo__icontains=termo_pesquisa)
         )
         
-    # Extração de Notícias (Sem duplicatas)
+    # Remove duplicatas
     seen_ids = set()
     noticias_curtidas = []
     for item in interacoes_qs:
-        if item.noticia.id not in seen_ids:
-            noticias_curtidas.append(item.noticia)
-            seen_ids.add(item.noticia.id)
+        noticia = item.noticia
+        if noticia.id not in seen_ids:
+            noticias_curtidas.append(noticia)
+            seen_ids.add(noticia.id)
 
-    # Contexto
+    # Pega categorias para os botões
     categorias_disponiveis = Categoria.objects.all().order_by('nome')
 
     context = {
         'noticias_curtidas': noticias_curtidas,
         'categorias_disponiveis': categorias_disponiveis, 
         'total_curtidas': len(noticias_curtidas),
-        'categoria_ativa': categoria_nome 
+        'categoria_ativa': categoria_nome,
+        'termo_pesquisa': termo_pesquisa
     }
     
     return render(request, 'Echo_app/noticias_curtidas.html', context)
+
 
 @login_required
 def noticias_salvas_view(request):
