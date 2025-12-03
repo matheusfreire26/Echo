@@ -34,7 +34,7 @@
                         box-shadow: 0 4px 15px rgba(0,0,0,0.15);
                         background-color: #eee;
                         background-position: center;
-                        background-size: 350%;
+                        background-size: 500%;
                         background-repeat: no-repeat;
                         background-image: url('{% if perfil.foto_perfil %}{{ perfil.foto_perfil.url }}?v={% now 'U' %}{% else %}https://ui-avatars.com/api/?name={{ request.user.first_name|default:request.user.username }}&background=0D8ABC&color=fff&size=512{% endif %}');
                      ">
