@@ -1,61 +1,50 @@
-{% block content %}
+<div class="jc-container">
 
-<div class="curtidas-container">
-
-    <h1 class="titulo-pagina">Curtidas</h1>
+    <h1 class="jc-title">Curtidas</h1>
 
     <!-- SEARCH -->
-    <form method="GET" class="search-bar">
-        <i class="fas fa-search"></i>
+    <form method="GET" class="jc-search-box">
         <input type="text" name="q" placeholder="Pesquisa" value="{{ request.GET.q }}">
+        <button type="submit"><i class="fas fa-search"></i></button>
     </form>
 
-    <!-- FILTROS -->
-    <div class="filtros-container">
-        <a href="?q={{ request.GET.q }}" class="filtro {% if not categoria_ativa %}active{% endif %}">Tudo</a>
-
+    <!-- FILTERS -->
+    <div class="jc-filters">
+        <a href="?q={{ request.GET.q }}" class="chip {% if not categoria_ativa %}chip-active{% endif %}">Tudo</a>
         {% for categoria in categorias_disponiveis %}
-        <a href="?categoria={{ categoria.nome }}&q={{ request.GET.q }}"
-           class="filtro {% if categoria_ativa == categoria.nome %}active{% endif %}">
-            {{ categoria.nome }}
-        </a>
+            <a href="?categoria={{ categoria.nome }}&q={{ request.GET.q }}"
+               class="chip {% if categoria_ativa == categoria.nome %}chip-active{% endif %}">
+                {{ categoria.nome }}
+            </a>
         {% endfor %}
     </div>
 
-    <!-- BOTÕES SUPERIORES -->
-    <div class="top-actions">
-        <button class="btn-cancelar">Cancelar</button>
-        <button class="btn-descurtir">
-            Descurtir ({{ noticias_curtidas|length }})
-        </button>
-    </div>
+    <a class="jc-cancel">Cancelar</a>
 
     <!-- GRID -->
-    <div class="grid-curtidas">
-
+    <div class="jc-grid">
         {% for noticia in noticias_curtidas %}
-        <label class="card-noticia">
+        <div class="jc-card">
 
-            <!-- IMAGEM -->
-            <div class="img-area">
-                {% if noticia.imagem %}
-                    <img src="{{ noticia.imagem.url }}" class="img" alt="">
-                {% else %}
-                    <div class="img placeholder"></div>
-                {% endif %}
+            <img src="{{ noticia.imagem.url }}" class="jc-card-img">
 
-                <div class="categoria-chip">{{ noticia.categoria.nome }}</div>
+            <div class="jc-card-overlay"></div>
 
-                <div class="titulo-noticia">{{ noticia.titulo }}</div>
+            <p class="jc-card-title">
+                {{ noticia.titulo }}
+            </p>
 
-                <input type="checkbox" name="descurtir_ids" value="{{ noticia.id }}" class="checkbox">
-            </div>
+            <label class="jc-check-container">
+                <input type="checkbox" name="selecionadas" value="{{ noticia.id }}">
+                <span class="jc-check"></span>
+            </label>
 
-        </label>
+        </div>
         {% endfor %}
-
     </div>
 
-</div>
+    <button class="jc-unlike-btn">
+        Descurtir ({{ noticias_curtidas|length }})
+    </button>
 
-{% endblock %}
+</div>
