@@ -11,7 +11,7 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 - 🙎🏻‍♂️ **Criação de perfil para o usuário**  
   Salve seus dados e seja reconhecido pela marca.
 
-- ⭐ **Salvar as notícias**  
+- ⭐ **Salvar e Curtir as notícias**  
   Curta ou favorite as notícias que você gostar.
 
 - 🤳 **Recomendações pessoais**  
@@ -25,6 +25,9 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 
 - 🧭 **Navegação limpa pelas páginas**  
   Encontre o que procura com rapidez e fluidez, com menus intuitivos e organização otimizada.
+
+- 🕹️ **Jogos para se divertir**
+  Selecione um dos jogos para se divertir, encare os desafios.
 ---
 
 ## 👥 Time de Desenvolvimento  
