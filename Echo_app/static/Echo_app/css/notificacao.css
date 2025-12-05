@@ -1,38 +1,56 @@
+/* Echo_app/static/Echo_app/css/notificacao.css */
+
 /* =========================================
-   ESTILO GERAL DA PÁGINA
+   ESTRUTURA GERAL (Padronizada com Configurações)
    ========================================= */
 
-/* Dá um pouco mais de espaço no topo e no fundo da página */
-.container {
+.notificacao-container {
+    max-width: 900px; /* Largura aumentada para igualar Configurações */
+    margin: 0 auto;
     padding-top: 2rem;
-    padding-bottom: 3rem;
+    padding-bottom: 5rem;
 }
 
-/* Títulos das seções (Recomendadas / Outras) */
-h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #666; /* Cinza médio */
-    margin-top: 2rem;
+/* Título Principal Centralizado e Grande */
+h2 {
+    font-weight: 800; /* Mais negrito */
+    color: #333;
+    font-size: 2.2rem; /* Fonte aumentada */
+    text-align: center;
     margin-bottom: 1rem;
 }
 
-/* Subtítulos descritivos */
+/* Subtítulos das Seções (Recomendadas/Outras) */
+h4 {
+    font-size: 1.4rem; /* Aumentado */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    border-left: 5px solid #c02e3e; /* Detalhe visual da marca */
+    padding-left: 15px;
+}
+
 p.text-muted {
-    font-size: 0.9rem;
+    font-size: 1.05rem; /* Texto de apoio maior */
     margin-bottom: 1.5rem;
+    color: #666;
 }
 
-/* Botão "Marcar todas como lidas" - Usando a cor da marca */
-.btn-outline-secondary {
-    color: #c02e3e; /* Tom vermelho/vinho dos logos */
+/* Botão de Ação (Marcar como lidas) */
+.btn-acao-topo {
+    display: block;
+    margin: 0 auto 3rem auto; /* Centraliza o botão */
+    color: #c02e3e;
     border-color: #c02e3e;
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 20px; /* Mais arredondado */
+    padding: 0.5rem 1.5rem;
 }
 
-.btn-outline-secondary:hover {
+.btn-acao-topo:hover {
     background-color: #c02e3e;
     color: white;
 }
@@ -41,101 +59,90 @@ p.text-muted {
    O CONTÊINER DA LISTA (O "Feed")
    ========================================= */
 
-/* Remove as bordas e cantos arredondados individuais do Bootstrap */
-.list-group-item {
-    border: none;
-    border-radius: 0 !important;
-    padding: 0; /* Remove padding padrão para nós controlarmos */
-}
-
-/* Agrupa a lista inteira em um bloco com sombra suave (Estilo LinkedIn) */
 .notificacao-list, .list-group {
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Sombra suave */
-    overflow: hidden; /* Garante que os cantos arredondados funcionem */
-    border: 1px solid #eee; /* Borda sutil em volta de tudo */
+    border-radius: 16px; /* Cantos mais arredondados */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); /* Sombra mais destacada */
+    overflow: hidden;
+    border: none;
+    margin-bottom: 3rem;
 }
 
-/* O link que envolve cada notificação */
 .notificacao-link {
     text-decoration: none;
     color: inherit;
     display: block;
-    /* Linha separadora sutil entre as notificações */
     border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, padding 0.2s ease;
 }
 
-/* Remove a borda do último item para ficar limpo */
 .notificacao-link:last-child {
     border-bottom: none;
 }
 
-/* Efeito hover (passar o mouse) - cinza bem clarinho */
 .notificacao-link:hover {
-    background-color: #f8f9fa !important;
+    background-color: #fcfcfc !important;
+    padding-left: 5px; /* Leve movimento à direita ao passar mouse */
 }
 
-
 /* =========================================
-   O CARTÃO DA NOTIFICAÇÃO (Layout Interno)
+   O CARTÃO DA NOTIFICAÇÃO
    ========================================= */
 
-/* Estrutura flexbox do cartão */
 .notificacao-card {
     display: flex;
-    align-items: flex-start; /* Alinha itens ao topo */
-    padding: 16px;
-    background-color: #fff; /* Fundo branco padrão (LIDO) */
+    align-items: center; /* Centraliza verticalmente */
+    padding: 1.5rem 2rem; /* Mais espaçamento interno */
+    background-color: #fff;
 }
 
-/* --- ESTADO: NÃO LIDO (Override do Bootstrap) --- */
-/* O LinkedIn usa um azul/cinza muito claro para não lidos */
+/* ESTADO: NÃO LIDO */
 .notificacao-card.list-group-item-primary {
-    background-color: #eef3f8; /* Azul clarinho estilo LinkedIn */
-    color: #212529;
+    background-color: #eef3f8;
+    border-left: 6px solid #c02e3e; /* Destaque lateral para não lidos */
 }
 
-/* Força o título a ficar em NEG RITO forte se não estiver lido */
 .notificacao-card.list-group-item-primary .mb-1.fw-bold {
-    font-weight: 700 !important;
-    color: #000; /* Preto mais forte para destaque */
+    font-weight: 800 !important;
+    color: #000;
 }
-/* -------------------------------------------------- */
-
 
 /* =========================================
-   ELEMENTOS INTERNOS (Imagem e Texto)
+   ELEMENTOS INTERNOS (Maior e mais legível)
    ========================================= */
 
-/* Imagem da Notícia - Circular estilo LinkedIn */
+/* Imagem da Notícia */
 .notificacao-imagem {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%; /* Faz ficar redonda */
-    object-fit: cover; /* Garante que a imagem preencha o círculo sem distorcer */
-    margin-right: 16px; /* Espaço entre imagem e texto */
-    border: 1px solid #eee; /* Borda sutil na imagem */
-    flex-shrink: 0; /* Impede a imagem de amassar em telas pequenas */
+    width: 80px;  /* Aumentado (era 64px) */
+    height: 80px; /* Aumentado */
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex-shrink: 0;
 }
 
-/* O corpo do texto */
 .notificacao-corpo {
     flex-grow: 1;
 }
 
-/* A manchete da notificação */
+/* Manchete */
 .notificacao-corpo p.mb-1 {
-    font-size: 1rem;
+    font-size: 1.2rem; /* Aumentado (era 1rem) */
     line-height: 1.4;
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
+    color: #333;
 }
 
-/* Textos menores (Data e Tópico) */
+/* Metadados (Data e Tópico) */
 .notificacao-corpo small.text-muted {
-    font-size: 0.85rem;
-    color: #7f8c8d !important; /* Cinza um pouco mais escuro para leitura */
-    display: block; /* Faz ficar um em cada linha */
-    margin-top: 2px;
+    font-size: 0.95rem; /* Aumentado */
+    color: #7f8c8d !important;
+}
+
+/* Estilo para quando a lista está vazia */
+.p-3.text-center {
+    padding: 3rem !important;
+    font-size: 1.2rem;
+    color: #999;
 }

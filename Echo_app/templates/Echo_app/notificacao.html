@@ -8,20 +8,23 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 700px;"> <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-4 notificacao-container">
+    
+    <div class="mb-4 text-center">
         <h2>Minhas Notificações</h2>
-        <form action="{% url 'Echo_app:marcar_todas_lidas' %}" method="POST" class="m-0">
+        
+        <form action="{% url 'Echo_app:marcar_todas_lidas' %}" method="POST" class="d-inline-block mt-2">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-secondary">
+            <button type="submit" class="btn btn-sm btn-outline-secondary btn-acao-topo">
                 Marcar todas como lidas
             </button>
         </form>
     </div>
 
     <h4>Recomendadas para você</h4>
-    <p class="text-muted">Com base nas suas categorias de interesse.</p>
+    <p class="text-muted">Notícias baseadas nos seus interesses em Esportes, Tecnologia, etc.</p>
     
-    <div class="notificacao-list mb-5">
+    <div class="notificacao-list">
         
         {% for notificacao in notificacoes_recomendadas %}
              {% if notificacao.noticia %}
@@ -39,9 +42,9 @@
                     {% endif %}
                     
                     <div class="notificacao-corpo">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
                             <p class="mb-1 fw-bold">{{ notificacao.manchete }}</p>
-                            <small class="text-muted">{{ notificacao.data_criacao|timesince }} atrás</small>
+                            <small class="text-muted text-nowrap ms-2">{{ notificacao.data_criacao|timesince }} atrás</small>
                         </div>
                         {% if notificacao.noticia and notificacao.noticia.categoria %}
                             <small class="text-muted">Tópico: {{ notificacao.noticia.categoria.nome }}</small>
@@ -55,9 +58,9 @@
                 <div class="notificacao-card list-group-item-primary">
                     <img src="{% static 'Echo_app/images/exemplo_tech.png' %}" alt="Tecnologia" class="notificacao-imagem">
                     <div class="notificacao-corpo">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
                             <p class="mb-1 fw-bold">Exemplo: Nova reportagem sobre Tecnologia!</p>
-                            <small class="text-muted">10 minutos atrás</small>
+                            <small class="text-muted">10 m</small>
                         </div>
                         <small class="text-muted">Tópico: Tecnologia</small>
                     </div>
@@ -68,9 +71,9 @@
                 <div class="notificacao-card">
                     <img src="{% static 'Echo_app/images/exemplo_esportes.png' %}" alt="Esportes" class="notificacao-imagem">
                     <div class="notificacao-corpo">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
                             <p class="mb-1 fw-bold">Exemplo: Destaques da rodada de Esportes</p>
-                            <small class="text-muted">1 hora atrás</small>
+                            <small class="text-muted">1 h</small>
                         </div>
                         <small class="text-muted">Tópico: Esportes</small>
                     </div>
@@ -99,9 +102,9 @@
                     {% endif %}
                     
                     <div class="notificacao-corpo">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
                             <p class="mb-1 fw-bold">{{ notificacao.manchete }}</p>
-                            <small class="text-muted">{{ notificacao.data_criacao|timesince }} atrás</small>
+                            <small class="text-muted text-nowrap ms-2">{{ notificacao.data_criacao|timesince }} atrás</small>
                         </div>
                         {% if notificacao.noticia and notificacao.noticia.categoria %}
                             <small class="text-muted">Tópico: {{ notificacao.noticia.categoria.nome }}</small>
@@ -112,7 +115,7 @@
         
         {% empty %}
              <div class="p-3 text-center text-muted">
-                <p class="mb-0">Você não tem outras notificações.</p>
+                <p class="mb-0">Você não tem outras notificações no momento.</p>
             </div>
         {% endfor %} 
     </div>
