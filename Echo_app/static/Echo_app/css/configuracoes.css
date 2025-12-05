@@ -1,88 +1,105 @@
+/* Echo_app/static/Echo_app/css/configuracoes.css */
+
+/* =========================================
+   ESTRUTURA GERAL
+   ========================================= */
+
 .config-container {
-    max-width: 850px;
+    max-width: 750px; /* Um pouco mais estreito para focar a leitura numa coluna só */
     margin: 0 auto;
-    padding-bottom: 4rem;
+    padding-bottom: 5rem;
+    padding-top: 2rem;
 }
 
-/* O título principal da página */
+/* Cabeçalho centralizado */
+.mb-5.text-center {
+    margin-bottom: 3rem !important;
+}
+
 h2 {
-    font-weight: 700;
+    font-weight: 800;
     color: #333;
-    font-size: 1.75rem;
+    font-size: 2.2rem;
+    text-align: center;
 }
 
-/* O link de voltar */
-.btn-back {
-    color: #666;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-back:hover {
-    color: #c02e3e; /* Vermelho da marca */
-    transform: translateX(-4px); /* Move levemente para a esquerda */
-}
+/* =========================================
+   ESTILO DOS CARTÕES (CARDS)
+   ========================================= */
 
 .card {
-    border: none; /* Remove borda padrão feia */
-    border-radius: 12px; /* Cantos mais arredondados */
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); /* Sombra muito suave e moderna */
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     background-color: #fff;
     overflow: hidden;
+    margin-bottom: 2rem; /* Espaço maior entre os cartões empilhados */
 }
 
-/* Efeito ao passar o mouse no card (opcional, dá vida à tela) */
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-/* O cabeçalho de cada cartão */
 .card-header {
-    background-color: #fff; /* Fundo branco para ficar limpo */
-    border-bottom: 1px solid #f0f0f0;
-    padding: 1.25rem 1.5rem;
+    background-color: #fff;
+    border-bottom: 2px solid #f8f9fa;
+    padding: 1.5rem;
 }
 
+/* Títulos dos Cartões (Segurança, Preferências) */
 .card-header h5 {
     color: #2c3e50;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Espaço entre ícone e texto */
+    font-size: 1.5rem; /* Título do cartão grande */
+    font-weight: 800;
+    margin: 0;
 }
 
 .card-body {
-    padding: 1.5rem;
+    padding: 2.5rem; /* Mais espaço interno */
 }
+
+/* --- AQUI ESTÁ O AUMENTO DOS SUBTÍTULOS QUE VOCÊ PEDIU --- */
+
+/* Subtítulo "Alterar Senha" */
+.card-subtitle {
+    font-size: 1.3rem !important; /* Bem maior */
+    font-weight: 700 !important;
+    color: #555;
+    margin-bottom: 1.5rem !important;
+    border-left: 4px solid #c02e3e; /* Detalhe visual opcional */
+    padding-left: 10px;
+}
+
+/* =========================================
+   FORMULÁRIOS E INPUTS
+   ========================================= */
 
 .form-label {
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-size: 0.75rem;
-    color: #888;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 .form-control {
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid #dee2e6;
-    padding: 0.6rem 1rem;
-    font-size: 0.95rem;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
 }
 
 .form-control:focus {
-    border-color: #c02e3e; /* Foco na cor da marca */
-    box-shadow: 0 0 0 0.2rem rgba(192, 46, 62, 0.15);
+    border-color: #c02e3e;
+    box-shadow: 0 0 0 0.25rem rgba(192, 46, 62, 0.15);
 }
 
-/* Botão Principal */
 .btn-primary {
     background-color: #c02e3e;
     border-color: #c02e3e;
-    font-weight: 600;
-    padding: 0.6rem;
-    border-radius: 6px;
-    transition: all 0.2s;
+    font-weight: 700;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    margin-top: 1rem;
 }
 
 .btn-primary:hover {
@@ -90,42 +107,60 @@ h2 {
     border-color: #a02633;
 }
 
-.form-switch .form-check-input {
-    width: 3em; /* Switch um pouco mais largo */
-    height: 1.5em;
-    cursor: pointer;
+/* =========================================
+   PREFERÊNCIAS (SWITCHES)
+   ========================================= */
+
+.form-switch {
+    padding-left: 3.5em;
+    margin-bottom: 1.5rem !important;
+    display: flex;
+    align-items: center;
 }
 
-/* Cor do switch quando ativado */
+.form-switch .form-check-input {
+    width: 3.5em;
+    height: 1.75em;
+    cursor: pointer;
+    margin-left: -3.5em;
+}
+
 .form-check-input:checked {
-    background-color: #2ecc71; /* Verde sucesso */
+    background-color: #2ecc71;
     border-color: #2ecc71;
 }
 
+/* Texto dos Switches (Receber emails, etc) */
 .form-check-label {
-    margin-left: 10px;
-    font-weight: 500;
-    color: #444;
-    padding-top: 2px;
+    font-size: 1.25rem; /* AUMENTADO */
+    font-weight: 600; /* Mais grosso */
+    color: #333;
+    padding-left: 0.8rem;
     cursor: pointer;
 }
 
+.text-muted.small {
+    font-size: 1rem; /* Texto de ajuda maior */
+    color: #888;
+}
+
+/* =========================================
+   ZONA DE PERIGO
+   ========================================= */
+
 .card.border-danger {
-    border: 1px solid #ffeeba !important; /* Borda amarelada/vermelha sutil */
+    border: 2px solid #ffeeba !important;
 }
 
 .card-header.bg-danger {
-    background-color: #fff5f5 !important; /* Fundo vermelho bem claro, não sólido */
-    color: #dc3545 !important; /* Texto vermelho */
+    background-color: #fff5f5 !important;
+    color: #dc3545 !important;
     border-bottom: 1px solid #ffebeb;
 }
 
 .btn-outline-danger {
-    border-width: 1.5px;
-    font-weight: 600;
-}
-
-.btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: white;
+    border-width: 2px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.8rem;
 }
