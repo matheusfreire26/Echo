@@ -32,18 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const letrasAlfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const partesDaForca = [
-        'forca-base-1', 'forca-base-2', 'forca-base-3', 'forca-laco', 
-        'forca-cabeca', 'forca-tronco', 'forca-braco-e', 'forca-braco-d', 
-        'forca-perna-e', 'forca-perna-d' // 10 erros no total
-    ];
 
-    // Variáveis de Estado
+    // =====================================
+    // ELEMENTOS DO DOM E ESTADO
+    // =====================================
     let palavraSecreta = '';
     let temaAtual = '';
     let letrasAdivinhadas = [];
     let erros = 0;
-    let maxErros = partesDaForca.length;
     let jogoAtivo = true;
 
     // Elementos DOM
@@ -56,38 +52,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const correctGuessesTable = document.getElementById('correct-guesses-table');
     const restartButton = document.getElementById('restart-button');
 
+    // Contagem de peças existentes no HTML (peças do boneco, com data-step)
+    const forcaPieces = Array.from(document.querySelectorAll('.forca-piece'))
+        .sort((a, b) => (parseInt(a.dataset.step) || 0) - (parseInt(b.dataset.step) || 0));
+    const maxErros = Math.max(forcaPieces.length, 1); // garante >=1
+
     // =====================================
     // FUNÇÕES DE LÓGICA
     // =====================================
 
     /**
-     * 1. Inicializa um novo jogo: seleciona palavra, reseta estado e monta UI.
+     * Inicializa um novo jogo.
      */
     function initializeGame() {
-        // 1. Resetar Estado
         letrasAdivinhadas = [];
         erros = 0;
         jogoAtivo = true;
-        forcaGabarito.innerHTML = '';
+        // NÃO limpamos o innerHTML do forca-gabarito (peças são estáticas no HTML)
         messageDisplay.textContent = '';
-        
-        // 2. Selecionar Palavra e Tema
+        messageDisplay.classList.remove('game-over', 'game-win');
+
+        // Seleciona tema e palavra aleatória
         const temas = Object.keys(palavrasPorTema);
         temaAtual = temas[Math.floor(Math.random() * temas.length)];
         const palavrasDoTema = palavrasPorTema[temaAtual];
         const palavraObj = palavrasDoTema[Math.floor(Math.random() * palavrasDoTema.length)];
-        
+
         palavraSecreta = palavraObj.palavra;
-        
-        // 3. Atualizar UI
+
+        // Atualiza UI
         temaDisplay.textContent = `${temaAtual} (Dica: ${palavraObj.dica})`;
         renderWordDisplay();
         renderKeyboard();
         updateHistoryTable();
+
+        // tenta resetar desenho se função estiver disponível (script inline pode definir)
+        if (typeof window.resetHangman === 'function') {
+            window.resetHangman();
+        } else {
+            // fallback: remove classe visível das peças se existirem
+            forcaPieces.forEach(p => p.classList.remove('forca-piece-visible'));
+        }
     }
 
     /**
-     * 2. Renderiza a palavra oculta no DOM.
+     * Renderiza a palavra oculta no DOM.
      */
     function renderWordDisplay() {
         wordDisplay.innerHTML = palavraSecreta.split('').map(letra => {
@@ -97,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 3. Cria os botões do teclado virtual.
+     * Cria os botões do teclado virtual.
      */
     function renderKeyboard() {
         keyboardContainer.innerHTML = '';
@@ -112,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 4. Lida com o palpite de uma letra.
+     * Lida com o palpite de uma letra.
      */
     function handleGuess(letra, button) {
         if (!jogoAtivo || letrasAdivinhadas.includes(letra)) return;
@@ -137,55 +146,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * 5. Adiciona uma parte do desenho da forca.
+     * Desenha as partes da forca conforme número de erros.
+     * Agora usa as peças estáticas do DOM (com data-step) ou funções globais se existirem.
      */
     function drawHangmanPart() {
-        if (erros > 0 && erros <= maxErros) {
-            const partClass = partesDaForca[erros - 1];
-            const partDiv = document.createElement('div');
-            partDiv.classList.add(partClass);
-            forcaGabarito.appendChild(partDiv);
+        // limita erros ao maxErros
+        if (erros < 0) erros = 0;
+        if (erros > maxErros) erros = maxErros;
+
+        // Se função global do template estiver disponível, use-a (preferível)
+        if (typeof window.showHangmanStep === 'function') {
+            try {
+                window.showHangmanStep(erros);
+                return;
+            } catch (e) {
+                // segue para fallback se erro
+                console.warn('showHangmanStep falhou, usando fallback local.', e);
+            }
         }
+
+        // Fallback: aplica classe nas peças correspondentes
+        forcaPieces.forEach(p => {
+            const s = parseInt(p.dataset.step) || 0;
+            if (s > 0 && s <= erros) {
+                p.classList.add('forca-piece-visible');
+                p.setAttribute('aria-hidden', 'false');
+            } else {
+                p.classList.remove('forca-piece-visible');
+                p.setAttribute('aria-hidden', 'true');
+            }
+        });
     }
 
     /**
-     * 6. Atualiza a tabela de tentativas anteriores.
+     * Atualiza a tabela de tentativas anteriores.
      */
     function updateHistoryTable() {
-        // Filtra as letras erradas
         const letrasErradas = letrasAdivinhadas.filter(letra => !palavraSecreta.includes(letra));
         incorrectGuessesTable.textContent = letrasErradas.join(', ');
 
-        // Filtra as letras corretas que JÁ FORAM exibidas na palavra
         const letrasCorretas = letrasAdivinhadas.filter(letra => palavraSecreta.includes(letra));
         correctGuessesTable.textContent = letrasCorretas.join(', ');
     }
 
     /**
-     * 7. Verifica se o jogo terminou (vitória ou derrota).
+     * Verifica se o jogo terminou (vitória ou derrota).
      */
     function checkGameStatus() {
         const palavraAtual = palavraSecreta.split('').map(letra => letrasAdivinhadas.includes(letra) ? letra : '_').join('');
 
         if (palavraAtual === palavraSecreta) {
-            // Vitória
             jogoAtivo = false;
             messageDisplay.textContent = '🎉 Parabéns! Você salvou o boneco!';
             messageDisplay.classList.remove('game-over');
             messageDisplay.classList.add('game-win');
             disableKeyboard();
         } else if (erros >= maxErros) {
-            // Derrota
             jogoAtivo = false;
             messageDisplay.innerHTML = `💀 Fim de jogo! A palavra era: <strong>${palavraSecreta}</strong>`;
             messageDisplay.classList.remove('game-win');
             messageDisplay.classList.add('game-over');
             disableKeyboard();
+
+            // mostra o boneco completo (garante exibição total)
+            if (typeof window.showHangmanStep === 'function') {
+                try { window.showHangmanStep(maxErros); } catch (e) {}
+            } else {
+                forcaPieces.forEach(p => p.classList.add('forca-piece-visible'));
+            }
         }
     }
 
     /**
-     * 8. Desabilita todos os botões do teclado.
+     * Desabilita todos os botões do teclado.
      */
     function disableKeyboard() {
         document.querySelectorAll('.key-button').forEach(button => {
@@ -196,9 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================
     // EVENT LISTENERS
     // =====================================
-
     restartButton.addEventListener('click', initializeGame);
 
-    // Inicia o jogo quando a página carrega
+    // Inicia o jogo
     initializeGame();
 });

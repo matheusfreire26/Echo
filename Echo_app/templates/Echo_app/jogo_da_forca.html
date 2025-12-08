@@ -13,20 +13,40 @@
     
     <div class="game-area">
         
-        <div class="hangman-drawing">
+        <div class="hangman-drawing" aria-hidden="true">
             <div id="forca-gabarito">
-                </div>
-            <div class="game-messages">
+                <!-- GALLOWS (visíveis por padrão) -->
+                <div class="forca-base-1 forca-gallows" aria-hidden="true"></div>
+                <div class="forca-base-2 forca-gallows" aria-hidden="true"></div>
+                <div class="forca-base-3 forca-gallows" aria-hidden="true"></div>
+                <div class="forca-laco forca-gallows" aria-hidden="true"></div>
+
+                <!-- PEÇAS DO BONECO (iniciam ocultas; aparecem por passos) -->
+                <!-- step 1 -->
+                <div class="forca-cabeca forca-piece" data-step="1" aria-hidden="true"></div>
+                <!-- step 2 -->
+                <div class="forca-tronco forca-piece" data-step="2" aria-hidden="true"></div>
+                <!-- step 3 -->
+                <div class="forca-braco-e forca-piece" data-step="3" aria-hidden="true"></div>
+                <!-- step 4 -->
+                <div class="forca-braco-d forca-piece" data-step="4" aria-hidden="true"></div>
+                <!-- step 5 -->
+                <div class="forca-perna-e forca-piece" data-step="5" aria-hidden="true"></div>
+                <!-- step 6 -->
+                <div class="forca-perna-d forca-piece" data-step="6" aria-hidden="true"></div>
+            </div>
+
+            <div class="game-messages" role="status" aria-live="polite">
                 <p id="tema-display">Tema: <span></span></p>
                 <p id="message-display"></p>
             </div>
         </div>
 
-        <div class="word-display" id="word-display">
-            </div>
+        <div class="word-display" id="word-display" aria-label="Palavra">
+        </div>
         
-        <div class="keyboard-container" id="keyboard-container">
-            </div>
+        <div class="keyboard-container" id="keyboard-container" role="application" aria-label="Teclado">
+        </div>
 
         <button id="restart-button" class="restart-button">Novo Jogo</button>
     </div>
@@ -58,4 +78,43 @@
 {% block extra_js %}
     {{ block.super }} 
     <script src="{% static 'Echo_app/js/jogo_da_forca.js' %}?v={% now 'U' %}"></script>
+
+    <!-- Script leve para controlar a exibição das peças da forca -->
+    <script>
+    (function () {
+        // pega todas as peças ordenadas por data-step
+        const pieces = Array.from(document.querySelectorAll('.forca-piece'))
+            .sort((a,b) => (parseInt(a.dataset.step) || 0) - (parseInt(b.dataset.step) || 0));
+
+        // garante que galows (postes) estejam visíveis (classe forca-gallows controlada via CSS)
+        // função que mostra peças até o passo n (1..pieces.length)
+        function showHangmanStep(n) {
+            const step = Number(n) || 0;
+            pieces.forEach(p => {
+                const s = parseInt(p.dataset.step) || 0;
+                if (s <= step && s > 0) {
+                    p.classList.add('forca-piece-visible');
+                    p.setAttribute('aria-hidden','false');
+                } else {
+                    p.classList.remove('forca-piece-visible');
+                    p.setAttribute('aria-hidden','true');
+                }
+            });
+        }
+
+        function resetHangman() {
+            pieces.forEach(p => {
+                p.classList.remove('forca-piece-visible');
+                p.setAttribute('aria-hidden','true');
+            });
+        }
+
+        // expõe no escopo global para que seu jogo (jogo_da_forca.js) possa chamar:
+        window.showHangmanStep = showHangmanStep;
+        window.resetHangman = resetHangman;
+
+        // inicializa: limpa desenho
+        resetHangman();
+    })();
+    </script>
 {% endblock %}
