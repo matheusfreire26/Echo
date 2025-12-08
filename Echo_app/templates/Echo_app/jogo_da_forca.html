@@ -15,24 +15,18 @@
         
         <div class="hangman-drawing" aria-hidden="true">
             <div id="forca-gabarito">
-                <!-- GALLOWS (visíveis por padrão) -->
-                <div class="forca-base-1 forca-gallows" aria-hidden="true"></div>
-                <div class="forca-base-2 forca-gallows" aria-hidden="true"></div>
-                <div class="forca-base-3 forca-gallows" aria-hidden="true"></div>
-                <div class="forca-laco forca-gallows" aria-hidden="true"></div>
+                <!-- GALLOWS / POSTES (sempre visíveis) -->
+                <div class="forca-base-1" aria-hidden="true"></div>
+                <div class="forca-poste-vertical" aria-hidden="true"></div>
+                <div class="forca-viga" aria-hidden="true"></div>
+                <div class="forca-laco" aria-hidden="true"></div>
 
-                <!-- PEÇAS DO BONECO (iniciam ocultas; aparecem por passos) -->
-                <!-- step 1 -->
+                <!-- PEÇAS DO BONECO (iniciam ocultas; reveladas por data-step) -->
                 <div class="forca-cabeca forca-piece" data-step="1" aria-hidden="true"></div>
-                <!-- step 2 -->
                 <div class="forca-tronco forca-piece" data-step="2" aria-hidden="true"></div>
-                <!-- step 3 -->
                 <div class="forca-braco-e forca-piece" data-step="3" aria-hidden="true"></div>
-                <!-- step 4 -->
                 <div class="forca-braco-d forca-piece" data-step="4" aria-hidden="true"></div>
-                <!-- step 5 -->
                 <div class="forca-perna-e forca-piece" data-step="5" aria-hidden="true"></div>
-                <!-- step 6 -->
                 <div class="forca-perna-d forca-piece" data-step="6" aria-hidden="true"></div>
             </div>
 
@@ -42,11 +36,9 @@
             </div>
         </div>
 
-        <div class="word-display" id="word-display" aria-label="Palavra">
-        </div>
+        <div class="word-display" id="word-display" aria-label="Palavra"></div>
         
-        <div class="keyboard-container" id="keyboard-container" role="application" aria-label="Teclado">
-        </div>
+        <div class="keyboard-container" id="keyboard-container" role="application" aria-label="Teclado"></div>
 
         <button id="restart-button" class="restart-button">Novo Jogo</button>
     </div>
@@ -76,23 +68,20 @@
 {% endblock %}
 
 {% block extra_js %}
-    {{ block.super }} 
-    <script src="{% static 'Echo_app/js/jogo_da_forca.js' %}?v={% now 'U' %}"></script>
+    {{ block.super }}
 
-    <!-- Script leve para controlar a exibição das peças da forca -->
+    <!-- JS auxiliar: define showHangmanStep/resetHangman antes do jogo principal -->
     <script>
     (function () {
-        // pega todas as peças ordenadas por data-step
+        // seleciona as peças (devem ter .forca-piece e data-step)
         const pieces = Array.from(document.querySelectorAll('.forca-piece'))
-            .sort((a,b) => (parseInt(a.dataset.step) || 0) - (parseInt(b.dataset.step) || 0));
+            .sort((a,b) => (parseInt(a.dataset.step)||0) - (parseInt(b.dataset.step)||0));
 
-        // garante que galows (postes) estejam visíveis (classe forca-gallows controlada via CSS)
-        // função que mostra peças até o passo n (1..pieces.length)
-        function showHangmanStep(n) {
+        function showHangmanStep(n){
             const step = Number(n) || 0;
             pieces.forEach(p => {
-                const s = parseInt(p.dataset.step) || 0;
-                if (s <= step && s > 0) {
+                const s = parseInt(p.dataset.step)||0;
+                if(s>0 && s<=step){
                     p.classList.add('forca-piece-visible');
                     p.setAttribute('aria-hidden','false');
                 } else {
@@ -102,19 +91,27 @@
             });
         }
 
-        function resetHangman() {
+        function resetHangman(){
             pieces.forEach(p => {
                 p.classList.remove('forca-piece-visible');
                 p.setAttribute('aria-hidden','true');
             });
         }
 
-        // expõe no escopo global para que seu jogo (jogo_da_forca.js) possa chamar:
+        // expõe globalmente
         window.showHangmanStep = showHangmanStep;
         window.resetHangman = resetHangman;
 
-        // inicializa: limpa desenho
-        resetHangman();
+        // inicializa oculto
+        // se DOM ainda não estiver pronto, aguarde evento DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', resetHangman, { once: true });
+        } else {
+            resetHangman();
+        }
     })();
     </script>
+
+    <!-- script principal do jogo (usa showHangmanStep/resetHangman) -->
+    <script src="{% static 'Echo_app/js/jogo_da_forca.js' %}?v={% now 'U' %}"></script>
 {% endblock %}
