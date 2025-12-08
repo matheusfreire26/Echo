@@ -4,7 +4,7 @@
 {% block title %}Dashboard - Echo {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard_off.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
 {% endblock %}
 
 {% block content %}
@@ -19,7 +19,7 @@
 <section class="recommended-section">
     <div class="section-header">
         <a href="#" class="section-title-link">
-            <h2 class="section-title">Maior Engajamento</h2>
+            <h2 class="section-title">Bem-vindo, Usuário!</h2>
         </a>
         <a href="#" class="see-more subtle-btn">Ver mais</a>
     </div>
@@ -41,7 +41,7 @@
                                     {% if noticia.imagem %}
                                         <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
                                     {% else %}
-                                        <div class="image-placeholder recommended-placeholder">🔥</div>
+                                        <div class="image-placeholder recommended-placeholder">📰</div>
                                     {% endif %}
                                 </div>
                                 <div class="card-content">
@@ -62,8 +62,8 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-icon">🔥</div>
-                    <p>As notícias mais quentes aparecerão aqui em breve!</p>
+                    <div class="empty-icon">📰</div>
+                    <p>Ainda não há notícias para você.<br>Interaja com o app para receber recomendações!</p>
                 </div>
             {% endif %}
             
@@ -185,7 +185,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // =========================================
-    // 1. CARROSSEL DE MAIOR ENGAJAMENTO (COM TIMER DE 10S)
+    // 1. CARROSSEL DE RECOMENDADOS (COM TIMER DE 10S)
     // =========================================
     const recWrapper = document.getElementById('rec-slider-wrapper');
     const recPrevBtn = document.getElementById('rec-prev-btn');
@@ -197,23 +197,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (recWrapper && recPrevBtn && recNextBtn && recProgressBar) {
         
+        // Função para iniciar/reiniciar o timer e a barra
         function startAutoSlide() {
+            // 1. Limpa o timer anterior
             clearTimeout(autoSlideTimer);
 
-            // Reseta animação da barra
+            // 2. Reseta a barra visualmente (truque do offsetWidth para reiniciar animação CSS)
             recProgressBar.style.transition = 'none';
             recProgressBar.style.width = '0%';
-            void recProgressBar.offsetWidth; // Força repaint
+            void recProgressBar.offsetWidth; // Força o reflow/repaint do navegador
 
-            // Inicia animação
+            // 3. Inicia a animação da barra
             recProgressBar.style.transition = `width ${SLIDE_DURATION}ms linear`;
             recProgressBar.style.width = '100%';
 
+            // 4. Define o timer para trocar o slide
             autoSlideTimer = setTimeout(() => {
-                slide(1);
+                slide(1); // Vai para o próximo
             }, SLIDE_DURATION);
         }
 
+        // Função para rolar o slide
         function slide(direction) {
             const item = recWrapper.querySelector('.rec-slide-item');
             if (!item) return;
@@ -222,29 +226,39 @@ document.addEventListener('DOMContentLoaded', function() {
             const maxScroll = recWrapper.scrollWidth - recWrapper.clientWidth;
             const currentScroll = recWrapper.scrollLeft;
 
-            // Loop infinito
+            // Lógica de Loop (se chegar ao fim, volta pro começo)
             if (direction === 1 && currentScroll >= maxScroll - 5) {
+                // Se for pra frente e estiver no fim -> Volta pro início
                 recWrapper.scrollTo({ left: 0, behavior: 'smooth' });
             } else if (direction === -1 && currentScroll <= 5) {
+                // Se for pra trás e estiver no início -> Vai pro fim
                 recWrapper.scrollTo({ left: maxScroll, behavior: 'smooth' });
             } else {
+                // Movimento normal
                 recWrapper.scrollBy({
                     left: direction * scrollAmount,
                     behavior: 'smooth'
                 });
             }
+
+            // Reinicia a contagem sempre que mudar o slide
             startAutoSlide();
         }
 
+        // Eventos de Clique (Reiniciam o timer também)
         recPrevBtn.addEventListener('click', () => slide(-1));
         recNextBtn.addEventListener('click', () => slide(1));
 
+        // Inicia o ciclo assim que carregar
         startAutoSlide();
     }
 
 
     // =========================================
-    // 2. SLIDER DE URGENTES (MANTIDO IGUAL)
+    // 2. SLIDER DE URGENTES (MANTIDO)
+    // =========================================
+        // =========================================
+    // 2. SLIDER DE URGENTES (MANTIDO + HOVER ADJACENTE)
     // =========================================
     const navDots = document.querySelectorAll('.urgent-nav-dot');
     const newsCards = document.querySelectorAll('.urgent-news-card');
@@ -256,7 +270,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         function getCardWidth() {
             if (newsCards.length === 0) return 0;
-            return newsCards[0].offsetWidth + 20; 
+            // inclui gap aproximado já usado no CSS (20px)
+            return newsCards[0].offsetWidth + 20;
         }
 
         function updateNewsView(index) {
@@ -276,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
             newsCards.forEach((card, i) => {
                 card.classList.remove('active', 'partial-view', 'full-view');
                 if (i === index) card.classList.add('active', 'full-view');
-                else if (i === index + 1) card.classList.add('partial-view');
+                else if (i === index + 1 || i === index - 1) card.classList.add('partial-view');
                 else card.classList.add('full-view');
             });
             currentIndex = index;
@@ -286,6 +301,15 @@ document.addEventListener('DOMContentLoaded', function() {
             dot.addEventListener('click', function() {
                 const index = parseInt(this.getAttribute('data-index'));
                 if (index < totalNews) updateNewsView(index);
+            });
+        });
+
+        newsCards.forEach((card, i) => {
+            card.addEventListener('mouseenter', () => {
+                // só muda se for a notícia adjacente (próxima à direita ou à esquerda)
+                if (i === currentIndex + 1 || i === currentIndex - 1) {
+                    updateNewsView(i);
+                }
             });
         });
 
@@ -305,9 +329,9 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNewsView(0);
         window.addEventListener('resize', () => updateNewsView(currentIndex));
     }
-
+    
     // =========================================
-    // 3. FILTRO DE CATEGORIAS (AJAX)
+    // 3. FILTRO DE CATEGORIAS (AJAX - MANTIDO)
     // =========================================
     const categoryBubbles = document.querySelectorAll('.category-bubble-filter');
     const newsListContainer = document.getElementById('latest-news-list-container');
