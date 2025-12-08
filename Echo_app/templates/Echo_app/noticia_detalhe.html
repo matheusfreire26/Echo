@@ -90,6 +90,13 @@
         </div>
 
         {% if noticias_relacionadas %}
+        <div class="ad-container ad-before-related">
+            <div class="ad-label">Publicidade</div>
+            <div class="ad-content">
+                <img src="{% static 'Echo_app/images/propaganda3.jpg' %}" alt="Publicidade" class="ad-image">
+            </div>
+        </div>
+
         <section class="veja-tambem-section">
             <h2 class="vt-titulo-secao">Veja também</h2>
             <div class="vt-lista">
@@ -120,6 +127,13 @@
                 {% endfor %}
             </div>
         </section>
+
+        <div class="ad-container ad-after-related">
+            <div class="ad-label">Publicidade</div>
+            <div class="ad-content">
+                <img src="{% static 'Echo_app/images/propaganda4.jpg' %}" alt="Publicidade" class="ad-image">
+            </div>
+        </div>
         {% endif %}
 
     </article>

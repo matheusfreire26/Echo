@@ -269,6 +269,56 @@ body {
 }
 
 /* =====================================
+   ESPAÇOS DE PUBLICIDADE
+   ===================================== */
+.ad-container {
+    width: 100%;
+    text-align: center;
+    margin: 2rem auto;
+    padding: 0;
+}
+
+.ad-label {
+    font-size: 0.7rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    padding: 0 1rem;
+}
+
+.ad-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90px;
+    overflow: hidden;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.ad-image {
+    max-width: 100%;
+    width: 100%;
+    height: 300px;
+    display: block;
+    object-fit: cover;
+}
+
+/* Publicidade antes do Veja Também */
+.ad-before-related {
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+/* Publicidade depois do Veja Também */
+.ad-after-related {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* =====================================
    SEÇÃO VEJA TAMBÉM
    ===================================== */
 .veja-tambem-section {

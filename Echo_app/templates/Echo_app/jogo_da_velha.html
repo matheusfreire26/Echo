@@ -79,6 +79,49 @@
         .app-content {
             padding: 0; /* Remove o padding padrão da main se estiver atrapalhando */
         }
+
+        /* ===================================== */
+        /* ESPAÇOS DE PUBLICIDADE */
+        /* ===================================== */
+        .ad-container {
+            width: 100%;
+            max-width: 1200px; /* Mesma largura aproximada do grid do jogo */
+            text-align: center;
+            margin: 0 auto; /* Centraliza e remove margem superior */
+            padding: 0;
+        }
+
+        .ad-label {
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .ad-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .ad-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Publicidade depois do jogo */
+        .ad-after-game {
+            margin-top: 5px;
+            margin-bottom: 150px;
+        }
     </style>
 {% endblock %}
 
@@ -98,6 +141,13 @@
             <div class="cell" data-index="8"></div>
         </div>
         <button id="restart-button">Reiniciar Jogo</button>
+    </div>
+
+    <div class="ad-container ad-after-game">
+        <div class="ad-label">Publicidade</div>
+        <div class="ad-content">
+            <img src="{% static 'Echo_app/images/propaganda4.jpg' %}" alt="Publicidade" class="ad-image">
+        </div>
     </div>
 {% endblock %}
 
