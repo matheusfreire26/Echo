@@ -7,10 +7,8 @@
 <link rel="stylesheet" href="{% static 'Echo_app/css/dashboard.css' %}?v={% now 'U' %}">
 
 <style>
-    /* --- ESTRUTURA GERAL (Igual ao de Curtidas) --- */
-    body {
-        background-color: #f0f2f5;
-    }
+    /* --- ESTRUTURA GERAL --- */
+    body { background-color: #f0f2f5; }
 
     .main-wrapper {
         padding: 30px 0;
@@ -18,121 +16,200 @@
         justify-content: center;
     }
 
-    /* Container Principal - Largo e Centralizado */
     .salvos-container {
         width: 100%;
         max-width: 1000px;
         margin: 0 auto;
         padding: 0 20px;
-        background-color: transparent;
     }
 
-    /* --- TÍTULO --- */
-    .page-header {
-        text-align: center;
+    /* --- CABEÇALHO E PESQUISA --- */
+    .page-header { text-align: center; margin-bottom: 30px; }
+    .page-title { font-size: 2rem; font-weight: 800; color: #1a1a1a; margin: 0; }
+
+    .search-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px; /* Espaço entre barra e botão + */
         margin-bottom: 30px;
-    }
-
-    .page-title {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #1a1a1a;
-        margin: 0;
-    }
-
-    /* --- BARRA DE PESQUISA --- */
-    .search-form {
-        position: relative;
-        margin-bottom: 30px;
-        width: 100%;
-        max-width: 700px;
+        max-width: 800px;
         margin-left: auto;
         margin-right: auto;
     }
 
+    .search-form {
+        flex-grow: 1;
+        position: relative;
+    }
+
     .search-input {
         width: 100%;
-        height: 55px;
-        background-color: #ffffff;
+        height: 50px;
+        background-color: #fff;
         border: 1px solid #ddd;
-        border-radius: 30px;
-        padding: 0 60px 0 30px;
+        border-radius: 25px;
+        padding: 0 50px 0 25px;
         font-size: 1.1rem;
-        color: #333;
         outline: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: all 0.2s;
+        transition: border-color 0.2s;
     }
 
-    .search-input:focus {
-        border-color: #ed1c24; /* Vermelho JC */
-        box-shadow: 0 4px 12px rgba(237, 28, 36, 0.15);
-    }
-
-    .search-input::placeholder {
-        color: #999;
-    }
+    .search-input:focus { border-color: #ed1c24; }
 
     .search-btn {
         position: absolute;
         right: 15px;
         top: 50%;
         transform: translateY(-50%);
-        height: 45px;
-        width: 45px;
         border: none;
         background: transparent;
         color: #666;
         cursor: pointer;
+        font-size: 1.1rem;
+    }
+
+    /* Botão de Adicionar (Para criar coleção rápida) */
+    .add-btn-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        color: #333;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .add-btn-circle:hover {
+        background-color: #ed1c24;
+        color: #fff;
+        border-color: #ed1c24;
     }
 
-    .search-btn:hover {
+    /* --- SEÇÃO DE COLEÇÕES (NOVO) --- */
+    .section-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        margin-bottom: 15px;
+        padding: 0 5px;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    .section-link {
+        font-size: 0.9rem;
+        color: #666;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .section-link:hover { color: #ed1c24; }
+
+    /* Scroll Horizontal das Coleções */
+    .collections-scroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 15px; /* Espaço para scrollbar invisivel */
+        margin-bottom: 30px;
+        scrollbar-width: none;
+    }
+    .collections-scroll::-webkit-scrollbar { display: none; }
+
+    /* Card da Coleção */
+    .collection-card {
+        min-width: 160px;
+        width: 160px;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        group;
+    }
+
+    .collection-thumb-box {
+        width: 100%;
+        height: 120px;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        background-color: #e0e0e0;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .collection-card:hover .collection-thumb-box {
+        transform: translateY(-3px);
+    }
+
+    .collection-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Estilo para o Card "Nova Coleção" */
+    .create-collection-box {
+        background-color: #fff;
+        border: 2px dashed #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: #ed1c24;
+        font-size: 2rem;
+    }
+    .create-collection-box:hover {
+        border-color: #ed1c24;
+        background-color: #fff5f5;
     }
 
-    /* --- FILTROS (BOLHAS) --- */
+    .collection-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .collection-count {
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    /* --- FILTROS (Mantidos) --- */
     .category-scroll {
         display: flex;
         overflow-x: auto;
-        gap: 12px;
-        margin-bottom: 35px;
-        padding-bottom: 10px;
+        gap: 10px;
+        margin-bottom: 25px;
         scrollbar-width: none;
-        justify-content: center;
     }
     
-    .category-scroll::-webkit-scrollbar { display: none; }
-
     .bubble {
-        white-space: nowrap;
-        padding: 10px 24px;
-        border-radius: 25px;
-        font-size: 1rem;
-        font-weight: 600;
-        text-decoration: none;
+        padding: 8px 20px;
+        border-radius: 20px;
         border: 1px solid #ccc;
         color: #555;
-        background-color: transparent;
-        transition: all 0.2s ease;
+        text-decoration: none;
+        font-weight: 600;
+        white-space: nowrap;
+        background: transparent;
     }
-
-    .bubble:hover {
-        border-color: #333;
-        color: #333;
-    }
-
     .bubble.active {
         background-color: #ed1c24;
         color: white;
         border-color: #ed1c24;
-        box-shadow: 0 3px 8px rgba(237, 28, 36, 0.3);
     }
 
-    /* --- GRID DE NOTÍCIAS (Cards Grandes) --- */
+    /* --- GRID DE ITENS SALVOS (Mantido) --- */
     .news-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
@@ -143,85 +220,29 @@
         position: relative;
         border-radius: 16px;
         overflow: hidden;
-        aspect-ratio: 3/4; /* Formato Retrato */
-        background-color: #e1e8ed;
+        aspect-ratio: 3/4;
+        background-color: #ddd;
         text-decoration: none;
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         transition: transform 0.2s;
     }
+    .news-card:hover { transform: translateY(-4px); }
 
-    .news-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-
-    .card-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Gradiente para leitura do texto */
-    .card-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        height: 70%;
-    }
-
-    .card-title {
-        color: #fff;
-        font-size: 1.1rem;
-        font-weight: 700;
-        line-height: 1.3;
-        margin: 0 0 5px 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-    }
-
-    /* Pequeno indicador de "Salvo" no card */
-    .saved-indicator {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.8);
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-top: 5px;
-    }
-
-    /* --- EMPTY STATE --- */
-    .empty-state {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 60px 20px;
-        background-color: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
+    .card-img { width: 100%; height: 100%; object-fit: cover; }
     
-    .empty-icon {
-        font-size: 3rem;
-        color: #ddd;
-        margin-bottom: 20px;
+    .card-overlay {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        padding: 20px;
+        display: flex; flex-direction: column; justify-content: flex-end; height: 70%;
     }
+    .card-title { color: white; font-weight: 700; margin: 0; font-size: 1.1rem; line-height: 1.3; }
+    
+    .manage-link {
+        font-size: 0.9rem; color: #999; cursor: pointer;
+    }
+    .manage-link:hover { color: #333; }
 
-    .empty-btn-link {
-        color: #ed1c24;
-        font-weight: 700;
-        text-decoration: none;
-        margin-top: 15px;
-        font-size: 1.1rem;
-        display: inline-block;
-    }
 </style>
 {% endblock %}
 
@@ -234,69 +255,93 @@
             <h2 class="page-title">Salvos</h2>
         </div>
 
-        <form method="GET" action="{% url 'Echo_app:noticias_salvas' %}" class="search-form">
-            <input type="text" name="q" placeholder="Pesquisar" class="search-input" value="{{ request.GET.q|default:'' }}">
-            
-            {% if categoria_ativa %}
-                <input type="hidden" name="categoria" value="{{ categoria_ativa }}">
-            {% endif %}
-
-            <button type="submit" class="search-btn">
-                <i class="fas fa-search"></i>
+        <div class="search-wrapper">
+            <form method="GET" action="{% url 'Echo_app:noticias_salvas' %}" class="search-form">
+                <input type="text" name="q" placeholder="Pesquisar nos salvos..." class="search-input" value="{{ request.GET.q|default:'' }}">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+            <button class="add-btn-circle" title="Criar nova coleção">
+                <i class="fas fa-plus"></i>
             </button>
-        </form>
+        </div>
+
+        <div class="section-label">
+            <h3 class="section-title">Coleções</h3>
+            <a href="#" class="section-link">Ver tudo</a>
+        </div>
+
+        <div class="collections-scroll">
+            
+            <a href="#" class="collection-card">
+                <div class="collection-thumb-box create-collection-box">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <h4 class="collection-name">Nova coleção</h4>
+            </a>
+
+            <a href="#" class="collection-card">
+                <div class="collection-thumb-box">
+                    <img src="https://via.placeholder.com/150" class="collection-thumb">
+                </div>
+                <h4 class="collection-name">Política BR</h4>
+                <span class="collection-count">12 itens</span>
+            </a>
+
+            <a href="#" class="collection-card">
+                <div class="collection-thumb-box">
+                    <img src="https://via.placeholder.com/150/000000/FFFFFF" class="collection-thumb">
+                </div>
+                <h4 class="collection-name">Para ler tarde</h4>
+                <span class="collection-count">5 itens</span>
+            </a>
+
+            <a href="#" class="collection-card">
+                <div class="collection-thumb-box">
+                    <img src="https://via.placeholder.com/150/ed1c24/FFFFFF" class="collection-thumb">
+                </div>
+                <h4 class="collection-name">Tecnologia</h4>
+                <span class="collection-count">8 itens</span>
+            </a>
+
+        </div>
+
+        <div class="section-label" style="margin-top: 10px;">
+            <h3 class="section-title">Itens salvos</h3>
+            <span class="manage-link">Gerenciar</span>
+        </div>
 
         <div class="category-scroll">
             {% url 'Echo_app:noticias_salvas' as base_url %}
             {% with q_param=request.GET.q|default:'' %}
-            
-            <a href="{{ base_url }}?q={{ q_param }}" 
-               class="bubble {% if not categoria_ativa %}active{% endif %}">
-                Tudo
-            </a>
-            
-            {% for cat in categorias_disponiveis %}
-                <a href="{{ base_url }}?categoria={{ cat.nome }}&q={{ q_param }}" 
-                   class="bubble {% if categoria_ativa == cat.nome %}active{% endif %}">
-                    {{ cat.nome }}
-                </a>
-            {% endfor %}
-            
+            <a href="{{ base_url }}" class="bubble {% if not categoria_ativa %}active{% endif %}">Tudo</a>
+            <a href="{{ base_url }}?categoria=Política" class="bubble">Política</a>
+            <a href="{{ base_url }}?categoria=Educação" class="bubble">Educação</a>
+            <a href="{{ base_url }}?categoria=Economia" class="bubble">Economia</a>
             {% endwith %}
         </div>
 
         <div class="news-grid">
-            
             {% if noticias_salvas %}
                 {% for noticia in noticias_salvas %}
                 <a href="{% url 'Echo_app:noticia_detalhe' pk=noticia.pk %}" class="news-card">
-                    
                     {% if noticia.imagem %}
                         <img src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}" class="card-img">
                     {% else %}
                         <div style="height:100%; display:flex; align-items:center; justify-content:center; background:#ccc; color:#666;">
-                            <i class="fas fa-bookmark fa-3x"></i>
+                            <i class="fas fa-bookmark fa-2x"></i>
                         </div>
                     {% endif %}
-
                     <div class="card-overlay">
                         <h3 class="card-title">{{ noticia.titulo }}</h3>
-                        <div class="saved-indicator">
-                            <i class="fas fa-bookmark"></i> Salvo
-                        </div>
                     </div>
                 </a>
                 {% endfor %}
-            
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="far fa-bookmark"></i></div>
-                    <h4 style="color:#666; margin:0 0 10px 0; font-size: 1.2rem;">Nenhum item salvo encontrado.</h4>
-                    <p style="color:#999; margin-bottom: 20px;">Salve notícias para ler mais tarde.</p>
-                    <a href="{% url 'Echo_app:dashboard' %}" class="empty-btn-link">Ir para o Dashboard</a>
+                <div style="grid-column: 1/-1; text-align:center; padding: 40px; background:#fff; border-radius:12px;">
+                    <i class="far fa-bookmark fa-2x" style="color:#ccc; margin-bottom:10px;"></i>
+                    <p style="color:#666;">Nenhum item salvo ainda.</p>
                 </div>
             {% endif %}
-
         </div>
 
     </div>
