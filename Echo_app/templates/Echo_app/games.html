@@ -17,26 +17,26 @@
         <div class="games-list-grid">
             
             <a href="{% url 'Echo_app:jogo_da_velha' %}" class="game-card">
-                <div class="game-icon"></div>
+                <div class="game-icon icon-velha"></div>
                 <h2>Jogo da Velha</h2>
                 <p>Desafie o bot para um duelo clássico de 3 em linha.</p>
                 <span class="status-tag easy">Fácil</span>
             </a>
 
             <a href="{% url 'Echo_app:jogo_da_memoria' %}" class="game-card">
-                <div class="game-icon"></div>
+                <div class="game-icon icon-memoria"></div>
                 <h2>Jogo da Memória</h2>
                 <p>Teste sua memória encontrando todos os pares de emojis.</p>
                 <span class="status-tag medium">Médio</span>
             </a>
             
             <a href="{% url 'Echo_app:jogo_da_forca' %}" class="game-card">
-                <div class="game-icon"></div>
+                <div class="game-icon icon-forca"></div>
                 <h2>Jogo da Forca</h2>
                 <p>Descubra a palavra secreta antes que o boneco seja enforcado.</p>
                 <span class="status-tag hard">Difícil</span>
             </a>
-            </div>
+        </div>
     </div>
 {% endblock %}
 

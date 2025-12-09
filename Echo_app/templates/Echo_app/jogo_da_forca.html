@@ -11,47 +11,55 @@
 <div class="hangman-container">
     <h1>Jogo da Forca</h1>
     
-    <div class="game-area">
+    <div class="game-wrapper">
         
-        <div class="hangman-drawing" aria-hidden="true">
-            <div id="forca-gabarito">
-                <!-- GALLOWS / POSTES (sempre visíveis) -->
-                <div class="forca-base-1" aria-hidden="true"></div>
-                <div class="forca-poste-vertical" aria-hidden="true"></div>
-                <div class="forca-viga" aria-hidden="true"></div>
-                <div class="forca-laco" aria-hidden="true"></div>
-
-                <!-- PEÇAS DO BONECO (iniciam ocultas; reveladas por data-step) -->
-                <div class="forca-cabeca forca-piece" data-step="1" aria-hidden="true"></div>
-                <div class="forca-tronco forca-piece" data-step="2" aria-hidden="true"></div>
-                <div class="forca-braco-e forca-piece" data-step="3" aria-hidden="true"></div>
-                <div class="forca-braco-d forca-piece" data-step="4" aria-hidden="true"></div>
-                <div class="forca-perna-e forca-piece" data-step="5" aria-hidden="true"></div>
-                <div class="forca-perna-d forca-piece" data-step="6" aria-hidden="true"></div>
+        <div class="display-feedback-area">
+            
+            <div class="hangman-drawing">
+                <img id="hangman-image" 
+                     src="{% static 'Echo_app/images/forca1.jpeg' %}" 
+                     alt="Desenho da Forca" 
+                     class="hangman-img-display">
             </div>
 
-            <div class="game-messages" role="status" aria-live="polite">
-                <p id="tema-display">Tema: <span></span></p>
+            <div class="game-messages">
                 <p id="message-display"></p>
             </div>
         </div>
 
-        <div class="word-display" id="word-display" aria-label="Palavra"></div>
-        
-        <div class="keyboard-container" id="keyboard-container" role="application" aria-label="Teclado"></div>
-
-        <button id="restart-button" class="restart-button">Novo Jogo</button>
+        <div class="input-area">
+            
+            <div class="game-info wide-theme">
+                <p class="game-theme">Tema: <span id="tema-display-word"></span>
+                    
+                    <button id="show-hint-button" class="hint-button" title="Mostrar Dica">
+                        💡
+                    </button>
+                </p>
+                
+                <p id="hint-text" class="hidden-hint">
+                    <span id="tema-display-hint"></span>
+                </p>
+            </div>
+            
+            <div class="word-display" id="word-display">
+                </div>
+            
+            <div class="keyboard-container" id="keyboard-container">
+                </div>
+            <button id="restart-button" class="restart-button">Novo Jogo</button>
+        </div>
     </div>
 
-    <hr>
+    <hr class="separator">
 
     <div class="history-section">
         <h3>Tentativas Anteriores</h3>
         <table id="guesses-table">
             <thead>
                 <tr>
-                    <th>Letras Erradas</th>
-                    <th>Letras Corretas (Já na Palavra)</th>
+                    <th>Letras Erradas (Erros: <span id="erros-count">0</span>/8)</th>
+                    <th>Letras Corretas</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,57 +69,17 @@
                 </tr>
             </tbody>
         </table>
-        <p class="history-hint">* As letras corretas exibidas acima são as que já fazem parte da palavra, excluindo as que você ainda não acertou.</p>
+        <p class="history-hint">* As letras corretas exibidas acima são aquelas que você já adivinhou e que fazem parte da palavra.</p>
     </div>
 
 </div>
 {% endblock %}
 
 {% block extra_js %}
-    {{ block.super }}
-
-    <!-- JS auxiliar: define showHangmanStep/resetHangman antes do jogo principal -->
+    {{ block.super }} 
     <script>
-    (function () {
-        // seleciona as peças (devem ter .forca-piece e data-step)
-        const pieces = Array.from(document.querySelectorAll('.forca-piece'))
-            .sort((a,b) => (parseInt(a.dataset.step)||0) - (parseInt(b.dataset.step)||0));
-
-        function showHangmanStep(n){
-            const step = Number(n) || 0;
-            pieces.forEach(p => {
-                const s = parseInt(p.dataset.step)||0;
-                if(s>0 && s<=step){
-                    p.classList.add('forca-piece-visible');
-                    p.setAttribute('aria-hidden','false');
-                } else {
-                    p.classList.remove('forca-piece-visible');
-                    p.setAttribute('aria-hidden','true');
-                }
-            });
-        }
-
-        function resetHangman(){
-            pieces.forEach(p => {
-                p.classList.remove('forca-piece-visible');
-                p.setAttribute('aria-hidden','true');
-            });
-        }
-
-        // expõe globalmente
-        window.showHangmanStep = showHangmanStep;
-        window.resetHangman = resetHangman;
-
-        // inicializa oculto
-        // se DOM ainda não estiver pronto, aguarde evento DOMContentLoaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', resetHangman, { once: true });
-        } else {
-            resetHangman();
-        }
-    })();
+        // Variável global no HTML para o JS acessar o caminho static do Django
+        const STATIC_IMAGE_PATH = "{% static 'Echo_app/images/' %}";
     </script>
-
-    <!-- script principal do jogo (usa showHangmanStep/resetHangman) -->
     <script src="{% static 'Echo_app/js/jogo_da_forca.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

@@ -1,123 +1,182 @@
 /* --- Echo_app/static/Echo_app/css/games.css --- */
 
-/* ----------------------------------
- * 1. Layout Principal do Hub
- * ---------------------------------- */
+/* =====================================
+   VARIÁVEIS DE COR & LAYOUT BASE
+   ===================================== */
+:root {
+    --cor-primaria: #E10F26; /* Vermelho principal (JC) */
+    --cor-fundo: #F0F2F5;    /* Fundo suave */
+    --cor-surface: #FFFFFF;  /* Fundo dos cards */
+    --cor-texto: #1C1E21;
+    --cor-texto-secundario: #6c757d;
+    --cor-borda: #CED0D4;
+    --cor-facil: #4CAF50;    /* Verde */
+    --cor-medio: #FFC107;    /* Amarelo/Laranja */
+    --cor-dificil: #F44336;  /* Vermelho */
+}
 
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* =====================================
+   CONTAINER PRINCIPAL
+   ===================================== */
 .games-hub-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 20px;
-    background-color: #ffffff; /* Fundo leve para destacar o conteúdo */
-    min-height: calc(100vh - 120px); /* Ocupa a altura restante da tela */
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
 }
 
 .games-hub-container h1 {
-    color: #343a40;
-    margin-bottom: 10px;
-    font-size: 2.5rem;
-}
-
-.subtitle {
-    color: #6c757d;
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-}
-
-/* ----------------------------------
- * 2. Grid e Cards
- * ---------------------------------- */
-
-.games-list-grid {
-    display: grid;
-    /* Colunas responsivas: 1 coluna em telas menores, 2 ou mais em telas maiores */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    width: 100%;
-    max-width: 1000px; /* Limite a largura para melhor leitura */
-}
-
-.game-card {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 200px;
-}
-
-.game-card:hover {
-    transform: translateY(-5px); /* Efeito de elevação */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.game-card h2 {
-    font-size: 1.5rem;
-    color: #007bff; /* Cor primária */
-    margin-top: 10px;
-}
-
-.game-card p {
-    color: #6c757d;
-    font-size: 0.95rem;
-    flex-grow: 1; /* Permite que o parágrafo ocupe o espaço */
-    margin-bottom: 15px;
-}
-
-.game-icon {
+    color: var(--cor-primaria);
     font-size: 3rem;
     margin-bottom: 10px;
 }
 
-/* ----------------------------------
- * 3. Status Tags
- * ---------------------------------- */
+.subtitle {
+    font-size: 1.25rem;
+    color: var(--cor-texto-secundario);
+    margin-bottom: 40px;
+}
 
+/* =====================================
+   GRID DE JOGOS
+   ===================================== */
+.games-list-grid {
+    display: grid;
+    /* 3 colunas em telas grandes, mínimo de 300px por coluna */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 0 10px;
+}
+
+/* =====================================
+   CARD INDIVIDUAL DO JOGO
+   ===================================== */
+.game-card {
+    background-color: var(--cor-surface);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--cor-texto);
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden; /* Garante que elementos internos respeitem o border-radius */
+}
+
+/* Efeito Hover: levanta o card e aumenta a sombra */
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.game-card h2 {
+    color: var(--cor-primaria);
+    font-size: 1.8rem;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.game-card p {
+    color: var(--cor-texto-secundario);
+    font-size: 1rem;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Empurra a tag de status para baixo */
+}
+
+/* =====================================
+   ÍCONES (Representação visual)
+   ===================================== */
+.game-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--cor-fundo);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    border: 3px solid var(--cor-borda);
+}
+
+/* Cores e conteúdo dos ícones */
+.icon-velha::before {
+    content: "✖️";
+    color: #007bff; /* Azul para o Jogo da Velha */
+}
+.icon-memoria::before {
+    content: "🧠";
+    color: #8A2BE2; /* Roxo para o Jogo da Memória */
+}
+.icon-forca::before {
+    content: "🔗"; /* Ícone de elo/corrente */
+    color: var(--cor-primaria); /* Vermelho para a Forca */
+}
+
+
+/* =====================================
+   TAG DE STATUS (Dificuldade)
+   ===================================== */
 .status-tag {
     display: inline-block;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
+    padding: 6px 15px;
+    border-radius: 20px;
     font-weight: bold;
+    font-size: 0.9rem;
     text-transform: uppercase;
-    align-self: flex-end; /* Alinha o tag no canto inferior direito */
-    margin-top: auto; /* Empurra o tag para o final do card */
+    letter-spacing: 0.5px;
+    position: absolute; /* Ajusta a posição da tag */
+    top: 15px;
+    right: 15px;
 }
 
-/* Cores das Tags */
 .status-tag.easy {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--cor-facil);
+    color: white;
 }
-
 .status-tag.medium {
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: var(--cor-medio);
+    color: var(--cor-texto);
+}
+.status-tag.hard {
+    background-color: var(--cor-dificil);
+    color: white;
 }
 
-.status-tag.coming-soon {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-/* ----------------------------------
- * 4. Estado Desabilitado
- * ---------------------------------- */
-
-.game-card.disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-    pointer-events: none; /* Desativa totalmente o clique */
-}
-
-.game-card.disabled:hover {
-    transform: none;
-    box-shadow: none;
+/* =====================================
+   RESPONSIVIDADE
+   ===================================== */
+@media (max-width: 768px) {
+    .games-hub-container {
+        margin: 20px auto;
+        padding: 10px;
+    }
+    .games-list-grid {
+        /* Apenas 1 coluna em telas menores */
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .game-card {
+        padding: 20px;
+    }
+    .games-hub-container h1 {
+        font-size: 2.5rem;
+    }
+    .subtitle {
+        font-size: 1.1rem;
+    }
+    .status-tag {
+        position: static; /* Volta para o fluxo normal em telas pequenas */
+        margin-top: 10px;
+    }
 }

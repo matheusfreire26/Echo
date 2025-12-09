@@ -38,24 +38,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================
     let palavraSecreta = '';
     let temaAtual = '';
+    let dicaAtual = ''; // Variável para armazenar a dica
     let letrasAdivinhadas = [];
     let erros = 0;
+    const maxErros = 8; // MÁXIMO DE ERROS ajustado para 8
     let jogoAtivo = true;
 
     // Elementos DOM
     const wordDisplay = document.getElementById('word-display');
     const keyboardContainer = document.getElementById('keyboard-container');
-    const forcaGabarito = document.getElementById('forca-gabarito');
+    const hangmanImage = document.getElementById('hangman-image'); 
     const messageDisplay = document.getElementById('message-display');
-    const temaDisplay = document.querySelector('#tema-display span');
     const incorrectGuessesTable = document.getElementById('incorrect-guesses');
     const correctGuessesTable = document.getElementById('correct-guesses-table');
+    const errosCountDisplay = document.getElementById('erros-count'); 
     const restartButton = document.getElementById('restart-button');
-
-    // Contagem de peças existentes no HTML (peças do boneco, com data-step)
-    const forcaPieces = Array.from(document.querySelectorAll('.forca-piece'))
-        .sort((a, b) => (parseInt(a.dataset.step) || 0) - (parseInt(b.dataset.step) || 0));
-    const maxErros = Math.max(forcaPieces.length, 1); // garante >=1
+    
+    // NOVOS ELEMENTOS PARA TEMA E DICA
+    const showHintButton = document.getElementById('show-hint-button');
+    const hintTextContainer = document.getElementById('hint-text');
+    const temaDisplayWord = document.getElementById('tema-display-word');
+    const temaDisplayHint = document.getElementById('tema-display-hint');
+    
+    // Verifica se a variável STATIC_IMAGE_PATH (definida no HTML) existe
+    if (typeof STATIC_IMAGE_PATH === 'undefined') {
+        console.error("A variável STATIC_IMAGE_PATH não está definida no HTML. O jogo não funcionará corretamente.");
+        return; 
+    }
 
     // =====================================
     // FUNÇÕES DE LÓGICA
@@ -68,9 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
         letrasAdivinhadas = [];
         erros = 0;
         jogoAtivo = true;
-        // NÃO limpamos o innerHTML do forca-gabarito (peças são estáticas no HTML)
         messageDisplay.textContent = '';
         messageDisplay.classList.remove('game-over', 'game-win');
+
+        // Resetar o desenho da forca para a primeira imagem (forca1.jpeg)
+        hangmanImage.src = `${STATIC_IMAGE_PATH}forca1.jpeg`;
 
         // Seleciona tema e palavra aleatória
         const temas = Object.keys(palavrasPorTema);
@@ -79,20 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const palavraObj = palavrasDoTema[Math.floor(Math.random() * palavrasDoTema.length)];
 
         palavraSecreta = palavraObj.palavra;
+        dicaAtual = palavraObj.dica; // Armazena a dica
 
         // Atualiza UI
-        temaDisplay.textContent = `${temaAtual} (Dica: ${palavraObj.dica})`;
+        temaDisplayWord.textContent = temaAtual; // Exibe apenas o TEMA
+        temaDisplayHint.textContent = dicaAtual; // Armazena a dica
+        hintTextContainer.classList.remove('visible'); // Esconde a dica
+        showHintButton.disabled = false; // Habilita o botão de dica
+        
         renderWordDisplay();
         renderKeyboard();
         updateHistoryTable();
-
-        // tenta resetar desenho se função estiver disponível (script inline pode definir)
-        if (typeof window.resetHangman === 'function') {
-            window.resetHangman();
-        } else {
-            // fallback: remove classe visível das peças se existirem
-            forcaPieces.forEach(p => p.classList.remove('forca-piece-visible'));
-        }
     }
 
     /**
@@ -116,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.textContent = letra;
             button.setAttribute('data-letra', letra);
             button.addEventListener('click', () => handleGuess(letra, button));
+            button.disabled = letrasAdivinhadas.includes(letra);
             keyboardContainer.appendChild(button);
         });
     }
@@ -139,43 +148,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // Errou
             button.classList.add('incorrect');
             erros++;
-            drawHangmanPart();
+            drawHangmanPart(); // Chama a função para mudar a imagem
             updateHistoryTable();
             checkGameStatus();
         }
     }
 
     /**
-     * Desenha as partes da forca conforme número de erros.
-     * Agora usa as peças estáticas do DOM (com data-step) ou funções globais se existirem.
+     * Desenha as partes da forca conforme número de erros (Muda a imagem JPEG).
      */
     function drawHangmanPart() {
-        // limita erros ao maxErros
-        if (erros < 0) erros = 0;
-        if (erros > maxErros) erros = maxErros;
-
-        // Se função global do template estiver disponível, use-a (preferível)
-        if (typeof window.showHangmanStep === 'function') {
-            try {
-                window.showHangmanStep(erros);
-                return;
-            } catch (e) {
-                // segue para fallback se erro
-                console.warn('showHangmanStep falhou, usando fallback local.', e);
-            }
+        if (erros > 0 && erros <= maxErros) {
+             hangmanImage.src = `${STATIC_IMAGE_PATH}forca${erros}.jpeg`;
         }
+        
+        errosCountDisplay.textContent = `${erros}`;
+    }
 
-        // Fallback: aplica classe nas peças correspondentes
-        forcaPieces.forEach(p => {
-            const s = parseInt(p.dataset.step) || 0;
-            if (s > 0 && s <= erros) {
-                p.classList.add('forca-piece-visible');
-                p.setAttribute('aria-hidden', 'false');
-            } else {
-                p.classList.remove('forca-piece-visible');
-                p.setAttribute('aria-hidden', 'true');
-            }
-        });
+    /**
+     * Exibe a dica e desabilita o botão de lâmpada.
+     */
+    function showHint() {
+        if (!showHintButton.disabled) {
+            hintTextContainer.classList.add('visible');
+            showHintButton.disabled = true; // Desabilita após o primeiro uso
+        }
     }
 
     /**
@@ -187,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const letrasCorretas = letrasAdivinhadas.filter(letra => palavraSecreta.includes(letra));
         correctGuessesTable.textContent = letrasCorretas.join(', ');
+        
+        errosCountDisplay.textContent = `${erros}`; 
     }
 
     /**
@@ -201,19 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDisplay.classList.remove('game-over');
             messageDisplay.classList.add('game-win');
             disableKeyboard();
+            showHintButton.disabled = true;
+            hintTextContainer.classList.add('visible'); // Mostra a dica na vitória
         } else if (erros >= maxErros) {
             jogoAtivo = false;
-            messageDisplay.innerHTML = `💀 Fim de jogo! A palavra era: <strong>${palavraSecreta}</strong>`;
+            messageDisplay.innerHTML = `Fim de jogo! A palavra era: <strong>${palavraSecreta}</strong>`;
             messageDisplay.classList.remove('game-win');
             messageDisplay.classList.add('game-over');
             disableKeyboard();
+            showHintButton.disabled = true;
+            hintTextContainer.classList.add('visible'); // Mostra a dica na derrota
 
-            // mostra o boneco completo (garante exibição total)
-            if (typeof window.showHangmanStep === 'function') {
-                try { window.showHangmanStep(maxErros); } catch (e) {}
-            } else {
-                forcaPieces.forEach(p => p.classList.add('forca-piece-visible'));
-            }
+            // Garante que a imagem final (forca8.jpeg) seja exibida
+            hangmanImage.src = `${STATIC_IMAGE_PATH}forca${maxErros}.jpeg`;
         }
     }
 
@@ -230,6 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // EVENT LISTENERS
     // =====================================
     restartButton.addEventListener('click', initializeGame);
+    showHintButton.addEventListener('click', showHint); // Listener para o botão de lâmpada
+
+    // Adiciona listener para teclado físico
+    document.addEventListener('keydown', (event) => {
+        const key = event.key.toUpperCase();
+        if (letrasAlfabeto.includes(key) && jogoAtivo) {
+            const button = document.querySelector(`.key-button[data-letra="${key}"]`);
+            if (button && !button.disabled) {
+                // Simula o clique do botão para acionar a mesma lógica
+                handleGuess(key, button);
+            }
+        }
+    });
 
     // Inicia o jogo
     initializeGame();
