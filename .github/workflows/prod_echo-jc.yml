@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - echo-jc
+name: Build and deploy Python app to Azure Web App - ECHO-jc
 
 on:
   push:
@@ -71,6 +71,22 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'echo-jc'
+          app-name: 'ECHO-jc'
           slot-name: 'Production'
           
+      - name: Install dependencies
+        run: pip install -r ECHO/requirements.txt
+
+      - name: Cleaning testing files
+        run: |
+          cd ECHO/
+          rm db.sqlite3
+          rm .env
+          cd ..
+
+      - name: Zip artifact for deployment
+        run: |
+          cd ECHO/
+          zip release.zip ./* -r
+          cd ..
+          mv ECHO/release.zip .
