@@ -34,8 +34,14 @@ else:
     SECURE_SSL_REDIRECT = \
         os.getenv('SECURE_SSL_REDIRECT', '0').lower() in ['true', 't', '1']
 
-    if SECURE_SSL_REDIRECT:
-        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # CRÍTICO: Define o SECURE_PROXY_SSL_HEADER para o Azure.
+    # Isso garante que o Django confie no cabeçalho HTTPS do proxy reverso, 
+    # resolvendo a falha de CSRF no login.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # O bloco condicional original (agora desnecessário) pode ser removido 
+    # ou mantido, mas o SECURE_PROXY_SSL_HEADER deve ser definido fora dele
+    # para garantir que esteja sempre ativo em produção.
 
     DATABASES = {
         'default': {
