@@ -57,11 +57,20 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 
 ## 🔗 Links Importantes  
 ---
-## 📦 Entregáveis  
+## 📦 Entregáveis 
+
+<details>
+  <summary>- ✅ Semana 9 </summary>
+
+  Implementação dos modelos django, presentes do admin.
+  Histórias dos usuários bem definidas.
+  
+</details>
+
 <details>
   <summary>- ✅ Semana 10 </summary>
 
-  Implementação do Login do usuário.
+  Implementação do Login do usuário (página funcional).
   
 </details>
 
@@ -91,8 +100,8 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 
   Implementação da barra superior (menu, uol, perfil, barra de pesquisa e notificações)
 
-  Link dos
-  []()
+  Link do vídeo dos testes automotizados
+  [link](https://youtu.be/sCLyI_-rSE0)
   
 </details>
 
@@ -102,16 +111,13 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
   Implementação de últimas notícias, notificações, página do perfil e página sem login.
 
   Link do deploy
-  []()
-
-  Link do screencast do deploy
-  []()
+  [echo-jc.azurewebsites.net](echo-jc.azurewebsites.net)
 
   Link do screencast do CI/CD
-  []()
+  [Screencast](https://youtu.be/WaGwXmZqoJA)
 
   Link do screencast dos Testes Automatizados
-  []()
+  [Screecast](https://youtu.be/sCLyI_-rSE0)
   
 </details>
 
@@ -128,19 +134,23 @@ Com ele, o público pode **navegar** pelo portal com mais facilidade, **acessar 
 <details>
   <summary>- ✅ Semana 16 </summary>
 
-  Implementação do novo interior das notícias, aba de curtidas, aba de salvos, área de publicações, configurações da conta e pop-up.
+  Implementação do envio de emials, jogo da memória e jogo da velha.
+  Criação da área destinada à edição do perfil (avatar, configuração da conta e etc)
 
-  Link do relatório de Programação em par
-  [Relatório](https://docs.google.com/document/d/1XjHNZ55Ojp-XdYE7mFOUtEuQm9QJk_qDLDxG13kPsxA/edit?tab=t.0)
+  Link dos testes CI/CD (Pipeline)
+  [Screencast](https://youtu.be/n-cECBiz7Dc)
+
+  Link dos testes automatizados
+  [Screencast](https://youtu.be/X4-WRwCViio)
   
 </details>
 
 <details>
   <summary>- ✅ Semana 17 </summary>
 
-  Implementação do novo interior das notícias, aba de curtidas, aba de salvos, área de publicações, configurações da conta e pop-up.
+  Implementação do jogo da forca, imagem de perfil no topo e corrigindo bugs.
 
-  Link do relatório de Programação em par
-  [Relatório](https://docs.google.com/document/d/1XjHNZ55Ojp-XdYE7mFOUtEuQm9QJk_qDLDxG13kPsxA/edit?tab=t.0)
+  Link do deploy finalizado
+  [Deploy](echo-jc.azurewebsites.net)
   
 </details>
