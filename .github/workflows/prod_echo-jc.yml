@@ -75,7 +75,7 @@ jobs:
           slot-name: 'Production'
           
       - name: Install dependencies
-        run: pip install -r ECHO/requirements.txt
+        run: Run pip install -r requirements.txt
 
       - name: Cleaning testing files
         run: |
